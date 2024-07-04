@@ -1,5 +1,6 @@
 package me.ljpb.alarmbynotification
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,11 +18,22 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.time.LocalTime
+
+// 現在時刻を取得するための更新間隔
+private const val DELAY_TIME: Long = 100L
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,11 +92,20 @@ private fun HomeScreenContent(
 ) {
 }
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HomeScreenTopAppBar(
     scrollBehavior: TopAppBarScrollBehavior
 ) {
+    val scope = rememberCoroutineScope()
+    var time by remember { mutableStateOf(LocalTime.now()) }
+    scope.launch { 
+        while (true) {
+            delay(DELAY_TIME)
+            time = LocalTime.now()
+        }
+    }
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
             titleContentColor = MaterialTheme.colorScheme.onBackground,
@@ -93,10 +114,11 @@ private fun HomeScreenTopAppBar(
         scrollBehavior = scrollBehavior,
         // 現在の時刻を表示
         title = {
-            Text(text = "16:00")
+            Text(text = Utility.localTimeToString(time, true))
         }
     )
 }
+
 
 @Composable
 private fun FloatingActionButton(
