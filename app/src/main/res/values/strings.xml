@@ -2,4 +2,6 @@
     <string name="app_name">Alarm By Notification</string>
     <string name="delete_alarm">アラームを削除する</string>
     <string name="untitled">名称未設定</string>
+    <string name="empty">アラームはありません</string>
+    <string name="add">アラームを追加</string>
 </resources>
