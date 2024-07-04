@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Alarm By Notification</string>
+    <string name="delete_alarm">アラームを削除する</string>
+    <string name="untitled">名称未設定</string>
 </resources>

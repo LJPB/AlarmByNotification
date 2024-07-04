@@ -1,0 +1,105 @@
+package me.ljpb.alarmbynotification.ui.theme.ui.component
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import me.ljpb.alarmbynotification.R
+
+
+/**
+ * アラームに設定した時間を表示するカード
+ */
+@Composable
+fun AlarmCard(
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+    ) {
+        CardContent(
+            modifier = Modifier
+                .padding(
+                    vertical = dimensionResource(id = R.dimen.padding_small),
+                    horizontal = dimensionResource(id = R.dimen.padding_medium)
+                )
+                .fillMaxWidth(),
+            onTitleClick = {},
+            onTimeClick = {},
+            onDeleteClick = {}
+        )
+    }
+}
+
+/**
+ * [onTitleClick] : アラームのタイトルを設定する
+ * [onTimeClick] : アラームの時刻を設定する
+ * [onDeleteClick] : アラームを削除する
+ */
+@Composable
+private fun CardContent(
+    modifier: Modifier = Modifier,
+    onTitleClick: () -> Unit,
+    onTimeClick: () -> Unit,
+    onDeleteClick: () -> Unit,
+) {
+    Column(
+        modifier = modifier
+    ) {
+        // アラームのタイトル
+        Text(
+            text = stringResource(id = R.string.untitled),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.clickable { onTitleClick() }
+        )
+        Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.padding_small)))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            // アラームの設定時間
+            Text(
+                text = "16:00",
+                style = MaterialTheme.typography.displayLarge,
+                modifier = Modifier.clickable { onTimeClick() }
+            )
+            // アラーム削除ボタン
+            IconButton(
+                onClick = onDeleteClick,
+                modifier = Modifier.align(Alignment.Bottom)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Delete,
+                    contentDescription = stringResource(id = R.string.delete_alarm)
+                )
+            }
+        }
+    }
+}
+
+@Preview(showSystemUi = true)
+@Composable
+private fun AlarmCardPreview() {
+    AlarmCard(
+        modifier = Modifier.padding(16.dp)
+    )
+}
