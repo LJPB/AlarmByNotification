@@ -3,8 +3,9 @@
     <string name="delete_alarm">アラームを削除する</string>
     <string name="untitled">名称未設定</string>
     <string name="empty">アラームはありません</string>
-    <string name="add">アラームを追加</string>
-    <string name="select_time">時間を選択</string>
+    <string name="add">追加</string>
+    <string name="add_alarm">アラームを追加</string>
+    <string name="add_timer">タイマーを追加 (23時間59分後まで)</string>
     <string name="cancel">キャンセル</string>
     <string name="ok">OK</string>
 </resources>

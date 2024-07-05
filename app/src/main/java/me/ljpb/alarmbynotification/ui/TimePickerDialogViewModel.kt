@@ -10,34 +10,132 @@ import androidx.lifecycle.AndroidViewModel
 import java.time.LocalTime
 
 class TimePickerDialogViewModel(app: Application) : AndroidViewModel(app) {
+    // アラームにセットする時刻を管理する
     @OptIn(ExperimentalMaterial3Api::class)
-    lateinit var timePickerState: TimePickerState
-        private set
+    lateinit var alarmState: TimePickerState
+
+    // タイマーにセットする時間を管理する
+    @OptIn(ExperimentalMaterial3Api::class)
+    lateinit var timerState: TimePickerState
+
+    // ダイアログの表示状態
     var isShow by mutableStateOf(false)
-    
+
     init {
-        setTime()
+        setAlarmInitialState()
+        setTimerInitialState()
     }
 
-    fun showDialog(
-        hour: Int? = null,
-        min: Int? = null,
-        is24Hour: Boolean? = null
-    ) {
+    fun showDialog(hour: Int? = null, min: Int? = null, is24Hour: Boolean? = null) {
         isShow = true
-        setTime(
-            hour = hour,
-            min = min,
-            is24Hour = is24Hour
-        )
+        setAlarmInitialState(hour = hour, min = min, is24Hour = is24Hour)
+    }
+
+    fun showAlarmDialog(hour: Int? = null, min: Int? = null, is24Hour: Boolean? = null) {
+        isShow = true
+        setAlarmInitialState(hour = hour, min = min, is24Hour = is24Hour)
+    }
+
+    fun showTimerDialog(hour: Int? = null, min: Int? = null, is24Hour: Boolean? = null) {
+        isShow = true
+        setAlarmInitialState(hour = hour, min = min, is24Hour = is24Hour)
     }
 
     fun hiddenDialog() {
         isShow = false
     }
 
+    /**
+     * 表示中のダイアログの切り替え
+     * [toTimer] : trueならタイマーに切り替える，falseならアラームに切り替える
+     */
     @OptIn(ExperimentalMaterial3Api::class)
-    private fun setTime(
+    fun changeDialog(toTimer: Boolean) {
+        if (toTimer) {
+            setTimerStateFromAlarmStateBasedCurrentTime()
+        } else {
+            setAlarmStateFromTimerStateBasedCurrentTime()
+        }
+    }
+
+    /** 現在時刻を基準にアラームにセットした時刻をタイマーの残り時間に変換してtimerStateにセットする
+     * たとえば現在10:00で，アラームに11:30とセットしていた場合，90分(1時間30分)に変換してセットする
+     */
+    @OptIn(ExperimentalMaterial3Api::class)
+    private fun setTimerStateFromAlarmStateBasedCurrentTime(alarmState: TimePickerState = this.alarmState) =
+        setTimerStateFromAlarmStateBasedCurrentTime(
+            alarmState.hour,
+            alarmState.minute,
+        )
+
+    /** 現在時刻を基準にアラームにセットした時刻をタイマーの残り時間に変換してtimerStateにセットする
+     * たとえば現在10:00で，アラームに11:30とセットしていた場合，90分(1時間30分)に変換してセットする
+     * [alarmHour] : アラームにセットした時刻の時間
+     * [alarmMin] : アラームにセットした時刻の分
+     */
+    private fun setTimerStateFromAlarmStateBasedCurrentTime(alarmHour: Int, alarmMin: Int) {
+        val currentTime = LocalTime.now()
+        val currentTimeAsMinute = currentTime.hour * 60 + currentTime.minute
+        val alarmTimeAsMinute = alarmHour * 60 + alarmMin
+
+        // 現在の時刻とアラームにセットした時刻の差
+        val diffTimeAsMinute = if (currentTimeAsMinute > alarmTimeAsMinute) {
+            // 「現在時刻 > アラームにセットした時刻」ならアラームにセットした時刻は翌日の時刻
+            val diff = currentTimeAsMinute - alarmTimeAsMinute
+            24 * 60 - diff
+        } else {
+            alarmTimeAsMinute - currentTimeAsMinute
+        }
+        setTimerInitialState(
+            hour = diffTimeAsMinute / 60,
+            min = diffTimeAsMinute % 60,
+        )
+    }
+
+    /** 現在時刻を基準にタイマーにセットした時間をアラームの時刻に変換してalarmStateにセットする
+     * たとえば現在10:00で，タイマーに90分(1時間30分)とセットしていた場合，11:30に変換してセットする
+     * [is24Hour] : 24時間表示かどうか, null(未指定)なら端末の設定による
+     */
+    @OptIn(ExperimentalMaterial3Api::class)
+    private fun setAlarmStateFromTimerStateBasedCurrentTime(timePickerState: TimePickerState = this.timerState, is24Hour: Boolean? = null) =
+        setAlarmStateFromTimerStateBasedCurrentTime(
+            timerHour = timePickerState.hour,
+            timerMin = timePickerState.minute,
+            is24Hour = is24Hour
+        )
+    
+    /** 現在時刻を基準にタイマーにセットした時間をアラームの時刻に変換してalarmStateにセットする
+     * たとえば現在10:00で，タイマーに90分(1時間30分)とセットしていた場合，11:30に変換してセットする
+     * [timerHour] : タイマーにセットした時間
+     * [timerMin] : タイマーにセットした分
+     * [is24Hour] : 24時間表示かどうか, null(未指定)なら端末の設定による
+     */
+    private fun setAlarmStateFromTimerStateBasedCurrentTime(
+        timerHour: Int,
+        timerMin: Int,
+        is24Hour: Boolean? = null
+    ) {
+        val currentTime = LocalTime.now()
+        val currentTimeAsMinute = currentTime.hour * 60 + currentTime.minute
+        val timerTimeAsMinute = timerHour * 60 + timerMin
+        var alarmTimeAsMinute = currentTimeAsMinute + timerTimeAsMinute
+
+        // 現在の時刻 + タイマーにセットした時間
+        alarmTimeAsMinute = if (alarmTimeAsMinute >= 24 * 60) {
+            // タイマーにセットした時間が経過すると23:59を超える場合
+            alarmTimeAsMinute - (24 * 60)
+        } else {
+            alarmTimeAsMinute
+        }
+        setAlarmInitialState(
+            hour = alarmTimeAsMinute / 60,
+            min = alarmTimeAsMinute % 60,
+            is24Hour = is24Hour
+        )
+    }
+    
+    @OptIn(ExperimentalMaterial3Api::class)
+    private fun setAlarmInitialState(
         hour: Int? = null,
         min: Int? = null,
         is24Hour: Boolean? = null
@@ -45,23 +143,40 @@ class TimePickerDialogViewModel(app: Application) : AndroidViewModel(app) {
         val currentTime = LocalTime.now()
         val initialHour: Int
         val initialMinute: Int
-        val initialIs24Hour: Boolean
-        if (hour == null || min == null || is24Hour == null) {
+        val initialIs24Hour = is24Hour ?: android.text.format.DateFormat.is24HourFormat(
+            getApplication<Application>().applicationContext
+        )
+        if (hour == null || min == null) {
             initialHour = currentTime.hour
             initialMinute = currentTime.minute
-            initialIs24Hour = android.text.format.DateFormat.is24HourFormat(
-                getApplication<Application>().applicationContext
-            )
         } else {
             initialHour = hour
             initialMinute = min
-            initialIs24Hour = is24Hour
         }
-        timePickerState = TimePickerState(
+        alarmState = TimePickerState(
             initialHour = initialHour,
             initialMinute = initialMinute,
             is24Hour = initialIs24Hour
         )
     }
-    
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    private fun setTimerInitialState(hour: Int? = null, min: Int? = null) {
+        val initialHour: Int
+        val initialMinute: Int
+        if (hour == null || min == null) {
+            initialHour = 0
+            initialMinute = 0
+        } else {
+//            if (hour > 23 || min > 59) throw IllegalArgumentException("Timer Initial Hour : $hour, Min : $min")
+            initialHour = hour
+            initialMinute = min
+        }
+        timerState = TimePickerState(
+            initialHour = initialHour,
+            initialMinute = initialMinute,
+            is24Hour = true
+        )
+    }
+
 }

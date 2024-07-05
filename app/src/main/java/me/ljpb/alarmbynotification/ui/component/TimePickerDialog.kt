@@ -1,95 +1,144 @@
 package me.ljpb.alarmbynotification.ui.component
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.HourglassTop
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimeInput
 import androidx.compose.material3.TimePicker
-import androidx.compose.material3.TimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import me.ljpb.alarmbynotification.R
+import me.ljpb.alarmbynotification.ui.TimePickerDialogViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TimePickerDialog(
-    modifier: Modifier = Modifier, 
-    state: TimePickerState,
+    modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit,
     onPositiveClick: () -> Unit,
+    onChangeDialog: (Boolean) -> Unit,
+    timePickerDialogViewModel: TimePickerDialogViewModel
 ) {
-    BasicAlertDialog(
-        onDismissRequest = onDismissRequest,
-    ) {
+    BasicAlertDialog(onDismissRequest = onDismissRequest) {
         Surface(
-            modifier = Modifier
+            modifier = modifier
                 .wrapContentWidth()
                 .wrapContentHeight(),
             shape = MaterialTheme.shapes.large,
             tonalElevation = AlertDialogDefaults.TonalElevation
         ) {
-            Column(
-                modifier = Modifier.padding(horizontal = dimensionResource(id = R.dimen.padding_medium)),
-            ) {
-                Text(
-                    modifier = Modifier.padding(vertical = dimensionResource(id = R.dimen.padding_medium)),
-                    text = stringResource(id = R.string.select_time),
-                    style = MaterialTheme.typography.labelSmall
-                )
-
-                TimePicker(
-                    state = state
-                )
-                
-                // ボタン
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.End)
-                        .padding(bottom = dimensionResource(id = R.dimen.padding_medium)),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // キャンセルボタン
-                    TextButton(
-                        onClick = onDismissRequest
-                    ) {
-                        Text(text = stringResource(id = R.string.cancel))
-                    }
-                    
-                    Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.padding_small)))
-                    
-                    // okボタン
-                    TextButton(
-                        onClick = onPositiveClick
-                    ) {
-                        Text(text = stringResource(id = R.string.ok))
-                    }
-                }
-            }
+            DialogContent(
+                onDismissRequest = onDismissRequest,
+                onPositiveClick = onPositiveClick,
+                onChangeDialog = onChangeDialog,
+                timePickerDialogViewModel = timePickerDialogViewModel
+            )
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DialogContent(
+    modifier: Modifier = Modifier,
+    onDismissRequest: () -> Unit,
+    onPositiveClick: () -> Unit,
+    onChangeDialog: (Boolean) -> Unit,
+    timePickerDialogViewModel: TimePickerDialogViewModel
+) {
+    var isAlarm by rememberSaveable { mutableStateOf(true) }
+    Column(
+        modifier = modifier
+            .padding(horizontal = dimensionResource(id = R.dimen.padding_medium))
+            .animateContentSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = dimensionResource(id = R.dimen.padding_medium)),
+            text = stringResource(if (isAlarm) R.string.add_alarm else R.string.add_timer),
+            style = MaterialTheme.typography.labelSmall
+        )
+        if (isAlarm) {
+            // アラームセット
+            TimePicker(
+                state = timePickerDialogViewModel.alarmState,
+            )
+        } else {
+            // タイマーセット
+            TimeInput(
+                state = timePickerDialogViewModel.timerState,
+            )
+        }
+        // ボタン
+        Row(
+            modifier = Modifier.padding(bottom = dimensionResource(id = R.dimen.padding_medium)),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // アラーム追加ダイアログとタイマー追加ダイアログの切り替えボタン
+            // isAlarmがtrueつまり現在がアラームの時はタイマーのアイコンを表示する
+            IconButton(onClick = {
+                onChangeDialog(isAlarm) // isAlarmがtrueのときこのボタンでタイマーダイアログに変わるため，(その場合)toTimerはtrueであるべき。つまりtoTimerとisAlarmの真偽は一致する
+                isAlarm = !isAlarm
+            }) {
+                Icon(
+                    imageVector = if (isAlarm) Icons.Default.HourglassTop else Icons.Default.Schedule,
+                    contentDescription = stringResource(if (isAlarm) R.string.add_timer else R.string.add_alarm)
+                )
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            // キャンセルボタン
+            TextButton(
+                onClick = onDismissRequest
+            ) {
+                Text(text = stringResource(id = R.string.cancel))
+            }
+            Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.padding_small)))
+            // okボタン
+            TextButton(
+                onClick = onPositiveClick
+            ) {
+                Text(text = stringResource(id = R.string.ok))
+            }
+        }
+    }
+}
+
 @Preview
 @Composable
 private fun TimePickerDialogPreview() {
     TimePickerDialog(
-        state = TimePickerState(initialHour = 11, initialMinute = 24, is24Hour = true),
         onDismissRequest = {},
-        onPositiveClick = {}
+        onPositiveClick = {},
+        onChangeDialog = {},
+        timePickerDialogViewModel = viewModel() as TimePickerDialogViewModel
     )
 }
