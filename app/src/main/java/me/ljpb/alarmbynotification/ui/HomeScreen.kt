@@ -1,4 +1,4 @@
-package me.ljpb.alarmbynotification.ui.theme
+package me.ljpb.alarmbynotification.ui
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
@@ -33,7 +33,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import me.ljpb.alarmbynotification.R
 import me.ljpb.alarmbynotification.Utility
-import me.ljpb.alarmbynotification.ui.theme.ui.component.TimePickerDialog
+import me.ljpb.alarmbynotification.ui.component.TimePickerDialog
 import java.time.LocalTime
 
 // 現在時刻を取得するための更新間隔

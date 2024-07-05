@@ -1,4 +1,4 @@
-package me.ljpb.alarmbynotification.ui.theme.ui.component
+package me.ljpb.alarmbynotification.ui.component
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement

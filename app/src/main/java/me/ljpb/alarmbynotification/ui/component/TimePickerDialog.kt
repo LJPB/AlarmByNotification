@@ -1,4 +1,4 @@
-package me.ljpb.alarmbynotification.ui.theme.ui.component
+package me.ljpb.alarmbynotification.ui.component
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -50,8 +50,10 @@ fun TimePickerDialog(
                     text = stringResource(id = R.string.select_time),
                     style = MaterialTheme.typography.labelSmall
                 )
-                
-                TimePicker(state = state)
+
+                TimePicker(
+                    state = state
+                )
                 
                 // ボタン
                 Row(
