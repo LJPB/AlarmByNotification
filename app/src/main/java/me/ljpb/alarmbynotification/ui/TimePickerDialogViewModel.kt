@@ -1,4 +1,4 @@
-package me.ljpb.alarmbynotification.ui.theme
+package me.ljpb.alarmbynotification.ui
 
 import android.app.Application
 import androidx.compose.material3.ExperimentalMaterial3Api
