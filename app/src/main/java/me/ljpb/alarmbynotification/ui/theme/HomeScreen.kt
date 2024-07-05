@@ -28,10 +28,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import me.ljpb.alarmbynotification.R
 import me.ljpb.alarmbynotification.Utility
+import me.ljpb.alarmbynotification.ui.theme.ui.component.TimePickerDialog
 import java.time.LocalTime
 
 // 現在時刻を取得するための更新間隔
@@ -43,13 +45,17 @@ fun HomeScreen(
     modifier: Modifier = Modifier
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val timePickerDialogViewModel: TimePickerDialogViewModel = viewModel()
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = { HomeScreenTopAppBar(scrollBehavior) },
         floatingActionButtonPosition = FabPosition.Center,
-        floatingActionButton = { FloatingActionButton {} }
+        floatingActionButton = { FloatingActionButton { timePickerDialogViewModel.showDialog() } }
     ) { innerPadding ->
-        HomeScreenContent(innerPadding = innerPadding)
+        HomeScreenContent(
+            innerPadding = innerPadding,
+            timePickerDialogViewModel = timePickerDialogViewModel
+        )
     }
 }
 
@@ -87,11 +93,20 @@ private fun AlarmList(
  * HomeScreenに実際に配置するコンポーザブル
  * 状態に応じてEmptyとAlarmListを切り替える
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HomeScreenContent(
     modifier: Modifier = Modifier,
     innerPadding: PaddingValues,
+    timePickerDialogViewModel: TimePickerDialogViewModel
 ) {
+    if (timePickerDialogViewModel.isShow) {
+        TimePickerDialog(
+            state = timePickerDialogViewModel.timePickerState, 
+            onDismissRequest = timePickerDialogViewModel::hiddenDialog,
+            onPositiveClick = {}
+        )
+    }
 }
 
 @SuppressLint("CoroutineCreationDuringComposition")
