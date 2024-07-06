@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
@@ -77,6 +78,7 @@ private fun CardContent(
                imageVector = if (isAlarm) ALARM_ICON else TIMER_ICON,
                contentDescription = stringResource(if (isAlarm) R.string.add_timer else R.string.add_alarm)
            )
+           Spacer(modifier = Modifier.width(8.dp))
            Text(
                 text = stringResource(id = R.string.untitled),
                 style = MaterialTheme.typography.bodyMedium,
