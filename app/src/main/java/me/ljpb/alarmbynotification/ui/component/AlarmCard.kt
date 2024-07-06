@@ -54,9 +54,9 @@ fun AlarmCard(
 }
 
 /**
- * [onTitleClick] : アラームのタイトルを設定する
- * [onTimeClick] : アラームの時刻を設定する
- * [onDeleteClick] : アラームを削除する
+ * @param onTitleClick アラームのタイトルを設定する
+ * @param onTimeClick アラームの時刻を設定する
+ * @param onDeleteClick アラームを削除する
  */
 @Composable
 private fun CardContent(

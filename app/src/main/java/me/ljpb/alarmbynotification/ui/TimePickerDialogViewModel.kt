@@ -47,7 +47,7 @@ class TimePickerDialogViewModel(app: Application) : AndroidViewModel(app) {
 
     /**
      * 表示中のダイアログの切り替え
-     * [toTimer] : trueならタイマーに切り替える，falseならアラームに切り替える
+     * @param toTimer trueならタイマーに切り替える，falseならアラームに切り替える
      */
     @OptIn(ExperimentalMaterial3Api::class)
     fun changeDialog(toTimer: Boolean) {
@@ -70,8 +70,8 @@ class TimePickerDialogViewModel(app: Application) : AndroidViewModel(app) {
 
     /** 現在時刻を基準にアラームにセットした時刻をタイマーの残り時間に変換してtimerStateにセットする
      * たとえば現在10:00で，アラームに11:30とセットしていた場合，90分(1時間30分)に変換してセットする
-     * [alarmHour] : アラームにセットした時刻の時間
-     * [alarmMin] : アラームにセットした時刻の分
+     * @param alarmHour アラームにセットした時刻の時間
+     * @param alarmMin アラームにセットした時刻の分
      */
     private fun setTimerStateFromAlarmStateBasedCurrentTime(alarmHour: Int, alarmMin: Int) {
         val currentTime = LocalTime.now()
@@ -94,7 +94,7 @@ class TimePickerDialogViewModel(app: Application) : AndroidViewModel(app) {
 
     /** 現在時刻を基準にタイマーにセットした時間をアラームの時刻に変換してalarmStateにセットする
      * たとえば現在10:00で，タイマーに90分(1時間30分)とセットしていた場合，11:30に変換してセットする
-     * [is24Hour] : 24時間表示かどうか, null(未指定)なら端末の設定による
+     * @param is24Hour 24時間表示かどうか, null(未指定)なら端末の設定による
      */
     @OptIn(ExperimentalMaterial3Api::class)
     private fun setAlarmStateFromTimerStateBasedCurrentTime(timePickerState: TimePickerState = this.timerState, is24Hour: Boolean? = null) =
@@ -106,9 +106,9 @@ class TimePickerDialogViewModel(app: Application) : AndroidViewModel(app) {
     
     /** 現在時刻を基準にタイマーにセットした時間をアラームの時刻に変換してalarmStateにセットする
      * たとえば現在10:00で，タイマーに90分(1時間30分)とセットしていた場合，11:30に変換してセットする
-     * [timerHour] : タイマーにセットした時間
-     * [timerMin] : タイマーにセットした分
-     * [is24Hour] : 24時間表示かどうか, null(未指定)なら端末の設定による
+     * @param timerHour タイマーにセットした時間
+     * @param timerMin タイマーにセットした分
+     * @param is24Hour 24時間表示かどうか, null(未指定)なら端末の設定による
      */
     private fun setAlarmStateFromTimerStateBasedCurrentTime(
         timerHour: Int,
