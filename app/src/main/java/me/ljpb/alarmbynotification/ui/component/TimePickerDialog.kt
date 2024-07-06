@@ -37,6 +37,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import me.ljpb.alarmbynotification.R
 import me.ljpb.alarmbynotification.ui.TimePickerDialogViewModel
 
+val ALARM_ICON = Icons.Default.Schedule
+val TIMER_ICON = Icons.Default.HourglassTop
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TimePickerDialog(
@@ -110,7 +113,7 @@ private fun DialogContent(
                 isAlarm = !isAlarm
             }) {
                 Icon(
-                    imageVector = if (isAlarm) Icons.Default.HourglassTop else Icons.Default.Schedule,
+                    imageVector = if (isAlarm) TIMER_ICON else ALARM_ICON,
                     contentDescription = stringResource(if (isAlarm) R.string.add_timer else R.string.add_alarm)
                 )
             }

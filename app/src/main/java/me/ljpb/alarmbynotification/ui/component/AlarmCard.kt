@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.HourglassTop
-import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -76,7 +74,7 @@ private fun CardContent(
            verticalAlignment = Alignment.CenterVertically
        ) {
            Icon(
-               imageVector = if (isAlarm) Icons.Default.HourglassTop else Icons.Default.Schedule,
+               imageVector = if (isAlarm) ALARM_ICON else TIMER_ICON,
                contentDescription = stringResource(if (isAlarm) R.string.add_timer else R.string.add_alarm)
            )
            Text(
