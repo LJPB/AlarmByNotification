@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.HourglassTop
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -30,7 +32,8 @@ import me.ljpb.alarmbynotification.R
  */
 @Composable
 fun AlarmCard(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isAlarm: Boolean
 ) {
     Card(
         modifier = modifier
@@ -45,7 +48,8 @@ fun AlarmCard(
                 .fillMaxWidth(),
             onTitleClick = {},
             onTimeClick = {},
-            onDeleteClick = {}
+            onDeleteClick = {},
+            isAlarm = isAlarm
         )
     }
 }
@@ -61,16 +65,25 @@ private fun CardContent(
     onTitleClick: () -> Unit,
     onTimeClick: () -> Unit,
     onDeleteClick: () -> Unit,
+    isAlarm: Boolean
 ) {
     Column(
         modifier = modifier
     ) {
         // アラームのタイトル
-        Text(
-            text = stringResource(id = R.string.untitled),
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.clickable { onTitleClick() }
-        )
+       Row(
+           modifier = Modifier.clickable { onTitleClick() },
+           verticalAlignment = Alignment.CenterVertically
+       ) {
+           Icon(
+               imageVector = if (isAlarm) Icons.Default.HourglassTop else Icons.Default.Schedule,
+               contentDescription = stringResource(if (isAlarm) R.string.add_timer else R.string.add_alarm)
+           )
+           Text(
+                text = stringResource(id = R.string.untitled),
+                style = MaterialTheme.typography.bodyMedium,
+           )
+        }
         Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.padding_small)))
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -100,6 +113,7 @@ private fun CardContent(
 @Composable
 private fun AlarmCardPreview() {
     AlarmCard(
-        modifier = Modifier.padding(16.dp)
+        modifier = Modifier.padding(16.dp),
+        isAlarm = true
     )
 }
