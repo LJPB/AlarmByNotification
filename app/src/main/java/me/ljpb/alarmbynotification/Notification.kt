@@ -143,13 +143,14 @@ fun timerNotify(
 /**
  * 通知のセット
  * @param context
- * @param notificationInfo
+ * @param notificationInfo 登録する通知の情報
  */
 fun setNotification(context: Context, notificationInfo: NotificationInfo) {
     val intent = Intent(context, NotifyReceiver::class.java)
     intent.putExtra(NotifyIntentKey.title, notificationInfo.title)
     intent.putExtra(NotifyIntentKey.text, notificationInfo.text)
     intent.putExtra(NotifyIntentKey.notifyId, notificationInfo.notifyId)
+    intent.putExtra(NotifyIntentKey.type, notificationInfo.type.name)
     
     val pendingIntent = PendingIntent.getBroadcast(
         context,
@@ -163,3 +164,11 @@ fun setNotification(context: Context, notificationInfo: NotificationInfo) {
     alarmManager.setAlarmClock(alarmClockInfo, pendingIntent)
 }
 
+/**
+ * 通知の削除
+ * @param context
+ * @param notificationInfo 削除対象となる通知(notifyIdが一致する通知を削除)
+ */
+fun deleteNotification(context: Context, notificationInfo: NotificationInfo) {
+    
+}
