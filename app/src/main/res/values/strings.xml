@@ -8,4 +8,10 @@
     <string name="add_timer">タイマーを追加 (23時間59分後まで)</string>
     <string name="cancel">キャンセル</string>
     <string name="ok">OK</string>
+    
+    <string name="alarm_channel_name">アラーム</string>
+    <string name="alarm_channel_id">ALARM_CHANNEL</string>
+    
+    <string name="timer_channel_name">タイマー</string>
+    <string name="timer_channel_id">TIMER_CHANNEL</string>
 </resources>
