@@ -9,11 +9,11 @@ import me.ljpb.alarmbynotification.data.NotifyType
 class NotifyReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         if (context != null && intent != null) {
-            val title = intent.getStringExtra(NotifyIntentKey.title) ?: ""
-            val text = intent.getStringExtra(NotifyIntentKey.text) ?: ""
-            val notifyId = intent.getIntExtra(NotifyIntentKey.notifyId, 1)
+            val title = intent.getStringExtra(NotifyIntentKey.TITLE) ?: ""
+            val text = intent.getStringExtra(NotifyIntentKey.TEXT) ?: ""
+            val notifyId = intent.getIntExtra(NotifyIntentKey.NOTIFY_ID, 1)
             
-            val type = intent.getStringExtra(NotifyIntentKey.type) ?: ""
+            val type = intent.getStringExtra(NotifyIntentKey.TYPE) ?: ""
             
             when (type) {
                 NotifyType.Alarm.name -> alarmNotify(

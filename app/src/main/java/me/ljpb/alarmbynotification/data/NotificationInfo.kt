@@ -17,10 +17,10 @@ data class NotificationInfo (
 )
 
 object NotifyIntentKey {
-    val title = "title"
-    val text = "text"
-    val notifyId = "notifyId"
-    val type = "type"
+    const val TITLE = "title"
+    const val TEXT = "text"
+    const val NOTIFY_ID = "notifyId"
+    const val TYPE = "type"
 }
 
 enum class NotifyType {

@@ -147,10 +147,10 @@ fun timerNotify(
  */
 fun setNotification(context: Context, notificationInfo: NotificationInfo) {
     val intent = Intent(context, NotifyReceiver::class.java)
-    intent.putExtra(NotifyIntentKey.title, notificationInfo.title)
-    intent.putExtra(NotifyIntentKey.text, notificationInfo.text)
-    intent.putExtra(NotifyIntentKey.notifyId, notificationInfo.notifyId)
-    intent.putExtra(NotifyIntentKey.type, notificationInfo.type.name)
+    intent.putExtra(NotifyIntentKey.TITLE, notificationInfo.title)
+    intent.putExtra(NotifyIntentKey.TEXT, notificationInfo.text)
+    intent.putExtra(NotifyIntentKey.NOTIFY_ID, notificationInfo.notifyId)
+    intent.putExtra(NotifyIntentKey.TYPE, notificationInfo.type.name)
     
     val pendingIntent = PendingIntent.getBroadcast(
         context,
