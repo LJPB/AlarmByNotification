@@ -13,7 +13,7 @@ data class NotificationInfo (
     val text: String,
     val notifyId: Int,
     val triggerTime: Long,
-    val type: NotifyType
+    val type: TimeType
 )
 
 object NotifyIntentKey {
@@ -21,9 +21,4 @@ object NotifyIntentKey {
     const val TEXT = "text"
     const val NOTIFY_ID = "notifyId"
     const val TYPE = "type"
-}
-
-enum class NotifyType {
-    Alarm,
-    Timer
 }

@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import me.ljpb.alarmbynotification.data.NotifyIntentKey
-import me.ljpb.alarmbynotification.data.NotifyType
+import me.ljpb.alarmbynotification.data.TimeType
 
 class NotifyReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
@@ -16,13 +16,13 @@ class NotifyReceiver : BroadcastReceiver() {
             val type = intent.getStringExtra(NotifyIntentKey.TYPE) ?: ""
             
             when (type) {
-                NotifyType.Alarm.name -> alarmNotify(
+                TimeType.Alarm.name -> alarmNotify(
                     context = context,
                     title = title,
                     text = text,
                     notifyId = notifyId
                 )
-                NotifyType.Timer.name -> timerNotify(
+                TimeType.Timer.name -> timerNotify(
                     context = context,
                     title = title,
                     text = text,
