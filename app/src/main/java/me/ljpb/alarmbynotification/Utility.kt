@@ -1,15 +1,17 @@
 package me.ljpb.alarmbynotification
 
-import java.time.LocalTime
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 object Utility {
-    fun localTimeToString(localTime: LocalTime, isFormat24: Boolean = false): String {
-       val timeFormat = if (isFormat24) {
-            DateTimeFormatter.ofPattern("HH:mm:ss")
+    fun localDateTimeToFormattedTime(localDateTime: LocalDateTime, isFormat24: Boolean = false, displaySecond: Boolean = true): String {
+        val timeFormat = if (isFormat24) {
+            val ptn = if(displaySecond) "HH:mm:ss" else "HH:mm"
+            DateTimeFormatter.ofPattern(ptn)
         } else {
-            DateTimeFormatter.ofPattern("KK:mm:ss a")
+            val ptn = if(displaySecond) "KK:mm:ss a" else "KK:mm a"
+            DateTimeFormatter.ofPattern(ptn)
         }
-        return localTime.format(timeFormat)
+        return localDateTime.format(timeFormat)
     }
 }
