@@ -33,7 +33,6 @@ import androidx.compose.ui.unit.dp
 import me.ljpb.alarmbynotification.R
 import me.ljpb.alarmbynotification.Utility.localDateTimeToFormattedTime
 import me.ljpb.alarmbynotification.data.TimeData
-import me.ljpb.alarmbynotification.data.TimeType
 import java.time.Duration
 import java.time.LocalDateTime
 
@@ -60,7 +59,8 @@ fun AlarmCard(
             onTimeClick = onTimeClick,
             onDeleteClick = onDeleteClick,
             currentTime = null,
-            finishTime = finishTime
+            finishTime = finishTime,
+            isAlarm = true
         )
     }
 }
@@ -89,7 +89,8 @@ fun TimerCard(
             onTimeClick = onTimeClick,
             onDeleteClick = onDeleteClick,
             currentTime = currentTime,
-            finishTime = finishTime
+            finishTime = finishTime,
+            isAlarm = false
         )
     }
 }
@@ -108,9 +109,8 @@ private fun CardContent(
     onDeleteClick: () -> Unit,
     currentTime: LocalDateTime?,
     finishTime: TimeData,
+    isAlarm: Boolean
 ) {
-    val isAlarm = finishTime.type == TimeType.Alarm
-
     val icon: ImageVector
     val iconDescription: String
     val deleteDescription: String
