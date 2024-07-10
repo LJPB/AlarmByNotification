@@ -24,10 +24,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimeInput
 import androidx.compose.material3.TimePicker
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
@@ -46,7 +42,7 @@ fun TimePickerDialog(
     modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit,
     onPositiveClick: () -> Unit,
-    onChangeDialog: (Boolean) -> Unit,
+    onChangeDialog: () -> Unit,
     timePickerDialogViewModel: TimePickerDialogViewModel
 ) {
     BasicAlertDialog(onDismissRequest = onDismissRequest) {
@@ -73,10 +69,10 @@ private fun DialogContent(
     modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit,
     onPositiveClick: () -> Unit,
-    onChangeDialog: (Boolean) -> Unit,
+    onChangeDialog: () -> Unit,
     timePickerDialogViewModel: TimePickerDialogViewModel
 ) {
-    var isAlarm by rememberSaveable { mutableStateOf(true) }
+    val isAlarm = timePickerDialogViewModel.isAlarm
     Column(
         modifier = modifier
             .padding(horizontal = dimensionResource(id = R.dimen.padding_medium))
@@ -108,10 +104,7 @@ private fun DialogContent(
         ) {
             // アラーム追加ダイアログとタイマー追加ダイアログの切り替えボタン
             // isAlarmがtrueつまり現在がアラームの時はタイマーのアイコンを表示する
-            IconButton(onClick = {
-                onChangeDialog(isAlarm) // isAlarmがtrueのときこのボタンでタイマーダイアログに変わるため，(その場合)toTimerはtrueであるべき。つまりtoTimerとisAlarmの真偽は一致する
-                isAlarm = !isAlarm
-            }) {
+            IconButton(onClick = onChangeDialog) {
                 Icon(
                     imageVector = if (isAlarm) TIMER_ICON else ALARM_ICON,
                     contentDescription = stringResource(if (isAlarm) R.string.add_timer else R.string.add_alarm)
