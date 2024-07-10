@@ -1,6 +1,8 @@
 package me.ljpb.alarmbynotification
 
+import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 object Utility {
@@ -13,5 +15,16 @@ object Utility {
             DateTimeFormatter.ofPattern(ptn)
         }
         return localDateTime.format(timeFormat)
+    }
+
+    fun epochSecondsToFormattedTimeOfDay(
+        epochSeconds: Long,
+        isFormat24: Boolean = false,
+        timeZoneId: String
+    ): String {
+        val instant = Instant.ofEpochSecond(epochSeconds)
+        val zoneId = ZoneId.of(timeZoneId)
+        val time = instant.atZone(zoneId).toLocalDateTime()
+        return localDateTimeToFormattedTime(time, isFormat24, false)
     }
 }
