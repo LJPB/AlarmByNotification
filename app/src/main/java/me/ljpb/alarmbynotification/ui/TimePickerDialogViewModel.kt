@@ -13,31 +13,39 @@ class TimePickerDialogViewModel(app: Application) : AndroidViewModel(app) {
     // アラームにセットする時刻を管理する
     @OptIn(ExperimentalMaterial3Api::class)
     lateinit var alarmState: TimePickerState
+        private set
 
     // タイマーにセットする時間を管理する
     @OptIn(ExperimentalMaterial3Api::class)
     lateinit var timerState: TimePickerState
+        private set
 
     // ダイアログの表示状態
     var isShow by mutableStateOf(false)
+        private set
+    var isAlarm by mutableStateOf(true)
+        private set
 
     init {
         setAlarmInitialState()
         setTimerInitialState()
     }
-
+/*
     fun showDialog(hour: Int? = null, min: Int? = null, is24Hour: Boolean? = null) {
         isShow = true
         setAlarmInitialState(hour = hour, min = min, is24Hour = is24Hour)
     }
+ */
 
     fun showAlarmDialog(hour: Int? = null, min: Int? = null, is24Hour: Boolean? = null) {
         isShow = true
+        isAlarm = true
         setAlarmInitialState(hour = hour, min = min, is24Hour = is24Hour)
     }
 
     fun showTimerDialog(hour: Int? = null, min: Int? = null, is24Hour: Boolean? = null) {
         isShow = true
+        isAlarm = false
         setAlarmInitialState(hour = hour, min = min, is24Hour = is24Hour)
     }
 
@@ -47,13 +55,14 @@ class TimePickerDialogViewModel(app: Application) : AndroidViewModel(app) {
 
     /**
      * 表示中のダイアログの切り替え
-     * @param toTimer trueならタイマーに切り替える，falseならアラームに切り替える
      */
     @OptIn(ExperimentalMaterial3Api::class)
-    fun changeDialog(toTimer: Boolean) {
-        if (toTimer) {
+    fun changeDialog() {
+        if (isAlarm) {
             setTimerStateFromAlarmStateBasedCurrentTime()
+            isAlarm = false
         } else {
+            isAlarm = true
             setAlarmStateFromTimerStateBasedCurrentTime()
         }
     }
