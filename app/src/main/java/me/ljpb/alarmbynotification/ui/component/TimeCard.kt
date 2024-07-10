@@ -34,13 +34,11 @@ import me.ljpb.alarmbynotification.R
 import me.ljpb.alarmbynotification.Utility.localDateTimeToFormattedTime
 import me.ljpb.alarmbynotification.data.TimeData
 import me.ljpb.alarmbynotification.data.TimeType
+import java.time.Duration
 import java.time.LocalDateTime
 
-/**
- * アラームに設定した時間を表示するカード
- */
 @Composable
-fun TimeCard(
+fun AlarmCard(
     modifier: Modifier = Modifier,
     onTitleClick: () -> Unit,
     onTimeClick: () -> Unit,
@@ -61,7 +59,37 @@ fun TimeCard(
             onTitleClick = onTitleClick,
             onTimeClick = onTimeClick,
             onDeleteClick = onDeleteClick,
-            finishTime = finishTime,
+            currentTime = null,
+            finishTime = finishTime
+        )
+    }
+}
+
+@Composable
+fun TimerCard(
+    modifier: Modifier = Modifier,
+    onTitleClick: () -> Unit,
+    onTimeClick: () -> Unit,
+    onDeleteClick: () -> Unit,
+    currentTime: LocalDateTime,
+    finishTime: TimeData
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+    ) {
+        CardContent(
+            modifier = Modifier
+                .padding(
+                    vertical = dimensionResource(id = R.dimen.padding_small),
+                    horizontal = dimensionResource(id = R.dimen.padding_medium)
+                )
+                .fillMaxWidth(),
+            onTitleClick = onTitleClick,
+            onTimeClick = onTimeClick,
+            onDeleteClick = onDeleteClick,
+            currentTime = currentTime,
+            finishTime = finishTime
         )
     }
 }
@@ -78,6 +106,7 @@ private fun CardContent(
     onTitleClick: () -> Unit,
     onTimeClick: () -> Unit,
     onDeleteClick: () -> Unit,
+    currentTime: LocalDateTime?,
     finishTime: TimeData,
 ) {
     val isAlarm = finishTime.type == TimeType.Alarm
@@ -119,7 +148,7 @@ private fun CardContent(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            if (isAlarm) AlarmTime(finishTime = finishTime.finishDateTime, onTimeClick = onTimeClick) else TimerTime(finishTIme = finishTime.finishDateTime, onTimeClick = onTimeClick)
+            if (isAlarm) AlarmTime(finishTime = finishTime.finishDateTime, onTimeClick = onTimeClick) else TimerTime(currentTime = currentTime!!, finishTime = finishTime.finishDateTime, onTimeClick = onTimeClick)
             
             // アラーム削除ボタン
             IconButton(
@@ -150,12 +179,23 @@ private fun AlarmTime(finishTime: LocalDateTime, modifier: Modifier = Modifier, 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 private fun TimerTime(
-    finishTIme: LocalDateTime,
+    currentTime: LocalDateTime,
+    finishTime: LocalDateTime,
     modifier: Modifier = Modifier,
     onTimeClick: () -> Unit,
 ) {
+    val text: String
+    if (currentTime.isAfter(finishTime)) {
+        // 現在時刻がセットした時間を過ぎていたら
+        text = "--:--"
+    } else {
+        val difSeconds = Duration
+            .between(currentTime, finishTime)
+            .toSeconds()
+        text = "${difSeconds/(60*60)}:${difSeconds/60}" // 時間:分
+    }
     Text(
-        text = "16:00",
+        text = text,
         style = MaterialTheme.typography.displayLarge,
         modifier = modifier.clickable { onTimeClick() }
     )
@@ -164,16 +204,17 @@ private fun TimerTime(
 @Preview(showSystemUi = true)
 @Composable
 private fun AlarmCardPreview() {
-    TimeCard(
-        modifier = Modifier.padding(16.dp),
-        finishTime = TimeData(
-            id = 1,
-            finishDateTime = LocalDateTime.now(),
-            name = "aaa",
-            type = TimeType.Alarm,
-        ),
-        onTimeClick = {},
-        onTitleClick = {},
-        onDeleteClick = {}
-    )
+//    TimeCard(
+//        modifier = Modifier.padding(16.dp),
+//        currentTime = LocalDateTime.now(),
+//        finishTime = TimeData(
+//            id = 1,
+//            finishDateTime = LocalDateTime.now(),
+//            name = "aaa",
+//            type = TimeType.Alarm,
+//        ),
+//        onTimeClick = {},
+//        onTitleClick = {},
+//        onDeleteClick = {}
+//    )
 }
