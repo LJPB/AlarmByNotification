@@ -1,6 +1,7 @@
 package me.ljpb.alarmbynotification.ui
 
 import android.annotation.SuppressLint
+import android.text.format.DateFormat
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,43 +19,50 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import me.ljpb.alarmbynotification.R
 import me.ljpb.alarmbynotification.Utility
 import me.ljpb.alarmbynotification.ui.component.TimePickerDialog
-import java.time.LocalTime
+import java.time.LocalDateTime
 
-// 現在時刻を取得するための更新間隔
-private const val DELAY_TIME: Long = 100L
-
+@SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    homeScreenViewMode: HomeScreenViewModel
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val timePickerDialogViewModel: TimePickerDialogViewModel = viewModel()
+    val currentTime by homeScreenViewMode.currentDateTime.collectAsState()
+    val scope = rememberCoroutineScope()
+    scope.launch {
+        homeScreenViewMode.updateCurrentDateTime()
+    }
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = { HomeScreenTopAppBar(scrollBehavior) },
+        topBar = { HomeScreenTopAppBar(scrollBehavior, currentTime) },
         floatingActionButtonPosition = FabPosition.Center,
-        floatingActionButton = { FloatingActionButton { timePickerDialogViewModel.showDialog() } }
+        floatingActionButton = {
+            FloatingActionButton {
+                timePickerDialogViewModel.showAlarmDialog()
+            }
+        }
     ) { innerPadding ->
         HomeScreenContent(
             innerPadding = innerPadding,
-            timePickerDialogViewModel = timePickerDialogViewModel
+            timePickerDialogViewModel = timePickerDialogViewModel,
+            homeScreenViewMode = homeScreenViewMode
         )
     }
 }
@@ -85,7 +93,7 @@ private fun AlarmList(
     modifier: Modifier = Modifier,
     innerPadding: PaddingValues
 ) {
-   
+
 }
 
 
@@ -98,13 +106,15 @@ private fun AlarmList(
 private fun HomeScreenContent(
     modifier: Modifier = Modifier,
     innerPadding: PaddingValues,
-    timePickerDialogViewModel: TimePickerDialogViewModel
+    timePickerDialogViewModel: TimePickerDialogViewModel,
+    homeScreenViewMode: HomeScreenViewModel
 ) {
     if (timePickerDialogViewModel.isShow) {
         TimePickerDialog(
-            state = timePickerDialogViewModel.timePickerState, 
             onDismissRequest = timePickerDialogViewModel::hiddenDialog,
-            onPositiveClick = {}
+            onPositiveClick = {},
+            onChangeDialog = timePickerDialogViewModel::changeDialog,
+            timePickerDialogViewModel = timePickerDialogViewModel
         )
     }
 }
@@ -113,16 +123,12 @@ private fun HomeScreenContent(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HomeScreenTopAppBar(
-    scrollBehavior: TopAppBarScrollBehavior
+    scrollBehavior: TopAppBarScrollBehavior,
+    currentTime: LocalDateTime
 ) {
-    val scope = rememberCoroutineScope()
-    var time by remember { mutableStateOf(LocalTime.now()) }
-    scope.launch { 
-        while (true) {
-            delay(DELAY_TIME)
-            time = LocalTime.now()
-        }
-    }
+    val context = LocalContext.current
+    val isFormat24 = DateFormat.is24HourFormat(context)
+
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
             titleContentColor = MaterialTheme.colorScheme.onBackground,
@@ -131,7 +137,7 @@ private fun HomeScreenTopAppBar(
         scrollBehavior = scrollBehavior,
         // 現在の時刻を表示
         title = {
-            Text(text = Utility.localTimeToString(time, true))
+            Text(text = Utility.localDateTimeToFormattedTime(currentTime, isFormat24))
         }
     )
 }
@@ -152,5 +158,5 @@ private fun FloatingActionButton(
 @Preview
 @Composable
 private fun HomeScreenPreview() {
-    HomeScreen()
+//    HomeScreen()
 }
