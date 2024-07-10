@@ -13,7 +13,7 @@ import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import me.ljpb.alarmbynotification.data.NotificationInfo
+import me.ljpb.alarmbynotification.data.NotificationInfoInterface
 import me.ljpb.alarmbynotification.data.NotifyIntentKey
 
 
@@ -145,7 +145,7 @@ fun timerNotify(
  * @param context
  * @param notificationInfo 登録する通知の情報
  */
-fun setNotification(context: Context, notificationInfo: NotificationInfo) {
+fun setNotification(context: Context, notificationInfo: NotificationInfoInterface) {
     val intent = Intent(context, NotifyReceiver::class.java)
     intent.putExtra(NotifyIntentKey.TITLE, notificationInfo.title)
     intent.putExtra(NotifyIntentKey.TEXT, notificationInfo.text)
@@ -169,6 +169,6 @@ fun setNotification(context: Context, notificationInfo: NotificationInfo) {
  * @param context
  * @param notificationInfo 削除対象となる通知(notifyIdが一致する通知を削除)
  */
-fun deleteNotification(context: Context, notificationInfo: NotificationInfo) {
+fun deleteNotification(context: Context, notificationInfo: NotificationInfoInterface) {
     
 }
