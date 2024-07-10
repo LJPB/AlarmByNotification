@@ -22,8 +22,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -33,11 +31,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.ljpb.alarmbynotification.R
-import me.ljpb.alarmbynotification.Utility.epochSecondsToFormattedTimeOfDay
+import me.ljpb.alarmbynotification.Utility.localDateTimeToFormattedTime
 import me.ljpb.alarmbynotification.data.TimeData
 import me.ljpb.alarmbynotification.data.TimeType
 import java.time.LocalDateTime
-import java.time.ZoneId
 
 /**
  * アラームに設定した時間を表示するカード
@@ -48,7 +45,7 @@ fun TimeCard(
     onTitleClick: () -> Unit,
     onTimeClick: () -> Unit,
     onDeleteClick: () -> Unit,
-    timeData: TimeData
+    finishTime: TimeData
 ) {
     Card(
         modifier = modifier
@@ -64,7 +61,7 @@ fun TimeCard(
             onTitleClick = onTitleClick,
             onTimeClick = onTimeClick,
             onDeleteClick = onDeleteClick,
-            timeData = timeData,
+            finishTime = finishTime,
         )
     }
 }
@@ -73,6 +70,7 @@ fun TimeCard(
  * @param onTitleClick アラームのタイトルを設定する
  * @param onTimeClick アラームの時刻を設定する
  * @param onDeleteClick アラームを削除する
+ * @param finishTime カードに表示する時刻のデータ
  */
 @Composable
 private fun CardContent(
@@ -80,9 +78,9 @@ private fun CardContent(
     onTitleClick: () -> Unit,
     onTimeClick: () -> Unit,
     onDeleteClick: () -> Unit,
-    timeData: TimeData,
+    finishTime: TimeData,
 ) {
-    val isAlarm = timeData.type == TimeType.Alarm
+    val isAlarm = finishTime.type == TimeType.Alarm
     
     val icon: ImageVector
     val iconDescription: String
@@ -96,7 +94,7 @@ private fun CardContent(
         iconDescription = stringResource(id = R.string.timer_channel_name)
         deleteDescription = stringResource(id = R.string.delete_timer)
     }
-    val title = if (timeData.name.trim().isNotEmpty()) timeData.name else stringResource(id = R.string.untitled)
+    val title = if (finishTime.name.trim().isNotEmpty()) finishTime.name else stringResource(id = R.string.untitled)
     
     Column(
         modifier = modifier
@@ -121,7 +119,7 @@ private fun CardContent(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            if (isAlarm) AlarmTime(epochSecondTime = timeData.epochSeconds, onTimeClick = onTimeClick) else TimerTime(epochSecondTime = timeData.epochSeconds, onTimeClick = onTimeClick)
+            if (isAlarm) AlarmTime(finishTime = finishTime.finishDateTime, onTimeClick = onTimeClick) else TimerTime(finishTIme = finishTime.finishDateTime, onTimeClick = onTimeClick)
             
             // アラーム削除ボタン
             IconButton(
@@ -138,11 +136,10 @@ private fun CardContent(
 }
 
 @Composable
-private fun AlarmTime(epochSecondTime: Long, modifier: Modifier = Modifier, onTimeClick: () -> Unit) {
+private fun AlarmTime(finishTime: LocalDateTime, modifier: Modifier = Modifier, onTimeClick: () -> Unit) {
     val context = LocalContext.current
     val isFormat24 by remember { mutableStateOf(DateFormat.is24HourFormat(context)) }
-    val timeZoneId by remember { mutableStateOf(ZoneId.systemDefault().id) }
-    val formattedTime = epochSecondsToFormattedTimeOfDay(epochSecondTime, isFormat24, timeZoneId)
+    val formattedTime = localDateTimeToFormattedTime(finishTime, isFormat24, false)
     Text(
         text = formattedTime,
         style = MaterialTheme.typography.displayLarge,
@@ -153,14 +150,10 @@ private fun AlarmTime(epochSecondTime: Long, modifier: Modifier = Modifier, onTi
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 private fun TimerTime(
-    epochSecondTime: Long, 
-    modifier: Modifier = Modifier, 
+    finishTIme: LocalDateTime,
+    modifier: Modifier = Modifier,
     onTimeClick: () -> Unit,
 ) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    var currentTime by remember { mutableStateOf(LocalDateTime.now()) }
-    
     Text(
         text = "16:00",
         style = MaterialTheme.typography.displayLarge,
@@ -173,9 +166,9 @@ private fun TimerTime(
 private fun AlarmCardPreview() {
     TimeCard(
         modifier = Modifier.padding(16.dp),
-        timeData = TimeData(
+        finishTime = TimeData(
             id = 1,
-            epochSeconds = 1L,
+            finishDateTime = LocalDateTime.now(),
             name = "aaa",
             type = TimeType.Alarm,
         ),
