@@ -2,16 +2,22 @@ package me.ljpb.alarmbynotification.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import androidx.room.TypeConverter
 
-/**
- * @param id PendingIntentのRequestCodeと一致
- */
 @Entity(tableName = "notifications")
 data class NotificationEntity(
     @PrimaryKey(autoGenerate = false)
-    val id: Int,
-    val title: String,
-    val text: String,
-    val triggerTime: Long,
-    val type: String
-)
+    override val notifyId: Int,
+    override val title: String,
+    override val text: String,
+    override val triggerTime: Long,
+    override val type: TimeType
+) : NotificationInfoInterface
+
+class TypeConverter {
+    @TypeConverter
+    fun timeTypeToString(timeType: TimeType): String = timeType.name
+    
+    @TypeConverter
+    fun stringToTimeType(timeType: String): TimeType = enumValueOf<TimeType>(timeType)
+}
