@@ -6,7 +6,16 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 object Utility {
-    fun localDateTimeToFormattedTime(localDateTime: LocalDateTime, isFormat24: Boolean = false, displaySecond: Boolean = true): String {
+    /** 与えられたLocalDateTimeの時刻をフォーマットした文字列に変換 (例 : LocalDateTime → 16:00, 04:00 p.m.)
+     * @param localDateTime
+     * @param isFormat24 24時間表記かどうか
+     * @param displaySecond 秒を表示するかどうか
+     */
+    fun localDateTimeToFormattedTime(
+        localDateTime: LocalDateTime, 
+        isFormat24: Boolean = false, 
+        displaySecond: Boolean = true
+    ): String {
         val timeFormat = if (isFormat24) {
             val ptn = if(displaySecond) "HH:mm:ss" else "HH:mm"
             DateTimeFormatter.ofPattern(ptn)
@@ -17,6 +26,11 @@ object Utility {
         return localDateTime.format(timeFormat)
     }
 
+    /** 与えられたエポック秒の時刻をフォーマットした文字列に変換 (例 : epochSeconds → 16:00, 04:00 p.m.)
+     * @param epochSeconds
+     * @param isFormat24 24時間表記かどうか
+     * @param timeZoneId
+     */
     fun epochSecondsToFormattedTimeOfDay(
         epochSeconds: Long,
         isFormat24: Boolean = false,
