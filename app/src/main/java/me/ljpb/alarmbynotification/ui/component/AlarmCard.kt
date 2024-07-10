@@ -1,5 +1,7 @@
 package me.ljpb.alarmbynotification.ui.component
 
+import android.annotation.SuppressLint
+import android.text.format.DateFormat
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,22 +19,36 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.ljpb.alarmbynotification.R
-
+import me.ljpb.alarmbynotification.Utility.epochSecondsToFormattedTimeOfDay
+import me.ljpb.alarmbynotification.data.TimeData
+import me.ljpb.alarmbynotification.data.TimeType
+import java.time.LocalDateTime
+import java.time.ZoneId
 
 /**
  * アラームに設定した時間を表示するカード
  */
 @Composable
-fun AlarmCard(
+fun TimeCard(
     modifier: Modifier = Modifier,
-    isAlarm: Boolean
+    onTitleClick: () -> Unit,
+    onTimeClick: () -> Unit,
+    onDeleteClick: () -> Unit,
+    timeData: TimeData
 ) {
     Card(
         modifier = modifier
@@ -45,10 +61,10 @@ fun AlarmCard(
                     horizontal = dimensionResource(id = R.dimen.padding_medium)
                 )
                 .fillMaxWidth(),
-            onTitleClick = {},
-            onTimeClick = {},
-            onDeleteClick = {},
-            isAlarm = isAlarm
+            onTitleClick = onTitleClick,
+            onTimeClick = onTimeClick,
+            onDeleteClick = onDeleteClick,
+            timeData = timeData,
         )
     }
 }
@@ -64,8 +80,24 @@ private fun CardContent(
     onTitleClick: () -> Unit,
     onTimeClick: () -> Unit,
     onDeleteClick: () -> Unit,
-    isAlarm: Boolean
+    timeData: TimeData,
 ) {
+    val isAlarm = timeData.type == TimeType.Alarm
+    
+    val icon: ImageVector
+    val iconDescription: String
+    val deleteDescription: String
+    if (isAlarm) {
+        icon = ALARM_ICON
+        iconDescription = stringResource(id = R.string.alarm_channel_name)
+        deleteDescription = stringResource(id = R.string.delete_alarm)
+    } else {
+        icon = TIMER_ICON
+        iconDescription = stringResource(id = R.string.timer_channel_name)
+        deleteDescription = stringResource(id = R.string.delete_timer)
+    }
+    val title = if (timeData.name.trim().isNotEmpty()) timeData.name else stringResource(id = R.string.untitled)
+    
     Column(
         modifier = modifier
     ) {
@@ -75,12 +107,12 @@ private fun CardContent(
            verticalAlignment = Alignment.CenterVertically
        ) {
            Icon(
-               imageVector = if (isAlarm) ALARM_ICON else TIMER_ICON,
-               contentDescription = stringResource(if (isAlarm) R.string.add_timer else R.string.add_alarm)
+               imageVector = icon,
+               contentDescription = iconDescription
            )
            Spacer(modifier = Modifier.width(8.dp))
            Text(
-                text = stringResource(id = R.string.untitled),
+                text = title,
                 style = MaterialTheme.typography.bodyMedium,
            )
         }
@@ -89,12 +121,8 @@ private fun CardContent(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // アラームの設定時間
-            Text(
-                text = "16:00",
-                style = MaterialTheme.typography.displayLarge,
-                modifier = Modifier.clickable { onTimeClick() }
-            )
+            if (isAlarm) AlarmTime(epochSecondTime = timeData.epochSeconds, onTimeClick = onTimeClick) else TimerTime(epochSecondTime = timeData.epochSeconds, onTimeClick = onTimeClick)
+            
             // アラーム削除ボタン
             IconButton(
                 onClick = onDeleteClick,
@@ -102,18 +130,57 @@ private fun CardContent(
             ) {
                 Icon(
                     imageVector = Icons.Filled.Delete,
-                    contentDescription = stringResource(id = R.string.delete_alarm)
+                    contentDescription = deleteDescription
                 )
             }
         }
     }
 }
 
+@Composable
+private fun AlarmTime(epochSecondTime: Long, modifier: Modifier = Modifier, onTimeClick: () -> Unit) {
+    val context = LocalContext.current
+    val isFormat24 by remember { mutableStateOf(DateFormat.is24HourFormat(context)) }
+    val timeZoneId by remember { mutableStateOf(ZoneId.systemDefault().id) }
+    val formattedTime = epochSecondsToFormattedTimeOfDay(epochSecondTime, isFormat24, timeZoneId)
+    Text(
+        text = formattedTime,
+        style = MaterialTheme.typography.displayLarge,
+        modifier = modifier.clickable { onTimeClick() }
+    )
+}
+
+@SuppressLint("CoroutineCreationDuringComposition")
+@Composable
+private fun TimerTime(
+    epochSecondTime: Long, 
+    modifier: Modifier = Modifier, 
+    onTimeClick: () -> Unit,
+) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var currentTime by remember { mutableStateOf(LocalDateTime.now()) }
+    
+    Text(
+        text = "16:00",
+        style = MaterialTheme.typography.displayLarge,
+        modifier = modifier.clickable { onTimeClick() }
+    )
+}
+
 @Preview(showSystemUi = true)
 @Composable
 private fun AlarmCardPreview() {
-    AlarmCard(
+    TimeCard(
         modifier = Modifier.padding(16.dp),
-        isAlarm = true
+        timeData = TimeData(
+            id = 1,
+            epochSeconds = 1L,
+            name = "aaa",
+            type = TimeType.Alarm,
+        ),
+        onTimeClick = {},
+        onTitleClick = {},
+        onDeleteClick = {}
     )
 }
