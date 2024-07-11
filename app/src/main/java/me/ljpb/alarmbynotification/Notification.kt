@@ -170,5 +170,14 @@ fun setNotification(context: Context, notificationInfo: NotificationInfoInterfac
  * @param notificationInfo 削除対象となる通知(notifyIdが一致する通知を削除)
  */
 fun deleteNotification(context: Context, notificationInfo: NotificationInfoInterface) {
-    
+    val intent = Intent(context, NotifyReceiver::class.java)
+    val pendingIntent = PendingIntent.getBroadcast(
+        context,
+        notificationInfo.notifyId, // requestCode
+        intent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
+    val alarmManager = context.getSystemService(ALARM_SERVICE) as AlarmManager
+    pendingIntent.cancel()
+    alarmManager.cancel(pendingIntent)
 }
