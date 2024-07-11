@@ -7,9 +7,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
+import me.ljpb.alarmbynotification.data.NotificationRepositoryInterface
 import java.time.LocalTime
 
-class TimePickerDialogViewModel(app: Application) : AndroidViewModel(app) {
+class TimePickerDialogViewModel(
+    private val repository: NotificationRepositoryInterface,
+    app: Application,
+    ) : AndroidViewModel(app) {
     // アラームにセットする時刻を管理する
     @OptIn(ExperimentalMaterial3Api::class)
     lateinit var alarmState: TimePickerState
