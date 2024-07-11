@@ -3,8 +3,10 @@ package me.ljpb.alarmbynotification.ui
 import android.annotation.SuppressLint
 import android.text.format.DateFormat
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -50,7 +52,7 @@ fun HomeScreen(
         homeScreenViewMode.updateCurrentDateTime()
     }
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = { HomeScreenTopAppBar(scrollBehavior, currentTime) },
         floatingActionButtonPosition = FabPosition.Center,
         floatingActionButton = {
@@ -101,7 +103,6 @@ private fun AlarmList(
  * HomeScreenに実際に配置するコンポーザブル
  * 状態に応じてEmptyとAlarmListを切り替える
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HomeScreenContent(
     modifier: Modifier = Modifier,
@@ -112,10 +113,14 @@ private fun HomeScreenContent(
     if (timePickerDialogViewModel.isShow) {
         TimePickerDialog(
             onDismissRequest = timePickerDialogViewModel::hiddenDialog,
-            onPositiveClick = {},
+            onPositiveClick = timePickerDialogViewModel::add,
             onChangeDialog = timePickerDialogViewModel::changeDialog,
             timePickerDialogViewModel = timePickerDialogViewModel
         )
+    }
+    Column(
+        modifier = modifier.padding(top = innerPadding.calculateTopPadding()),
+    ) {
     }
 }
 
