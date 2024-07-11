@@ -70,6 +70,8 @@ dependencies {
     implementation (libs.androidx.material.icons.extended)
 
     implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    
     annotationProcessor(libs.androidx.room.room.compiler)
     // To use Kotlin Symbol Processing (KSP)
     ksp(libs.androidx.room.room.compiler)
