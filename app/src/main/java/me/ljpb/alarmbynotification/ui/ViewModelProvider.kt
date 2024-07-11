@@ -15,5 +15,8 @@ object ViewModelProvider {
                 repository = repository
             )
         }
+        initializer { 
+            HomeScreenViewModel()
+        }
     }
 }
