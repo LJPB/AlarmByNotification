@@ -4,11 +4,10 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import androidx.room.TypeConverter
 import androidx.room.TypeConverters
 
 @Database(entities = [NotificationEntity::class], version = 1, exportSchema = false)
-@TypeConverters(TypeConverter::class)
+@TypeConverters(NotificationEntityTypeConverter::class)
 abstract class NotificationDatabase : RoomDatabase() {
     abstract fun notificationDao(): NotificationDao
 

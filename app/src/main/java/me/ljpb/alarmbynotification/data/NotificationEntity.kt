@@ -15,7 +15,7 @@ data class NotificationEntity(
     override val type: TimeType
 ) : NotificationInfoInterface
 
-class TypeConverter {
+class NotificationEntityTypeConverter {
     @TypeConverter
     fun timeTypeToString(timeType: TimeType): String = timeType.name
     
