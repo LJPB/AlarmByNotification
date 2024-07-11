@@ -15,8 +15,12 @@ object ViewModelProvider {
                 repository = repository
             )
         }
-        initializer { 
-            HomeScreenViewModel()
+        initializer {
+            val application = (this[APPLICATION_KEY] as NotificationApplication)
+            val repository = application.container.notificationRepository
+            HomeScreenViewModel(
+                repository = repository
+            )
         }
     }
 }

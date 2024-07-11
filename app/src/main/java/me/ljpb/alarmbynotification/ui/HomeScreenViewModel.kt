@@ -6,12 +6,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import me.ljpb.alarmbynotification.data.NotificationRepositoryInterface
 import java.time.LocalDateTime
 
 // 現在時刻を取得するための更新間隔
 const val DELAY_TIME: Long = 100L
 
-class HomeScreenViewModel : ViewModel() {
+class HomeScreenViewModel(private val repository: NotificationRepositoryInterface, ) : ViewModel() {
     private val _currentDateTime = MutableStateFlow(LocalDateTime.now())
     
     val currentDateTime: StateFlow<LocalDateTime> = _currentDateTime.asStateFlow()
