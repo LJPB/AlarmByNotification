@@ -23,5 +23,5 @@ interface NotificationDao {
     fun getItem(id: Int): Flow<NotificationEntity>
     
     @Query("select * from notifications order by triggerTime asc")
-    fun getAllItem(id: Int): List<Flow<NotificationEntity>>
+    fun getAllItem(): Flow<List<NotificationEntity>>
 }
