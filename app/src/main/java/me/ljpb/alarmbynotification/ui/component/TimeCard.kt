@@ -42,7 +42,7 @@ fun AlarmCard(
     onTitleClick: () -> Unit,
     onTimeClick: () -> Unit,
     onDeleteClick: () -> Unit,
-    finishTime: TimeData
+    timeData: TimeData
 ) {
     Card(
         modifier = modifier
@@ -59,7 +59,7 @@ fun AlarmCard(
             onTimeClick = onTimeClick,
             onDeleteClick = onDeleteClick,
             currentTime = null,
-            finishTime = finishTime,
+            timeData = timeData,
             isAlarm = true
         )
     }
@@ -72,7 +72,7 @@ fun TimerCard(
     onTimeClick: () -> Unit,
     onDeleteClick: () -> Unit,
     currentTime: LocalDateTime,
-    finishTime: TimeData
+    timeData: TimeData
 ) {
     Card(
         modifier = modifier
@@ -89,7 +89,7 @@ fun TimerCard(
             onTimeClick = onTimeClick,
             onDeleteClick = onDeleteClick,
             currentTime = currentTime,
-            finishTime = finishTime,
+            timeData = timeData,
             isAlarm = false
         )
     }
@@ -99,7 +99,7 @@ fun TimerCard(
  * @param onTitleClick アラームのタイトルを設定する
  * @param onTimeClick アラームの時刻を設定する
  * @param onDeleteClick アラームを削除する
- * @param finishTime カードに表示する時刻のデータ
+ * @param timeData カードに表示する時刻のデータ
  */
 @Composable
 private fun CardContent(
@@ -108,7 +108,7 @@ private fun CardContent(
     onTimeClick: () -> Unit,
     onDeleteClick: () -> Unit,
     currentTime: LocalDateTime?,
-    finishTime: TimeData,
+    timeData: TimeData,
     isAlarm: Boolean
 ) {
     val icon: ImageVector
@@ -123,9 +123,9 @@ private fun CardContent(
         iconDescription = stringResource(id = R.string.timer_channel_name)
         deleteDescription = stringResource(id = R.string.delete_timer)
     }
-    val title = if (finishTime.name.trim()
+    val title = if (timeData.name.trim()
             .isNotEmpty()
-    ) finishTime.name else stringResource(id = R.string.untitled)
+    ) timeData.name else stringResource(id = R.string.untitled)
 
     Column(
         modifier = modifier
@@ -151,11 +151,11 @@ private fun CardContent(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             if (isAlarm) AlarmTime(
-                finishTime = finishTime.finishDateTime,
+                timeData = timeData.finishDateTime,
                 onTimeClick = onTimeClick
             ) else TimerTime(
                 currentTime = currentTime!!,
-                finishTime = finishTime.finishDateTime,
+                timeData = timeData.finishDateTime,
                 onTimeClick = onTimeClick
             )
 
@@ -175,13 +175,13 @@ private fun CardContent(
 
 @Composable
 private fun AlarmTime(
-    finishTime: LocalDateTime,
+    timeData: LocalDateTime,
     modifier: Modifier = Modifier,
     onTimeClick: () -> Unit
 ) {
     val context = LocalContext.current
     val isFormat24 by remember { mutableStateOf(DateFormat.is24HourFormat(context)) }
-    val formattedTime = localDateTimeToFormattedTime(finishTime, isFormat24, false)
+    val formattedTime = localDateTimeToFormattedTime(timeData, isFormat24, false)
     Text(
         text = formattedTime,
         style = MaterialTheme.typography.displayLarge,
@@ -193,18 +193,18 @@ private fun AlarmTime(
 @Composable
 private fun TimerTime(
     currentTime: LocalDateTime,
-    finishTime: LocalDateTime,
+    timeData: LocalDateTime,
     modifier: Modifier = Modifier,
     onTimeClick: () -> Unit,
 ) {
     val text: String
-    if (currentTime.isAfter(finishTime)) {
+    if (currentTime.isAfter(timeData)) {
         // 現在時刻がセットした時間を過ぎていたら
         text = "--:--"
     } else {
         // 終了時刻に00:00:00となるように1秒足している
         val difSeconds = Duration
-            .between(currentTime, finishTime)
+            .between(currentTime, timeData)
             .toSeconds() + 1
         
         val hour = difSeconds / (60 * 60)
