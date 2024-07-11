@@ -19,7 +19,7 @@ interface NotificationDao {
     @Delete
     suspend fun delete(notification: NotificationEntity)
     
-    @Query("select * from notifications where notifyId = :id")
+    @Query("select * from notifications where id = :id")
     fun getItem(id: Int): Flow<NotificationEntity>
     
     @Query("select * from notifications order by triggerTime asc")
