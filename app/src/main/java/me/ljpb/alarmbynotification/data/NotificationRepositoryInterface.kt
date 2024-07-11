@@ -12,4 +12,6 @@ interface NotificationRepositoryInterface {
     fun getNotification(id: Int): Flow<NotificationEntity?>
     
     fun getAllNotifications():  Flow<List<NotificationEntity>>
+    
+    fun count(): Flow<Int>
 }

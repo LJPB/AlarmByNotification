@@ -28,4 +28,8 @@ class NotificationRepository(private val context: Context, private val dao: Noti
     override fun getAllNotifications(): Flow<List<NotificationEntity>> {
         return dao.getAllItem()
     }
+
+    override fun count(): Flow<Int> {
+        return dao.count()
+    }
 }
