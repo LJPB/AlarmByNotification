@@ -26,5 +26,5 @@ interface NotificationDao {
     fun getAllItem(): Flow<List<NotificationEntity>>
     
     @Query("select count(*) from notifications")
-    fun count(): Int
+    fun count(): Flow<Int>
 }
