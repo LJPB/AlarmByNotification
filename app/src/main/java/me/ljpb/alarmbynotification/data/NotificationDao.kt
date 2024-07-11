@@ -24,4 +24,7 @@ interface NotificationDao {
     
     @Query("select * from notifications order by triggerTime asc")
     fun getAllItem(): Flow<List<NotificationEntity>>
+    
+    @Query("select count(*) from notifications")
+    fun count(): Int
 }
