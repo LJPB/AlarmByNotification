@@ -25,7 +25,7 @@ class NotificationRepository(private val context: Context, private val dao: Noti
         return dao.getItem(id)
     }
 
-    override fun getAllNotifications(): Flow<List<NotificationEntity>> {
+    override fun getAllNotifications(): Flow<List<NotificationEntity>?> {
         return dao.getAllItem()
     }
 
