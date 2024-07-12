@@ -28,5 +28,6 @@ object NotifyIntentKey {
     const val TITLE = "title"
     const val TEXT = "text"
     const val NOTIFY_ID = "notifyId"
+    const val TRIGGER_TIME = "triggerTime"
     const val TYPE = "type"
 }

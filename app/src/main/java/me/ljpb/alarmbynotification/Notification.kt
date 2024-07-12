@@ -151,6 +151,7 @@ fun setNotification(context: Context, notificationInfo: NotificationInfoInterfac
     intent.putExtra(NotifyIntentKey.TEXT, notificationInfo.text)
     intent.putExtra(NotifyIntentKey.NOTIFY_ID, notificationInfo.notifyId)
     intent.putExtra(NotifyIntentKey.TYPE, notificationInfo.type.name)
+    intent.putExtra(NotifyIntentKey.TRIGGER_TIME, notificationInfo.triggerTime)
     
     val pendingIntent = PendingIntent.getBroadcast(
         context,
