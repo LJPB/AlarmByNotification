@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -28,13 +30,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 import me.ljpb.alarmbynotification.R
 import me.ljpb.alarmbynotification.Utility
+import me.ljpb.alarmbynotification.data.TimeData
+import me.ljpb.alarmbynotification.data.TimeType
+import me.ljpb.alarmbynotification.ui.component.AlarmCard
 import me.ljpb.alarmbynotification.ui.component.TimePickerDialog
+import me.ljpb.alarmbynotification.ui.component.TimerCard
 import java.time.LocalDateTime
 
 @SuppressLint("CoroutineCreationDuringComposition")
@@ -45,7 +52,7 @@ fun HomeScreen(
     homeScreenViewMode: HomeScreenViewModel
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    val timePickerDialogViewModel: TimePickerDialogViewModel = viewModel()
+    val timePickerDialogViewModel: TimePickerDialogViewModel = viewModel(factory = ViewModelProvider.Factory)
     val currentTime by homeScreenViewMode.currentDateTime.collectAsState()
     val scope = rememberCoroutineScope()
     scope.launch {
@@ -91,11 +98,42 @@ private fun Empty(
  * アラームの一覧を表示する
  */
 @Composable
-private fun AlarmList(
+private fun TimeList(
     modifier: Modifier = Modifier,
-    innerPadding: PaddingValues
+    setTimeList: List<TimeData>,
+    homeScreenViewMode: HomeScreenViewModel
 ) {
-
+    LazyColumn(
+        modifier = modifier
+    ) {
+        items (setTimeList) {
+            if (it.type == TimeType.Alarm) {
+                AlarmCard(
+                    onTitleClick = { /*TODO*/ },
+                    onTimeClick = { /*TODO*/ },
+                    onDeleteClick = { /*TODO*/ },
+                    timeData = it,
+                    modifier = Modifier.padding(
+                        vertical = dimensionResource(id = R.dimen.padding_small),
+                        horizontal = dimensionResource(id = R.dimen.padding_medium)
+                    )
+                )
+            } else {
+                val currentTime by homeScreenViewMode.currentDateTime.collectAsState()
+                TimerCard(
+                    onTitleClick = { /*TODO*/ },
+                    onTimeClick = { /*TODO*/ },
+                    onDeleteClick = { /*TODO*/ },
+                    currentTime = currentTime,
+                    timeData = it,
+                    modifier = Modifier.padding(
+                        vertical = dimensionResource(id = R.dimen.padding_small),
+                        horizontal = dimensionResource(id = R.dimen.padding_medium)
+                    )
+                )
+            }
+        }
+    }
 }
 
 
@@ -110,6 +148,9 @@ private fun HomeScreenContent(
     timePickerDialogViewModel: TimePickerDialogViewModel,
     homeScreenViewMode: HomeScreenViewModel
 ) {
+    val setTimeIsEmpty by homeScreenViewMode.setTimeIsEmpty.collectAsState()
+    val setTimeList by homeScreenViewMode.setTimeList.collectAsState()
+    
     if (timePickerDialogViewModel.isShow) {
         TimePickerDialog(
             onDismissRequest = timePickerDialogViewModel::hiddenDialog,
@@ -119,8 +160,16 @@ private fun HomeScreenContent(
         )
     }
     Column(
-        modifier = modifier.padding(top = innerPadding.calculateTopPadding()),
+        modifier = modifier.padding(innerPadding),
     ) {
+        if (setTimeIsEmpty) {
+            Empty()
+        } else {
+            TimeList(
+                setTimeList = setTimeList,
+                homeScreenViewMode = homeScreenViewMode
+            )
+        }
     }
 }
 
