@@ -22,15 +22,6 @@ const val DELAY_TIME: Long = 100L
 class HomeScreenViewModel(private val repository: NotificationRepositoryInterface) : ViewModel() {
     private val _currentDateTime = MutableStateFlow(LocalDateTime.now())
     val currentDateTime: StateFlow<LocalDateTime> = _currentDateTime.asStateFlow()
-
-    val setTimeIsEmpty: StateFlow<Boolean> = repository
-        .count()
-        .map { it != 0 }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(2_000L),
-            initialValue = true
-        )
     
     val setTimeList: StateFlow<List<TimeData>> = repository
         .getAllNotifications()
