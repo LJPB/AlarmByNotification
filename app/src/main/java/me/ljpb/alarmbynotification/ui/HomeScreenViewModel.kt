@@ -22,7 +22,7 @@ const val DELAY_TIME: Long = 100L
 class HomeScreenViewModel(private val repository: NotificationRepositoryInterface) : ViewModel() {
     private val _currentDateTime = MutableStateFlow(LocalDateTime.now())
     val currentDateTime: StateFlow<LocalDateTime> = _currentDateTime.asStateFlow()
-  
+
     val setTimeIsEmpty: StateFlow<Boolean> = repository
         .count()
         .map { it != 0 }
@@ -35,12 +35,13 @@ class HomeScreenViewModel(private val repository: NotificationRepositoryInterfac
     val setTimeList: StateFlow<List<TimeData>> = repository
         .getAllNotifications()
         .map { notificationEntities ->
+            if (notificationEntities.isNullOrEmpty()) return@map listOf()
             notificationEntities.map { notification ->
                 val zonedDateTime = Instant.ofEpochSecond(notification.triggerTime)
                     .atZone(ZoneId.systemDefault())
                     .toLocalDateTime()
                 TimeData(
-                    id = notification.id,
+                    id = notification.notifyId,
                     name = notification.title,
                     type = notification.type,
                     finishDateTime = zonedDateTime

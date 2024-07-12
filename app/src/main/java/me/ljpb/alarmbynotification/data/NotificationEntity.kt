@@ -6,8 +6,7 @@ import androidx.room.TypeConverter
 
 @Entity(tableName = "notifications")
 data class NotificationEntity(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
+    @PrimaryKey(autoGenerate = false)
     override val notifyId: Int,
     override val title: String,
     override val text: String,

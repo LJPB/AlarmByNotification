@@ -9,7 +9,7 @@ interface NotificationRepositoryInterface {
     
     suspend fun deleteNotification(notification: NotificationEntity)
     
-    fun getNotification(id: Int): Flow<NotificationEntity?>
+    fun getNotification(notifyId: Int): Flow<NotificationEntity?>
     
     fun getAllNotifications():  Flow<List<NotificationEntity>?>
     

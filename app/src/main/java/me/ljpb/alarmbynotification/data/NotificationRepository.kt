@@ -21,8 +21,8 @@ class NotificationRepository(private val context: Context, private val dao: Noti
         deleteNotification(context, notification)
     }
 
-    override fun getNotification(id: Int): Flow<NotificationEntity?> {
-        return dao.getItem(id)
+    override fun getNotification(notifyId: Int): Flow<NotificationEntity?> {
+        return dao.getItem(notifyId)
     }
 
     override fun getAllNotifications(): Flow<List<NotificationEntity>?> {
