@@ -17,7 +17,7 @@ class NotificationRepository(private val context: Context, private val dao: Noti
     }
 
     override suspend fun deleteNotification(notification: NotificationEntity) {
-        dao.delete(notification)
+        dao.delete(notification.notifyId)
         deleteNotification(context, notification)
     }
 

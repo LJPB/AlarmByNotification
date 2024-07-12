@@ -1,7 +1,6 @@
 package me.ljpb.alarmbynotification.data
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -16,8 +15,8 @@ interface NotificationDao {
     @Update
     suspend fun update(notification: NotificationEntity)
  
-    @Delete
-    suspend fun delete(notification: NotificationEntity)
+    @Query("delete from notifications where notifyId = :notifyId")
+    fun delete(notifyId: Int)
     
     @Query("select * from notifications where notifyId = :notifyId")
     fun getItem(notifyId: Int): Flow<NotificationEntity>
