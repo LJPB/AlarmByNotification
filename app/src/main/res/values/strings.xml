@@ -6,7 +6,7 @@
     
     <string name="untitled">名称未設定</string>
     
-    <string name="empty">時間はセットされていません</string>
+    <string name="empty">セットされた時間はありません</string>
     
     <string name="add">追加</string>
     <string name="add_alarm">アラームを追加</string>
