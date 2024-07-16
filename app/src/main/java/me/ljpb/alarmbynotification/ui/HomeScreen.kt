@@ -174,7 +174,6 @@ private fun HomeScreenContent(
 ) {
     val setTimeList by homeScreenViewModel.setTimeList.collectAsState()
     val setTimeIsEmpty = setTimeList.isEmpty()
-    val scope = rememberCoroutineScope()
 
     if (timePickerDialogViewModel.isShow) {
         TimePickerDialog(
