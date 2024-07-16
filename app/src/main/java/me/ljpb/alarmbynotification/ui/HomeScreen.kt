@@ -34,7 +34,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -47,7 +46,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -71,7 +69,6 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     homeScreenViewMode: HomeScreenViewModel
 ) {
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val timePickerDialogViewModel: TimePickerDialogViewModel =
         viewModel(factory = ViewModelProvider.Factory)
     val currentTime by homeScreenViewMode.currentDateTime.collectAsState()
@@ -80,8 +77,7 @@ fun HomeScreen(
         homeScreenViewMode.updateCurrentDateTime()
     }
     Scaffold(
-        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = { HomeScreenTopAppBar(scrollBehavior, currentTime) },
+        topBar = { HomeScreenTopAppBar(currentTime) },
         floatingActionButtonPosition = FabPosition.Center,
         floatingActionButton = {
             FloatingActionButton {
@@ -293,7 +289,7 @@ private fun TitleInputDialog(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HomeScreenTopAppBar(
-    scrollBehavior: TopAppBarScrollBehavior,
+//    scrollBehavior: TopAppBarScrollBehavior,
     currentTime: LocalDateTime
 ) {
     val context = LocalContext.current
@@ -304,7 +300,6 @@ private fun HomeScreenTopAppBar(
             titleContentColor = MaterialTheme.colorScheme.onBackground,
             actionIconContentColor = MaterialTheme.colorScheme.onBackground,
         ),
-        scrollBehavior = scrollBehavior,
         // 現在の時刻を表示
         title = {
             Text(text = Utility.localDateTimeToFormattedTime(currentTime, isFormat24))
