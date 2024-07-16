@@ -1,5 +1,8 @@
 package me.ljpb.alarmbynotification.ui
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
@@ -47,6 +50,69 @@ class HomeScreenViewModel(private val repository: NotificationRepositoryInterfac
             initialValue = listOf()
         )
 
+    var titleInputDialogIsShow by mutableStateOf(false)
+        private set
+    var timeUpdateDialogIsShow by mutableStateOf(false)
+        private set
+    
+    private var selectedTimeDate: TimeData? = null
+    
+    fun showTitleInputDialog(timeData: TimeData) {
+        titleInputDialogIsShow = true
+        selectedTimeDate = timeData
+    }
+    
+    fun hiddenTitleInputDialog() {
+        titleInputDialogIsShow = false
+        selectedTimeDate = null
+    }
+    
+    fun getDefaultTitle(): String {
+        if (selectedTimeDate == null) {
+            hiddenTitleInputDialog()
+            return ""
+        }
+        return selectedTimeDate!!.name
+    }
+    
+    fun showTimeUpdateDialog(timeData: TimeData) {
+        timeUpdateDialogIsShow = true
+        selectedTimeDate = timeData
+    }
+    
+    fun hiddenTimeUpdateDialog() {
+        timeUpdateDialogIsShow = false
+        selectedTimeDate = null
+    }
+
+    fun setTitle(title: String) {
+        if (selectedTimeDate == null) return
+        viewModelScope.launch {
+            val notify = repository
+                .getNotification(selectedTimeDate!!.id)
+                .firstOrNull()
+            if (notify != null) {
+                val newNotify = notify.copy(title = title)
+                repository.updateNotification(newNotify)
+            }
+        }
+    }
+
+    fun changeTime() {
+
+    }
+
+    fun delete(timeData: TimeData) {
+        viewModelScope.launch {
+            val notify = repository
+                .getNotification(timeData.id)
+                .firstOrNull()
+            if (notify != null) {
+                repository.deleteNotification(notify)
+            }
+        }
+    }
+    
     suspend fun updateCurrentDateTime() {
         while (true) {
             _currentDateTime.update { LocalDateTime.now() }
@@ -54,22 +120,5 @@ class HomeScreenViewModel(private val repository: NotificationRepositoryInterfac
         }
     }
 
-    fun setTitle() {
-
-    }
-
-    fun changeTime() {
-
-    }
-
-     fun delete(timeData: TimeData) {
-         viewModelScope.launch {
-             val notify = repository
-                 .getNotification(timeData.id)
-                 .firstOrNull()
-             if (notify != null) {
-                 repository.deleteNotification(notify)
-             }
-         }
-    }
+    
 }
