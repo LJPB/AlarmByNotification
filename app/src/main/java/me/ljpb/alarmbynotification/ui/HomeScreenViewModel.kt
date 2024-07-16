@@ -33,7 +33,7 @@ class HomeScreenViewModel(private val repository: NotificationRepositoryInterfac
         .map { notificationEntities ->
             if (notificationEntities.isNullOrEmpty()) return@map listOf()
             notificationEntities.map { notification ->
-                val zonedDateTime = Instant.ofEpochSecond(notification.triggerTimeMilliSeconds)
+                val zonedDateTime = Instant.ofEpochSecond(notification.triggerTimeMilliSeconds / 1000)
                     .atZone(ZoneId.systemDefault())
                     .toLocalDateTime()
                 TimeData(
