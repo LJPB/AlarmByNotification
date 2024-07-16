@@ -36,6 +36,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,6 +45,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
@@ -195,11 +198,16 @@ private fun HomeScreenContent(
  */
 
     if (homeScreenViewModel.titleInputDialogIsShow) {
+        val focusRequester = remember { FocusRequester() }
         TitleInputDialog(
             onDismissRequest = homeScreenViewModel::hiddenTitleInputDialog,
             onPositiveClick = homeScreenViewModel::setTitle,
+            focusRequester = focusRequester,
             defaultTitle = homeScreenViewModel.getDefaultTitle()
         )
+        LaunchedEffect(Unit){
+            focusRequester.requestFocus()
+        }
     }
 
     Column {
@@ -224,10 +232,10 @@ private fun TitleInputDialog(
     modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit,
     onPositiveClick: (String) -> Unit,
+    focusRequester: FocusRequester,
     defaultTitle: String = ""
 ) {
     var inputTitle by remember { mutableStateOf(defaultTitle) }
-
     BasicAlertDialog(onDismissRequest = onDismissRequest) {
         Surface(
             modifier = modifier
@@ -242,6 +250,7 @@ private fun TitleInputDialog(
             ) {
                 Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.padding_medium)))
                 OutlinedTextField(
+                    modifier = Modifier.focusRequester(focusRequester),
                     label = {
                         Text(stringResource(id = R.string.set_title))
                     },
@@ -254,7 +263,10 @@ private fun TitleInputDialog(
                         imeAction = ImeAction.Done
                     ),
                     keyboardActions = KeyboardActions(
-                        onDone = { onPositiveClick(inputTitle) }
+                        onDone = { 
+                            onPositiveClick(inputTitle)
+                            onDismissRequest()
+                        }
                     )
                 )
                 Row(
@@ -265,7 +277,10 @@ private fun TitleInputDialog(
                         Text(text = stringResource(id = R.string.cancel))
                     }
                     Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.padding_small)))
-                    TextButton(onClick = { onPositiveClick(inputTitle) }) {
+                    TextButton(onClick = { 
+                        onPositiveClick(inputTitle)
+                        onDismissRequest()
+                    }) {
                         Text(text = stringResource(id = R.string.ok))
                     }
                 } 
