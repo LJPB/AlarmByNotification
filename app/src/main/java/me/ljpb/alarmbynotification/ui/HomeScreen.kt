@@ -101,18 +101,21 @@ private fun Empty(
 private fun TimeList(
     modifier: Modifier = Modifier,
     setTimeList: List<TimeData>,
+    onTitleClick: () -> Unit,
+    onTimeClick: () -> Unit,
+    onDeleteClick: (TimeData) -> Unit,
     homeScreenViewMode: HomeScreenViewModel
 ) {
     LazyColumn(
         modifier = modifier
     ) {
-        items (setTimeList) {
-            if (it.type == TimeType.Alarm) {
+        items (setTimeList) { time ->
+            if (time.type == TimeType.Alarm) {
                 AlarmCard(
-                    onTitleClick = { /*TODO*/ },
-                    onTimeClick = { /*TODO*/ },
-                    onDeleteClick = { /*TODO*/ },
-                    timeData = it,
+                    onTitleClick = onTitleClick,
+                    onTimeClick = onTimeClick,
+                    onDeleteClick = { onDeleteClick(time) },
+                    timeData = time,
                     modifier = Modifier.padding(
                         vertical = dimensionResource(id = R.dimen.padding_small),
                         horizontal = dimensionResource(id = R.dimen.padding_medium)
@@ -121,11 +124,11 @@ private fun TimeList(
             } else {
                 val currentTime by homeScreenViewMode.currentDateTime.collectAsState()
                 TimerCard(
-                    onTitleClick = { /*TODO*/ },
-                    onTimeClick = { /*TODO*/ },
-                    onDeleteClick = { /*TODO*/ },
+                    onTitleClick = onTitleClick,
+                    onTimeClick = onTimeClick,
+                    onDeleteClick = { onDeleteClick(time) },
                     currentTime = currentTime,
-                    timeData = it,
+                    timeData = time,
                     modifier = Modifier.padding(
                         vertical = dimensionResource(id = R.dimen.padding_small),
                         horizontal = dimensionResource(id = R.dimen.padding_medium)
@@ -148,8 +151,9 @@ private fun HomeScreenContent(
     timePickerDialogViewModel: TimePickerDialogViewModel,
     homeScreenViewMode: HomeScreenViewModel
 ) {
-    val setTimeIsEmpty by homeScreenViewMode.setTimeIsEmpty.collectAsState()
     val setTimeList by homeScreenViewMode.setTimeList.collectAsState()
+    val setTimeIsEmpty = setTimeList.isEmpty()
+    val scope = rememberCoroutineScope()
     
     if (timePickerDialogViewModel.isShow) {
         TimePickerDialog(
@@ -167,7 +171,10 @@ private fun HomeScreenContent(
         } else {
             TimeList(
                 setTimeList = setTimeList,
-                homeScreenViewMode = homeScreenViewMode
+                homeScreenViewMode = homeScreenViewMode,
+                onTitleClick = {},
+                onTimeClick = {},
+                onDeleteClick = homeScreenViewMode::delete,
             )
         }
     }
