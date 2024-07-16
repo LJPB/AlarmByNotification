@@ -16,7 +16,7 @@ interface NotificationDao {
     suspend fun update(notification: NotificationEntity)
  
     @Query("delete from notifications where notifyId = :notifyId")
-    fun delete(notifyId: Int)
+    suspend fun delete(notifyId: Int)
     
     @Query("select * from notifications where notifyId = :notifyId")
     fun getItem(notifyId: Int): Flow<NotificationEntity>
