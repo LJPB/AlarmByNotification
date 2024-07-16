@@ -43,7 +43,8 @@ fun TimePickerDialog(
     onDismissRequest: () -> Unit,
     onPositiveClick: () -> Unit,
     onChangeDialog: () -> Unit,
-    timePickerDialogViewModel: TimePickerDialogViewModel
+    timePickerDialogViewModel: TimePickerDialogViewModel,
+    showChangeButton: Boolean = true
 ) {
     BasicAlertDialog(onDismissRequest = onDismissRequest) {
         Surface(
@@ -57,7 +58,8 @@ fun TimePickerDialog(
                 onDismissRequest = onDismissRequest,
                 onPositiveClick = onPositiveClick,
                 onChangeDialog = onChangeDialog,
-                timePickerDialogViewModel = timePickerDialogViewModel
+                timePickerDialogViewModel = timePickerDialogViewModel,
+                showChangeButton = showChangeButton
             )
         }
     }
@@ -70,7 +72,8 @@ private fun DialogContent(
     onDismissRequest: () -> Unit,
     onPositiveClick: () -> Unit,
     onChangeDialog: () -> Unit,
-    timePickerDialogViewModel: TimePickerDialogViewModel
+    timePickerDialogViewModel: TimePickerDialogViewModel,
+    showChangeButton: Boolean
 ) {
     val isAlarm = timePickerDialogViewModel.isAlarm
     Column(
@@ -102,14 +105,17 @@ private fun DialogContent(
             modifier = Modifier.padding(bottom = dimensionResource(id = R.dimen.padding_medium)),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // アラーム追加ダイアログとタイマー追加ダイアログの切り替えボタン
-            // isAlarmがtrueつまり現在がアラームの時はタイマーのアイコンを表示する
-            IconButton(onClick = onChangeDialog) {
-                Icon(
-                    imageVector = if (isAlarm) TIMER_ICON else ALARM_ICON,
-                    contentDescription = stringResource(if (isAlarm) R.string.add_timer else R.string.add_alarm)
-                )
+            if (showChangeButton) {
+                // アラーム追加ダイアログとタイマー追加ダイアログの切り替えボタン
+                // isAlarmがtrueつまり現在がアラームの時はタイマーのアイコンを表示する
+                IconButton(onClick = onChangeDialog) {
+                    Icon(
+                        imageVector = if (isAlarm) TIMER_ICON else ALARM_ICON,
+                        contentDescription = stringResource(if (isAlarm) R.string.add_timer else R.string.add_alarm)
+                    )
+                }
             }
+            
             Spacer(modifier = Modifier.weight(1f))
             // キャンセルボタン
             TextButton(
@@ -120,7 +126,10 @@ private fun DialogContent(
             Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.padding_small)))
             // okボタン
             TextButton(
-                onClick = onPositiveClick
+                onClick = { 
+                    onPositiveClick()
+                    onDismissRequest()
+                }
             ) {
                 Text(text = stringResource(id = R.string.ok))
             }
