@@ -10,7 +10,7 @@ data class NotificationEntity(
     override val notifyId: Int,
     override val title: String,
     override val text: String,
-    override val triggerTime: Long,
+    override val triggerTimeMilliSeconds: Long,
     override val type: TimeType
 ) : NotificationInfoInterface
 

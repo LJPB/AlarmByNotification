@@ -151,7 +151,7 @@ fun setNotification(context: Context, notificationInfo: NotificationInfoInterfac
     intent.putExtra(NotifyIntentKey.TEXT, notificationInfo.text)
     intent.putExtra(NotifyIntentKey.NOTIFY_ID, notificationInfo.notifyId)
     intent.putExtra(NotifyIntentKey.TYPE, notificationInfo.type.name)
-    intent.putExtra(NotifyIntentKey.TRIGGER_TIME, notificationInfo.triggerTime)
+    intent.putExtra(NotifyIntentKey.TRIGGER_TIME, notificationInfo.triggerTimeMilliSeconds)
     
     val pendingIntent = PendingIntent.getBroadcast(
         context,
@@ -161,7 +161,7 @@ fun setNotification(context: Context, notificationInfo: NotificationInfoInterfac
     )
     
     val alarmManager = context.getSystemService(ALARM_SERVICE) as AlarmManager
-    val alarmClockInfo = AlarmManager.AlarmClockInfo(notificationInfo.triggerTime, pendingIntent)
+    val alarmClockInfo = AlarmManager.AlarmClockInfo(notificationInfo.triggerTimeMilliSeconds, pendingIntent)
     alarmManager.setAlarmClock(alarmClockInfo, pendingIntent)
 }
 

@@ -5,14 +5,14 @@ package me.ljpb.alarmbynotification.data
  * @property title 通知に表示するタイトル
  * @property text 通知に表示する本文
  * @property notifyId 通知を区別するID
- * @property triggerTime 通知を実行するエポック秒
+ * @property triggerTimeMilliSeconds 通知を実行するエポック秒
  * @property type 通知の種類(アラームかタイマー)
  */
 interface NotificationInfoInterface {
     val title: String
     val text: String
     val notifyId: Int
-    val triggerTime: Long
+    val triggerTimeMilliSeconds: Long
     val type: TimeType
 }
 
@@ -20,7 +20,7 @@ data class NotificationInfo (
     override val title: String,
     override val text: String,
     override val notifyId: Int,
-    override val triggerTime: Long,
+    override val triggerTimeMilliSeconds: Long,
     override val type: TimeType
 ) : NotificationInfoInterface
 

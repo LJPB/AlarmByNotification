@@ -44,7 +44,7 @@ class NotifyReceiver : BroadcastReceiver() {
                             notifyId = notifyId,
                             title = title,
                             text = text,
-                            triggerTime = triggerTime,
+                            triggerTimeMilliSeconds = triggerTime,
                             type = type.toTimeType(),
                         )
                     )
