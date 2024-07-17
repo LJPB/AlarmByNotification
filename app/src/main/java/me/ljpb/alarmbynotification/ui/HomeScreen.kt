@@ -26,15 +26,20 @@ import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeFloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -47,6 +52,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -59,12 +65,14 @@ import me.ljpb.alarmbynotification.R
 import me.ljpb.alarmbynotification.Utility
 import me.ljpb.alarmbynotification.data.TimeData
 import me.ljpb.alarmbynotification.data.TimeType
+import me.ljpb.alarmbynotification.ui.component.ALARM_ICON
 import me.ljpb.alarmbynotification.ui.component.AlarmCard
+import me.ljpb.alarmbynotification.ui.component.TIMER_ICON
 import me.ljpb.alarmbynotification.ui.component.TimePickerDialog
 import me.ljpb.alarmbynotification.ui.component.TimerCard
 import java.time.LocalDateTime
 
-@SuppressLint("CoroutineCreationDuringComposition")
+@SuppressLint("CoroutineCreationDuringComposition", "StateFlowValueCalledInComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -75,15 +83,26 @@ fun HomeScreen(
         viewModel(factory = ViewModelProvider.Factory)
     val currentTime by homeScreenViewMode.currentDateTime.collectAsState()
     val scope = rememberCoroutineScope()
+    val dialogDefaultContentIsAlarm by homeScreenViewMode.dialogDefaultContentIsAlarm.collectAsState()
     scope.launch {
         homeScreenViewMode.updateCurrentDateTime()
     }
     Scaffold(
-        topBar = { HomeScreenTopAppBar(currentTime) },
+        topBar = {
+            HomeScreenTopAppBar(
+                currentTime = currentTime,
+                dialogDefaultContentIsAlarm = dialogDefaultContentIsAlarm,
+                onClickAction = homeScreenViewMode::changeDefaultContent
+            )
+        },
         floatingActionButtonPosition = FabPosition.Center,
         floatingActionButton = {
             FloatingActionButton {
-                timePickerDialogViewModel.showAlarmDialog()
+                if (dialogDefaultContentIsAlarm) {
+                    timePickerDialogViewModel.showAlarmDialog()
+                } else {
+                    timePickerDialogViewModel.showTimerDialog()
+                }
             }
         }
     ) { innerPadding ->
@@ -160,7 +179,7 @@ private fun TimeList(
             Spacer(modifier = Modifier.height(128.dp))
         }
     }
-    
+
     LaunchedEffect(setTimeList.size) {
         if (listState.layoutInfo.totalItemsCount > 0) {
             if (homeScreenViewModel.isScroll()) {
@@ -170,7 +189,7 @@ private fun TimeList(
             }
         }
     }
-    
+
 }
 
 
@@ -209,7 +228,6 @@ private fun HomeScreenContent(
             focusRequester.requestFocus()
         }
     }
-
     Column {
         if (setTimeIsEmpty) {
             Empty()
@@ -288,16 +306,27 @@ private fun TitleInputDialog(
     }
 }
 
-
 @SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HomeScreenTopAppBar(
 //    scrollBehavior: TopAppBarScrollBehavior,
-    currentTime: LocalDateTime
+    currentTime: LocalDateTime,
+    onClickAction: (Boolean) -> Unit,
+    dialogDefaultContentIsAlarm: Boolean
 ) {
     val context = LocalContext.current
     val isFormat24 = DateFormat.is24HourFormat(context)
+
+    val imageVector: ImageVector
+    val contentDescription: String
+    if (dialogDefaultContentIsAlarm) {
+        imageVector = ALARM_ICON
+        contentDescription = stringResource(id = R.string.alarm_channel_name)
+    } else {
+        imageVector = TIMER_ICON
+        contentDescription = stringResource(id = R.string.timer_channel_name)
+    }
 
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
@@ -307,6 +336,26 @@ private fun HomeScreenTopAppBar(
         // 現在の時刻を表示
         title = {
             Text(text = Utility.localDateTimeToFormattedTime(currentTime, isFormat24))
+        },
+        actions = {
+            TooltipBox(
+                positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                tooltip = {
+                    PlainTooltip {
+                        Text(stringResource(id = R.string.change_default))
+                    }
+                },
+                state = rememberTooltipState()
+            ) {
+                IconButton(onClick = {
+                    onClickAction(!dialogDefaultContentIsAlarm)
+                }) {
+                    Icon(
+                        imageVector = imageVector,
+                        contentDescription = contentDescription
+                    )
+                }
+            }
         }
     )
 }
@@ -324,8 +373,8 @@ private fun FloatingActionButton(
     }
 }
 
-@Preview
+@Preview(showSystemUi = true)
 @Composable
 private fun HomeScreenPreview() {
-
+//    HomeScreenTopAppBar(currentTime = LocalDateTime.now())
 }

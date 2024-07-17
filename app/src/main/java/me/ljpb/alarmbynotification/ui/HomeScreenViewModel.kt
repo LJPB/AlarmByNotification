@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import me.ljpb.alarmbynotification.data.DialogDefaultContentPreferencesRepository
 import me.ljpb.alarmbynotification.data.NotificationRepositoryInterface
 import me.ljpb.alarmbynotification.data.TimeData
 import java.time.Instant
@@ -26,7 +27,10 @@ import java.time.ZoneId
 // 現在時刻を取得するための更新間隔
 const val DELAY_TIME: Long = 100L
 
-class HomeScreenViewModel(private val repository: NotificationRepositoryInterface) : ViewModel() {
+class HomeScreenViewModel(
+    private val repository: NotificationRepositoryInterface,
+    private val preferencesRepository: DialogDefaultContentPreferencesRepository,
+) : ViewModel() {
     private val _currentDateTime = MutableStateFlow(LocalDateTime.now())
     val currentDateTime: StateFlow<LocalDateTime> = _currentDateTime.asStateFlow()
 
@@ -52,9 +56,18 @@ class HomeScreenViewModel(private val repository: NotificationRepositoryInterfac
             started = SharingStarted.WhileSubscribed(2_000L),
             initialValue = listOf()
         )
+    
+    val dialogDefaultContentIsAlarm: StateFlow<Boolean> = preferencesRepository.isAlarmDefault
+        .map { it }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(2_000L),
+            initialValue = true
+        )
 
     // addedItemTriggerTimeMilliSecondsの初期値
     private val initialSeconds = -1L
+
     // setTimeListに新たに追加された通知のtriggerTime
     private var addedItemTriggerTimeMilliSeconds by mutableLongStateOf(initialSeconds)
 
@@ -80,7 +93,7 @@ class HomeScreenViewModel(private val repository: NotificationRepositoryInterfac
         }
         return selectedTimeDate!!.name
     }
-    
+
     fun setTitle(title: String) {
         if (selectedTimeDate == null) return
         viewModelScope.launch {
@@ -94,8 +107,10 @@ class HomeScreenViewModel(private val repository: NotificationRepositoryInterfac
         }
     }
 
-    fun changeTime() {
-
+    fun changeDefaultContent(defaultIsAlarm: Boolean) {
+        viewModelScope.launch {
+            preferencesRepository.changeDialogDefaultContent(defaultIsAlarm)
+        }
     }
 
     fun delete(timeData: TimeData) {
@@ -119,11 +134,11 @@ class HomeScreenViewModel(private val repository: NotificationRepositoryInterfac
     fun setAddItemTime(triggerTimeMilliSeconds: Long) {
         addedItemTriggerTimeMilliSeconds = triggerTimeMilliSeconds
     }
-    
+
     fun initAddItemTime() {
         addedItemTriggerTimeMilliSeconds = initialSeconds
     }
-    
+
     fun isScroll(): Boolean {
         // addedItemTriggerTimeMilliSecondsが初期値ならスクロールしない
         // setTimeListからアイテムが削除された場合にスクロールしないようにするためのもの
@@ -134,7 +149,7 @@ class HomeScreenViewModel(private val repository: NotificationRepositoryInterfac
         val addItemFinishDateTime = Instant.ofEpochSecond(addedItemTriggerTimeMilliSeconds / 1000)
             .atZone(ZoneId.systemDefault())
             .toLocalDateTime()
-        
+
         val tmpList = setTimeList.value
         var start = 0
         var end = tmpList.size - 1
