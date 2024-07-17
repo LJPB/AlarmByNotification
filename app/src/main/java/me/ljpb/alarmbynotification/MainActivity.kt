@@ -4,44 +4,27 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
+import me.ljpb.alarmbynotification.ui.HomeScreen
+import me.ljpb.alarmbynotification.ui.HomeScreenViewModel
+import me.ljpb.alarmbynotification.ui.TimePickerDialogViewModel
+import me.ljpb.alarmbynotification.ui.ViewModelProvider
 import me.ljpb.alarmbynotification.ui.theme.AlarmByNotificationTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        createNotificationChannel(this)
         enableEdgeToEdge()
         setContent {
             AlarmByNotificationTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                val homeScreenViewModel: HomeScreenViewModel = viewModel(factory = ViewModelProvider.Factory)
+                val timePickerDialogViewModel: TimePickerDialogViewModel = viewModel(factory = ViewModelProvider.Factory)
+                HomeScreen(
+                    homeScreenViewMode = homeScreenViewModel,
+                    timePickerDialogViewModel = timePickerDialogViewModel
+                )
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    AlarmByNotificationTheme {
-        Greeting("Android")
     }
 }
