@@ -76,21 +76,21 @@ import java.time.LocalDateTime
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
-    homeScreenViewMode: HomeScreenViewModel,
+    homeScreenViewModel: HomeScreenViewModel,
     timePickerDialogViewModel: TimePickerDialogViewModel
 ) {
-    val currentTime by homeScreenViewMode.currentDateTime.collectAsState()
+    val currentTime by homeScreenViewModel.currentDateTime.collectAsState()
     val scope = rememberCoroutineScope()
-    val dialogDefaultContentIsAlarm by homeScreenViewMode.dialogDefaultContentIsAlarm.collectAsState()
+    val dialogDefaultContentIsAlarm by homeScreenViewModel.dialogDefaultContentIsAlarm.collectAsState()
     scope.launch {
-        homeScreenViewMode.updateCurrentDateTime()
+        homeScreenViewModel.updateCurrentDateTime()
     }
     Scaffold(
         topBar = {
             HomeScreenTopAppBar(
                 currentTime = currentTime,
                 dialogDefaultContentIsAlarm = dialogDefaultContentIsAlarm,
-                onClickAction = homeScreenViewMode::changeDefaultContent
+                onClickAction = homeScreenViewModel::changeDefaultContent
             )
         },
         floatingActionButtonPosition = FabPosition.Center,
@@ -107,7 +107,7 @@ fun HomeScreen(
         HomeScreenContent(
             innerPadding = innerPadding,
             timePickerDialogViewModel = timePickerDialogViewModel,
-            homeScreenViewModel = homeScreenViewMode
+            homeScreenViewModel = homeScreenViewModel
         )
     }
 }
