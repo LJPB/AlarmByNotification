@@ -60,8 +60,6 @@ class HomeScreenViewModel(private val repository: NotificationRepositoryInterfac
 
     var titleInputDialogIsShow by mutableStateOf(false)
         private set
-    var timeUpdateDialogIsShow by mutableStateOf(false)
-        private set
 
     private var selectedTimeDate: TimeData? = null
 
@@ -82,17 +80,7 @@ class HomeScreenViewModel(private val repository: NotificationRepositoryInterfac
         }
         return selectedTimeDate!!.name
     }
-
-    fun showTimeUpdateDialog(timeData: TimeData) {
-        timeUpdateDialogIsShow = true
-        selectedTimeDate = timeData
-    }
-
-    fun hiddenTimeUpdateDialog() {
-        timeUpdateDialogIsShow = false
-        selectedTimeDate = null
-    }
-
+    
     fun setTitle(title: String) {
         if (selectedTimeDate == null) return
         viewModelScope.launch {

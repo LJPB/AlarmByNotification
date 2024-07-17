@@ -40,7 +40,6 @@ import java.time.LocalDateTime
 fun AlarmCard(
     modifier: Modifier = Modifier,
     onTitleClick: () -> Unit,
-    onTimeClick: () -> Unit,
     onDeleteClick: () -> Unit,
     timeData: TimeData
 ) {
@@ -56,7 +55,6 @@ fun AlarmCard(
                 )
                 .fillMaxWidth(),
             onTitleClick = onTitleClick,
-            onTimeClick = onTimeClick,
             onDeleteClick = onDeleteClick,
             currentTime = null,
             timeData = timeData,
@@ -69,7 +67,6 @@ fun AlarmCard(
 fun TimerCard(
     modifier: Modifier = Modifier,
     onTitleClick: () -> Unit,
-    onTimeClick: () -> Unit,
     onDeleteClick: () -> Unit,
     currentTime: LocalDateTime,
     timeData: TimeData
@@ -86,7 +83,6 @@ fun TimerCard(
                 )
                 .fillMaxWidth(),
             onTitleClick = onTitleClick,
-            onTimeClick = onTimeClick,
             onDeleteClick = onDeleteClick,
             currentTime = currentTime,
             timeData = timeData,
@@ -105,7 +101,6 @@ fun TimerCard(
 private fun CardContent(
     modifier: Modifier = Modifier,
     onTitleClick: () -> Unit,
-    onTimeClick: () -> Unit,
     onDeleteClick: () -> Unit,
     currentTime: LocalDateTime?,
     timeData: TimeData,
@@ -152,11 +147,9 @@ private fun CardContent(
         ) {
             if (isAlarm) AlarmTime(
                 timeData = timeData.finishDateTime,
-                onTimeClick = onTimeClick
             ) else TimerTime(
                 currentTime = currentTime!!,
                 timeData = timeData.finishDateTime,
-                onTimeClick = onTimeClick
             )
 
             // アラーム削除ボタン
@@ -177,7 +170,6 @@ private fun CardContent(
 private fun AlarmTime(
     timeData: LocalDateTime,
     modifier: Modifier = Modifier,
-    onTimeClick: () -> Unit
 ) {
     val context = LocalContext.current
     val isFormat24 by remember { mutableStateOf(DateFormat.is24HourFormat(context)) }
@@ -185,7 +177,6 @@ private fun AlarmTime(
     Text(
         text = formattedTime,
         style = MaterialTheme.typography.displayLarge,
-        modifier = modifier.clickable { onTimeClick() }
     )
 }
 
@@ -195,7 +186,6 @@ private fun TimerTime(
     currentTime: LocalDateTime,
     timeData: LocalDateTime,
     modifier: Modifier = Modifier,
-    onTimeClick: () -> Unit,
 ) {
     val text: String
     if (currentTime.isAfter(timeData)) {
@@ -219,7 +209,6 @@ private fun TimerTime(
     Text(
         text = text,
         style = MaterialTheme.typography.displayLarge,
-        modifier = modifier.clickable { onTimeClick() }
     )
 }
 

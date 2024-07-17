@@ -122,7 +122,6 @@ private fun TimeList(
     innerPadding: PaddingValues,
     setTimeList: List<TimeData>,
     onTitleClick: (TimeData) -> Unit,
-    onTimeClick: (TimeData) -> Unit,
     onDeleteClick: (TimeData) -> Unit,
     homeScreenViewModel: HomeScreenViewModel
 ) {
@@ -136,7 +135,6 @@ private fun TimeList(
             if (time.type == TimeType.Alarm) {
                 AlarmCard(
                     onTitleClick = { onTitleClick(time) },
-                    onTimeClick = { onTimeClick(time) },
                     onDeleteClick = { onDeleteClick(time) },
                     timeData = time,
                     modifier = Modifier.padding(
@@ -148,7 +146,6 @@ private fun TimeList(
                 val currentTime by homeScreenViewModel.currentDateTime.collectAsState()
                 TimerCard(
                     onTitleClick = { onTitleClick(time) },
-                    onTimeClick = { onTimeClick(time) },
                     onDeleteClick = { onDeleteClick(time) },
                     currentTime = currentTime,
                     timeData = time,
@@ -199,18 +196,6 @@ private fun HomeScreenContent(
             timePickerDialogViewModel = timePickerDialogViewModel
         )
     }
-    /*
-        if (homeScreenViewModel.timeUpdateDialogIsShow) {
-            TimePickerDialog(
-                onDismissRequest = timePickerDialogViewModel::hiddenDialog,
-                onPositiveClick = timePickerDialogViewModel::add,
-                onChangeDialog = timePickerDialogViewModel::changeDialog,
-                timePickerDialogViewModel = timePickerDialogViewModel,
-                showChangeButton = false
-            )
-        }
-        
-     */
 
     if (homeScreenViewModel.titleInputDialogIsShow) {
         val focusRequester = remember { FocusRequester() }
@@ -233,7 +218,6 @@ private fun HomeScreenContent(
                 setTimeList = setTimeList,
                 homeScreenViewModel = homeScreenViewModel,
                 onTitleClick = homeScreenViewModel::showTitleInputDialog,
-                onTimeClick = homeScreenViewModel::showTimeUpdateDialog,
                 onDeleteClick = homeScreenViewModel::delete,
                 innerPadding = innerPadding,
             )
