@@ -59,7 +59,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 import me.ljpb.alarmbynotification.R
 import me.ljpb.alarmbynotification.Utility
@@ -77,10 +76,9 @@ import java.time.LocalDateTime
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
-    homeScreenViewMode: HomeScreenViewModel
+    homeScreenViewMode: HomeScreenViewModel,
+    timePickerDialogViewModel: TimePickerDialogViewModel
 ) {
-    val timePickerDialogViewModel: TimePickerDialogViewModel =
-        viewModel(factory = ViewModelProvider.Factory)
     val currentTime by homeScreenViewMode.currentDateTime.collectAsState()
     val scope = rememberCoroutineScope()
     val dialogDefaultContentIsAlarm by homeScreenViewMode.dialogDefaultContentIsAlarm.collectAsState()
