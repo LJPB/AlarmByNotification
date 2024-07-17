@@ -1,8 +1,10 @@
-package me.ljpb.alarmbynotification.data
+package me.ljpb.alarmbynotification.data.room
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverter
+import me.ljpb.alarmbynotification.data.NotificationInfoInterface
+import me.ljpb.alarmbynotification.data.TimeType
 
 @Entity(tableName = "notifications")
 data class NotificationEntity(

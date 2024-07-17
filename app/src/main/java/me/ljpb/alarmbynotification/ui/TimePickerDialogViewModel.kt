@@ -9,9 +9,9 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import me.ljpb.alarmbynotification.data.NotificationEntity
 import me.ljpb.alarmbynotification.data.NotificationRepositoryInterface
 import me.ljpb.alarmbynotification.data.TimeType
+import me.ljpb.alarmbynotification.data.room.NotificationEntity
 import java.time.LocalTime
 import java.time.ZonedDateTime
 import java.util.UUID

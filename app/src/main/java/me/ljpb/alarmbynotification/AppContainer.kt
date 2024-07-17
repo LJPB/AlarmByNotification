@@ -5,7 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import me.ljpb.alarmbynotification.data.DialogDefaultContentPreferencesRepository
-import me.ljpb.alarmbynotification.data.NotificationDatabase
+import me.ljpb.alarmbynotification.data.room.NotificationDatabase
 import me.ljpb.alarmbynotification.data.NotificationRepository
 import me.ljpb.alarmbynotification.data.NotificationRepositoryInterface
 

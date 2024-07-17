@@ -8,7 +8,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import me.ljpb.alarmbynotification.NotificationApplication
 import me.ljpb.alarmbynotification.alarmNotify
-import me.ljpb.alarmbynotification.data.NotificationEntity
+import me.ljpb.alarmbynotification.data.room.NotificationEntity
 import me.ljpb.alarmbynotification.data.NotifyIntentKey
 import me.ljpb.alarmbynotification.data.TimeType
 import me.ljpb.alarmbynotification.timerNotify

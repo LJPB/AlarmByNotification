@@ -1,4 +1,4 @@
-package me.ljpb.alarmbynotification.data
+package me.ljpb.alarmbynotification.data.room
 
 import android.content.Context
 import androidx.room.Database
