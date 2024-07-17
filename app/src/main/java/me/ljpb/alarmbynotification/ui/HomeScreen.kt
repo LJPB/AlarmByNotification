@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -51,6 +52,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 import me.ljpb.alarmbynotification.R
@@ -117,14 +119,18 @@ private fun Empty(
 @Composable
 private fun TimeList(
     modifier: Modifier = Modifier,
+    innerPadding: PaddingValues,
     setTimeList: List<TimeData>,
     onTitleClick: (TimeData) -> Unit,
     onTimeClick: (TimeData) -> Unit,
     onDeleteClick: (TimeData) -> Unit,
     homeScreenViewModel: HomeScreenViewModel
 ) {
+    val listState = rememberLazyListState()
+
     LazyColumn(
-        modifier = modifier
+        state = listState,
+        modifier = modifier.padding(innerPadding)
     ) {
         items(setTimeList) { time ->
             if (time.type == TimeType.Alarm) {
@@ -153,7 +159,21 @@ private fun TimeList(
                 )
             }
         }
+        item {
+            Spacer(modifier = Modifier.height(128.dp))
+        }
     }
+    
+    LaunchedEffect(setTimeList.size) {
+        if (listState.layoutInfo.totalItemsCount > 0) {
+            if (homeScreenViewModel.isScroll()) {
+                val index = homeScreenViewModel.getAddedItemIndex()
+                listState.animateScrollToItem(index)
+                homeScreenViewModel.initAddItemTime()
+            }
+        }
+    }
+    
 }
 
 
@@ -174,23 +194,23 @@ private fun HomeScreenContent(
     if (timePickerDialogViewModel.isShow) {
         TimePickerDialog(
             onDismissRequest = timePickerDialogViewModel::hiddenDialog,
-            onPositiveClick = timePickerDialogViewModel::add,
+            onPositiveClick = { timePickerDialogViewModel.add(homeScreenViewModel::setAddItemTime) },
             onChangeDialog = timePickerDialogViewModel::changeDialog,
             timePickerDialogViewModel = timePickerDialogViewModel
         )
     }
-/*
-    if (homeScreenViewModel.timeUpdateDialogIsShow) {
-        TimePickerDialog(
-            onDismissRequest = timePickerDialogViewModel::hiddenDialog,
-            onPositiveClick = timePickerDialogViewModel::add,
-            onChangeDialog = timePickerDialogViewModel::changeDialog,
-            timePickerDialogViewModel = timePickerDialogViewModel,
-            showChangeButton = false
-        )
-    }
-    
- */
+    /*
+        if (homeScreenViewModel.timeUpdateDialogIsShow) {
+            TimePickerDialog(
+                onDismissRequest = timePickerDialogViewModel::hiddenDialog,
+                onPositiveClick = timePickerDialogViewModel::add,
+                onChangeDialog = timePickerDialogViewModel::changeDialog,
+                timePickerDialogViewModel = timePickerDialogViewModel,
+                showChangeButton = false
+            )
+        }
+        
+     */
 
     if (homeScreenViewModel.titleInputDialogIsShow) {
         val focusRequester = remember { FocusRequester() }
@@ -200,7 +220,7 @@ private fun HomeScreenContent(
             focusRequester = focusRequester,
             defaultTitle = homeScreenViewModel.getDefaultTitle()
         )
-        LaunchedEffect(Unit){
+        LaunchedEffect(Unit) {
             focusRequester.requestFocus()
         }
     }
@@ -215,7 +235,7 @@ private fun HomeScreenContent(
                 onTitleClick = homeScreenViewModel::showTitleInputDialog,
                 onTimeClick = homeScreenViewModel::showTimeUpdateDialog,
                 onDeleteClick = homeScreenViewModel::delete,
-                modifier = modifier.padding(innerPadding),
+                innerPadding = innerPadding,
             )
         }
     }
@@ -258,7 +278,7 @@ private fun TitleInputDialog(
                         imeAction = ImeAction.Done
                     ),
                     keyboardActions = KeyboardActions(
-                        onDone = { 
+                        onDone = {
                             onPositiveClick(inputTitle)
                             onDismissRequest()
                         }
@@ -272,13 +292,13 @@ private fun TitleInputDialog(
                         Text(text = stringResource(id = R.string.cancel))
                     }
                     Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.padding_small)))
-                    TextButton(onClick = { 
+                    TextButton(onClick = {
                         onPositiveClick(inputTitle)
                         onDismissRequest()
                     }) {
                         Text(text = stringResource(id = R.string.ok))
                     }
-                } 
+                }
             }
         }
     }
@@ -323,5 +343,5 @@ private fun FloatingActionButton(
 @Preview
 @Composable
 private fun HomeScreenPreview() {
- 
+
 }

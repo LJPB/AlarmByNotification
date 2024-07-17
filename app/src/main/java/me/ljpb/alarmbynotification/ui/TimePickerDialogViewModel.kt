@@ -58,7 +58,7 @@ class TimePickerDialogViewModel(
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
-    fun add() {
+    fun add(setAddedItemToTmp: (Long) -> Unit) {
         val type: TimeType
         val triggerTimeSeconds: Long
         val currentDateTime = ZonedDateTime.now()
@@ -105,6 +105,7 @@ class TimePickerDialogViewModel(
             triggerTimeMilliSeconds = triggerTimeSeconds * 1000,
             type = type,
         )
+        setAddedItemToTmp(triggerTimeSeconds * 1000)
         viewModelScope.launch {
             repository.insertNotification(notification)
         }

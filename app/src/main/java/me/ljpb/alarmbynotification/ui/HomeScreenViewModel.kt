@@ -1,6 +1,8 @@
 package me.ljpb.alarmbynotification.ui
 
+import android.util.Log
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -33,9 +35,10 @@ class HomeScreenViewModel(private val repository: NotificationRepositoryInterfac
         .map { notificationEntities ->
             if (notificationEntities.isNullOrEmpty()) return@map listOf()
             notificationEntities.map { notification ->
-                val zonedDateTime = Instant.ofEpochSecond(notification.triggerTimeMilliSeconds / 1000)
-                    .atZone(ZoneId.systemDefault())
-                    .toLocalDateTime()
+                val zonedDateTime =
+                    Instant.ofEpochSecond(notification.triggerTimeMilliSeconds / 1000)
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDateTime()
                 TimeData(
                     id = notification.notifyId,
                     name = notification.title,
@@ -50,23 +53,28 @@ class HomeScreenViewModel(private val repository: NotificationRepositoryInterfac
             initialValue = listOf()
         )
 
+    // addedItemTriggerTimeMilliSecondsの初期値
+    private val initialSeconds = -1L
+    // setTimeListに新たに追加された通知のtriggerTime
+    private var addedItemTriggerTimeMilliSeconds by mutableLongStateOf(initialSeconds)
+
     var titleInputDialogIsShow by mutableStateOf(false)
         private set
     var timeUpdateDialogIsShow by mutableStateOf(false)
         private set
-    
+
     private var selectedTimeDate: TimeData? = null
-    
+
     fun showTitleInputDialog(timeData: TimeData) {
         titleInputDialogIsShow = true
         selectedTimeDate = timeData
     }
-    
+
     fun hiddenTitleInputDialog() {
         titleInputDialogIsShow = false
         selectedTimeDate = null
     }
-    
+
     fun getDefaultTitle(): String {
         if (selectedTimeDate == null) {
             hiddenTitleInputDialog()
@@ -74,12 +82,12 @@ class HomeScreenViewModel(private val repository: NotificationRepositoryInterfac
         }
         return selectedTimeDate!!.name
     }
-    
+
     fun showTimeUpdateDialog(timeData: TimeData) {
         timeUpdateDialogIsShow = true
         selectedTimeDate = timeData
     }
-    
+
     fun hiddenTimeUpdateDialog() {
         timeUpdateDialogIsShow = false
         selectedTimeDate = null
@@ -112,7 +120,7 @@ class HomeScreenViewModel(private val repository: NotificationRepositoryInterfac
             }
         }
     }
-    
+
     suspend fun updateCurrentDateTime() {
         while (true) {
             _currentDateTime.update { LocalDateTime.now() }
@@ -120,5 +128,50 @@ class HomeScreenViewModel(private val repository: NotificationRepositoryInterfac
         }
     }
 
+    fun setAddItemTime(triggerTimeMilliSeconds: Long) {
+        addedItemTriggerTimeMilliSeconds = triggerTimeMilliSeconds
+    }
     
+    fun initAddItemTime() {
+        addedItemTriggerTimeMilliSeconds = initialSeconds
+    }
+    
+    fun isScroll(): Boolean {
+        // addedItemTriggerTimeMilliSecondsが初期値ならスクロールしない
+        // setTimeListからアイテムが削除された場合にスクロールしないようにするためのもの
+        return addedItemTriggerTimeMilliSeconds != initialSeconds
+    }
+
+    fun getAddedItemIndex(): Int {
+        val addItemFinishDateTime = Instant.ofEpochSecond(addedItemTriggerTimeMilliSeconds / 1000)
+            .atZone(ZoneId.systemDefault())
+            .toLocalDateTime()
+        
+        val tmpList = setTimeList.value
+        var start = 0
+        var end = tmpList.size - 1
+        var middle = (start + end) / 2
+
+        while (start <= end) {
+            Log.d("start", start.toString())
+            Log.d("end", end.toString())
+            Log.d("middle", middle.toString())
+            if (addItemFinishDateTime == tmpList[start].finishDateTime) {
+                return start
+            }
+            if (addItemFinishDateTime == tmpList[end].finishDateTime) {
+                return end
+            }
+            if (addItemFinishDateTime == tmpList[middle].finishDateTime) {
+                return middle
+            }
+            if (addItemFinishDateTime.isAfter(tmpList[middle].finishDateTime)) {
+                start = middle + 1
+            } else if (addItemFinishDateTime.isBefore(tmpList[middle].finishDateTime)) {
+                end = middle - 1
+            }
+            middle = (start + end) / 2
+        }
+        return 0
+    }
 }
