@@ -20,7 +20,7 @@ class NotifyReceiver : BroadcastReceiver() {
             val title = intent.getStringExtra(NotifyIntentKey.TITLE) ?: ""
             val text = intent.getStringExtra(NotifyIntentKey.TEXT) ?: ""
             val notifyId = intent.getIntExtra(NotifyIntentKey.NOTIFY_ID, 1)
-            val triggerTime = intent.getLongExtra(NotifyIntentKey.TRIGGER_TIME, 1)
+            val triggerTime = intent.getLongExtra(NotifyIntentKey.TRIGGER_TIME_MILLI, 1)
             val type = intent.getStringExtra(NotifyIntentKey.TYPE) ?: ""
             val zoneId = intent.getStringExtra(NotifyIntentKey.ZONE_ID) ?: ""
             when (type) {

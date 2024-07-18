@@ -152,7 +152,7 @@ fun setNotification(context: Context, notificationInfo: NotificationInfoInterfac
     intent.putExtra(NotifyIntentKey.TEXT, notificationInfo.text)
     intent.putExtra(NotifyIntentKey.NOTIFY_ID, notificationInfo.notifyId)
     intent.putExtra(NotifyIntentKey.TYPE, notificationInfo.type.name)
-    intent.putExtra(NotifyIntentKey.TRIGGER_TIME, notificationInfo.triggerTimeMilliSeconds)
+    intent.putExtra(NotifyIntentKey.TRIGGER_TIME_MILLI, notificationInfo.triggerTimeMilliSeconds)
     intent.putExtra(NotifyIntentKey.ZONE_ID, notificationInfo.zoneId)
     
     val pendingIntent = PendingIntent.getBroadcast(
