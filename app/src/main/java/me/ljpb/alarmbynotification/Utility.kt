@@ -1,5 +1,7 @@
 package me.ljpb.alarmbynotification
 
+import me.ljpb.alarmbynotification.data.TimeType
+import me.ljpb.alarmbynotification.data.room.NotificationEntity
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -10,18 +12,27 @@ object Utility {
      * @param displaySecond 秒を表示するかどうか
      */
     fun localDateTimeToFormattedTime(
-        localDateTime: LocalDateTime, 
-        isFormat24: Boolean = false, 
+        localDateTime: LocalDateTime,
+        isFormat24: Boolean = false,
         displaySecond: Boolean = true
     ): String {
         val timeFormat = if (isFormat24) {
-            val ptn = if(displaySecond) "HH:mm:ss" else "HH:mm"
+            val ptn = if (displaySecond) "HH:mm:ss" else "HH:mm"
             DateTimeFormatter.ofPattern(ptn)
         } else {
-            val ptn = if(displaySecond) "KK:mm:ss a" else "KK:mm a"
+            val ptn = if (displaySecond) "KK:mm:ss a" else "KK:mm a"
             DateTimeFormatter.ofPattern(ptn)
         }
         return localDateTime.format(timeFormat)
     }
-    
+
+    val notificationEmptyEntity = NotificationEntity(
+        notifyId = 0,
+        title = "",
+        text = "",
+        triggerTimeMilliSeconds = 0L,
+        type = TimeType.Alarm,
+        zoneId = ""
+    )
+
 }

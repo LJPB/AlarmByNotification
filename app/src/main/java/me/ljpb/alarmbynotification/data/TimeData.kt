@@ -1,6 +1,6 @@
 package me.ljpb.alarmbynotification.data
 
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 
 /** セットしたタイマーやアラームを表示するためのデータを表すクラス
  * @param id 一意のID
@@ -12,7 +12,7 @@ data class TimeData(
     val id: Int,
     val name: String,
     val type: TimeType,
-    var finishDateTime: LocalDateTime,
+    var finishDateTime: ZonedDateTime,
 )
 
 enum class TimeType {

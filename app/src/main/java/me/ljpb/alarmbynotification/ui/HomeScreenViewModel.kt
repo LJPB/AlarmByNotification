@@ -1,7 +1,6 @@
 package me.ljpb.alarmbynotification.ui
 
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -16,6 +15,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import me.ljpb.alarmbynotification.Utility.notificationEmptyEntity
+import me.ljpb.alarmbynotification.data.NotificationInfoInterface
 import me.ljpb.alarmbynotification.data.NotificationRepositoryInterface
 import me.ljpb.alarmbynotification.data.TimeData
 import me.ljpb.alarmbynotification.data.UserPreferencesRepository
@@ -41,7 +42,6 @@ class HomeScreenViewModel(
                 val zonedDateTime =
                     Instant.ofEpochSecond(notification.triggerTimeMilliSeconds / 1000)
                         .atZone(ZoneId.systemDefault())
-                        .toLocalDateTime()
                 TimeData(
                     id = notification.notifyId,
                     name = notification.title,
@@ -66,8 +66,8 @@ class HomeScreenViewModel(
     // addedItemTriggerTimeMilliSecondsの初期値
     private val initialSeconds = -1L
 
-    // setTimeListに新たに追加された通知のtriggerTime
-    private var addedItemTriggerTimeMilliSeconds by mutableLongStateOf(initialSeconds)
+    // setTimeListに新たに追加された通知
+    private var addedItemInfo by mutableStateOf<NotificationInfoInterface>(notificationEmptyEntity)
 
     var titleInputDialogIsShow by mutableStateOf(false)
         private set
@@ -144,25 +144,23 @@ class HomeScreenViewModel(
         }
     }
 
-    fun setAddItemTime(triggerTimeMilliSeconds: Long) {
-        addedItemTriggerTimeMilliSeconds = triggerTimeMilliSeconds
+    fun setAddedItem(notificationInfo: NotificationInfoInterface) {
+        addedItemInfo = notificationInfo
     }
 
-    fun initAddItemTime() {
-        addedItemTriggerTimeMilliSeconds = initialSeconds
+    fun initAddedItem() {
+        addedItemInfo = notificationEmptyEntity
     }
 
     fun isScroll(): Boolean {
-        // addedItemTriggerTimeMilliSecondsが初期値ならスクロールしない
+        // addedItemInfoが初期値ならスクロールしない
         // setTimeListからアイテムが削除された場合にスクロールしないようにするためのもの
-        return addedItemTriggerTimeMilliSeconds != initialSeconds
+        return addedItemInfo != notificationEmptyEntity
     }
 
     fun getAddedItemIndex(): Int {
-        val addItemFinishDateTime = Instant.ofEpochSecond(addedItemTriggerTimeMilliSeconds / 1000)
-            .atZone(ZoneId.systemDefault())
-            .toLocalDateTime()
-
+        val addItemFinishDateTime = Instant.ofEpochSecond(addedItemInfo.triggerTimeMilliSeconds / 1000)
+            .atZone(ZoneId.of(addedItemInfo.zoneId))
         val tmpList = setTimeList.value
         var start = 0
         var end = tmpList.size - 1

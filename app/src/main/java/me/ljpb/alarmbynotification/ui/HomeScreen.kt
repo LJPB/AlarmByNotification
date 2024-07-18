@@ -189,7 +189,7 @@ private fun TimeList(
             if (homeScreenViewModel.isScroll()) {
                 val index = homeScreenViewModel.getAddedItemIndex()
                 listState.animateScrollToItem(index)
-                homeScreenViewModel.initAddItemTime()
+                homeScreenViewModel.initAddedItem()
             }
         }
     }
@@ -218,7 +218,7 @@ private fun HomeScreenContent(
     if (timePickerDialogViewModel.isShow) {
         TimePickerDialog(
             onDismissRequest = timePickerDialogViewModel::hiddenDialog,
-            onPositiveClick = { timePickerDialogViewModel.add(homeScreenViewModel::setAddItemTime) },
+            onPositiveClick = { timePickerDialogViewModel.add(homeScreenViewModel::setAddedItem) },
             onChangeDialog = timePickerDialogViewModel::changeDialog,
             timePickerDialogViewModel = timePickerDialogViewModel
         )

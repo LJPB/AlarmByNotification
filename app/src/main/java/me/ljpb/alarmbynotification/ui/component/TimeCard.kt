@@ -146,10 +146,10 @@ private fun CardContent(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             if (isAlarm) AlarmTime(
-                timeData = timeData.finishDateTime,
+                timeData = timeData.finishDateTime.toLocalDateTime(),
             ) else TimerTime(
                 currentTime = currentTime!!,
-                timeData = timeData.finishDateTime,
+                timeData = timeData.finishDateTime.toLocalDateTime(),
             )
 
             // アラーム削除ボタン

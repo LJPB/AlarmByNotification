@@ -9,6 +9,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+import me.ljpb.alarmbynotification.data.NotificationInfoInterface
 import me.ljpb.alarmbynotification.data.NotificationRepositoryInterface
 import me.ljpb.alarmbynotification.data.TimeType
 import me.ljpb.alarmbynotification.data.room.NotificationEntity
@@ -58,7 +59,7 @@ class TimePickerDialogViewModel(
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
-    fun add(setAddedItemToTmp: (Long) -> Unit) {
+    fun add(setAddedItemToTmp: (NotificationInfoInterface) -> Unit) {
         val type: TimeType
         val triggerTimeSeconds: Long
         val currentDateTime = ZonedDateTime.now()
@@ -106,7 +107,7 @@ class TimePickerDialogViewModel(
             type = type,
             zoneId = zoneId
         )
-        setAddedItemToTmp(triggerTimeSeconds * 1000)
+        setAddedItemToTmp(notification.copy())
         viewModelScope.launch {
             repository.insertNotification(notification)
         }
