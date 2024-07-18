@@ -13,7 +13,8 @@ data class NotificationEntity(
     override val title: String,
     override val text: String,
     override val triggerTimeMilliSeconds: Long,
-    override val type: TimeType
+    override val type: TimeType,
+    override val zoneId: String
 ) : NotificationInfoInterface
 
 class NotificationEntityTypeConverter {

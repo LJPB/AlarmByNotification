@@ -62,7 +62,7 @@ class TimePickerDialogViewModel(
         val type: TimeType
         val triggerTimeSeconds: Long
         val currentDateTime = ZonedDateTime.now()
-
+        val zoneId = currentDateTime.zone.id
         if (isAlarm) {
             type = TimeType.Alarm
 
@@ -104,6 +104,7 @@ class TimePickerDialogViewModel(
             text = "",
             triggerTimeMilliSeconds = triggerTimeSeconds * 1000,
             type = type,
+            zoneId = zoneId
         )
         setAddedItemToTmp(triggerTimeSeconds * 1000)
         viewModelScope.launch {

@@ -8,9 +8,9 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import me.ljpb.alarmbynotification.NotificationApplication
 import me.ljpb.alarmbynotification.alarmNotify
-import me.ljpb.alarmbynotification.data.room.NotificationEntity
 import me.ljpb.alarmbynotification.data.NotifyIntentKey
 import me.ljpb.alarmbynotification.data.TimeType
+import me.ljpb.alarmbynotification.data.room.NotificationEntity
 import me.ljpb.alarmbynotification.timerNotify
 
 class NotifyReceiver : BroadcastReceiver() {
@@ -22,6 +22,7 @@ class NotifyReceiver : BroadcastReceiver() {
             val notifyId = intent.getIntExtra(NotifyIntentKey.NOTIFY_ID, 1)
             val triggerTime = intent.getLongExtra(NotifyIntentKey.TRIGGER_TIME, 1)
             val type = intent.getStringExtra(NotifyIntentKey.TYPE) ?: ""
+            val zoneId = intent.getStringExtra(NotifyIntentKey.ZONE_ID) ?: ""
             when (type) {
                 TimeType.Alarm.name -> alarmNotify(
                     context = context,
@@ -49,6 +50,7 @@ class NotifyReceiver : BroadcastReceiver() {
                             text = text,
                             triggerTimeMilliSeconds = triggerTime,
                             type = type.toTimeType(),
+                            zoneId = zoneId
                         )
                     )
                 } finally {
