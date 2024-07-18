@@ -14,6 +14,10 @@
     
     <string name="set_title">タイトルを入力</string>
     
+    <string name="request_permission_title">通知を許可する</string>
+    <string name="request_permission_detail">設定した時間に通知を受け取るために必要です。</string>
+    <string name="allow">許可</string>
+    
     <string name="change_default">デフォルトの切り替え</string>
     
     

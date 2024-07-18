@@ -10,19 +10,16 @@ import me.ljpb.alarmbynotification.setNotification
 class NotificationRepository(private val context: Context, private val dao: NotificationDao) : NotificationRepositoryInterface {
     override suspend fun insertNotification(notification: NotificationEntity) {
         dao.insert(notification)
-        moveDatabase()
         setNotification(context, notification)
     }
 
     override suspend fun updateNotification(notification: NotificationEntity) {
         dao.update(notification)
-        moveDatabase()
         setNotification(context, notification)
     }
 
     override suspend fun deleteNotification(notification: NotificationEntity) {
         dao.delete(notification.notifyId)
-        moveDatabase()
         deleteNotification(context, notification)
     }
 
@@ -36,12 +33,5 @@ class NotificationRepository(private val context: Context, private val dao: Noti
 
     override fun count(): Flow<Int> {
         return dao.count()
-    }
-    
-    private fun moveDatabase() {
-//        context.moveDatabaseFrom(
-//            context,
-//            context.getDatabasePath("notification_database").toString()
-//        )
     }
 }

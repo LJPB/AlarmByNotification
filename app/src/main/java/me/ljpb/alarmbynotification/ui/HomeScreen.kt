@@ -1,6 +1,8 @@
 package me.ljpb.alarmbynotification.ui
 
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.os.Build
 import android.text.format.DateFormat
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -59,6 +61,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.launch
 import me.ljpb.alarmbynotification.R
 import me.ljpb.alarmbynotification.Utility
@@ -66,6 +71,7 @@ import me.ljpb.alarmbynotification.data.TimeData
 import me.ljpb.alarmbynotification.data.TimeType
 import me.ljpb.alarmbynotification.ui.component.ALARM_ICON
 import me.ljpb.alarmbynotification.ui.component.AlarmCard
+import me.ljpb.alarmbynotification.ui.component.NotificationPermissionDialog
 import me.ljpb.alarmbynotification.ui.component.TIMER_ICON
 import me.ljpb.alarmbynotification.ui.component.TimePickerDialog
 import me.ljpb.alarmbynotification.ui.component.TimerCard
@@ -77,7 +83,7 @@ import java.time.LocalDateTime
 fun HomeScreen(
     modifier: Modifier = Modifier,
     homeScreenViewModel: HomeScreenViewModel,
-    timePickerDialogViewModel: TimePickerDialogViewModel
+    timePickerDialogViewModel: TimePickerDialogViewModel,
 ) {
     val currentTime by homeScreenViewModel.currentDateTime.collectAsState()
     val scope = rememberCoroutineScope()
@@ -195,6 +201,7 @@ private fun TimeList(
  * HomeScreenに実際に配置するコンポーザブル
  * 状態に応じてEmptyとAlarmListを切り替える
  */
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 private fun HomeScreenContent(
     modifier: Modifier = Modifier,
@@ -204,7 +211,10 @@ private fun HomeScreenContent(
 ) {
     val setTimeList by homeScreenViewModel.setTimeList.collectAsState()
     val setTimeIsEmpty = setTimeList.isEmpty()
-
+    
+    // 通知権限の許可を促すダイアログを一度表示したかどうか
+    var isShowedDialog by remember { mutableStateOf(false) }
+    
     if (timePickerDialogViewModel.isShow) {
         TimePickerDialog(
             onDismissRequest = timePickerDialogViewModel::hiddenDialog,
@@ -226,7 +236,41 @@ private fun HomeScreenContent(
             focusRequester.requestFocus()
         }
     }
+    
     Column {
+        /*
+            通知権限の許可を促すダイアログ・・・NotificationPermissionDialog
+            通知権限の許可ダイアログ・・・OSのやつ
+         */
+        if (Build.VERSION.SDK_INT >= 33 && !isShowedDialog) {
+            // Android13以上で，アプリ起動後にまだ通知権限の許可を促すダイアログを表示していない場合
+            val context = LocalContext.current
+            val isShowedPermissionDialog by homeScreenViewModel.isShowedPermissionDialog.collectAsState()
+            
+            val notificationPermissionState = rememberPermissionState(
+                android.Manifest.permission.POST_NOTIFICATIONS
+            )
+            if (!notificationPermissionState.status.isGranted) {
+                NotificationPermissionDialog(onDismissRequest = { isShowedDialog = true }) {
+                    if (isShowedPermissionDialog) {
+                        // 通知権限の許可ダイアログを過去に一度表示している場合は，通知設定画面に遷移する
+                        val intent = Intent()
+                        intent.action = android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS
+                        intent.putExtra("app_package", context.packageName)
+                        intent.putExtra("app_uid", context.applicationInfo.uid)
+                        intent.putExtra(
+                            "android.provider.extra.APP_PACKAGE",
+                            context.packageName
+                        )
+                        context.startActivity(intent)
+                    } else {
+                        // 通知権限の許可ダイアログを一度も表示したことがない場合
+                        notificationPermissionState.launchPermissionRequest()
+                        homeScreenViewModel.showPermissionDialog()
+                    }
+                }
+            } 
+        }
         if (setTimeIsEmpty) {
             Empty()
         } else {

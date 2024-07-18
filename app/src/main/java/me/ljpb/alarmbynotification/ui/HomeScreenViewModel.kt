@@ -1,6 +1,5 @@
 package me.ljpb.alarmbynotification.ui
 
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -17,9 +16,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import me.ljpb.alarmbynotification.data.DialogDefaultContentPreferencesRepository
 import me.ljpb.alarmbynotification.data.NotificationRepositoryInterface
 import me.ljpb.alarmbynotification.data.TimeData
+import me.ljpb.alarmbynotification.data.UserPreferencesRepository
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -29,7 +28,7 @@ const val DELAY_TIME: Long = 100L
 
 class HomeScreenViewModel(
     private val repository: NotificationRepositoryInterface,
-    private val preferencesRepository: DialogDefaultContentPreferencesRepository,
+    private val preferencesRepository: UserPreferencesRepository,
 ) : ViewModel() {
     private val _currentDateTime = MutableStateFlow(LocalDateTime.now())
     val currentDateTime: StateFlow<LocalDateTime> = _currentDateTime.asStateFlow()
@@ -56,13 +55,12 @@ class HomeScreenViewModel(
             started = SharingStarted.WhileSubscribed(2_000L),
             initialValue = listOf()
         )
-    
+
     val dialogDefaultContentIsAlarm: StateFlow<Boolean> = preferencesRepository.isAlarmDefault
-        .map { it }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(2_000L),
-            initialValue = true
+            initialValue = false
         )
 
     // addedItemTriggerTimeMilliSecondsの初期値
@@ -75,6 +73,15 @@ class HomeScreenViewModel(
         private set
 
     private var selectedTimeDate: TimeData? = null
+
+    // 通知権限の許可取得ダイアログが一度表示されたかどうか
+    var isShowedPermissionDialog: StateFlow<Boolean> = preferencesRepository.isShowedPermissionDialog
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(2_000L),
+            initialValue = true
+        )
+     
 
     fun showTitleInputDialog(timeData: TimeData) {
         titleInputDialogIsShow = true
@@ -106,13 +113,19 @@ class HomeScreenViewModel(
             }
         }
     }
-
+    
     fun changeDefaultContent(defaultIsAlarm: Boolean) {
         viewModelScope.launch {
             preferencesRepository.changeDialogDefaultContent(defaultIsAlarm)
         }
     }
 
+    fun showPermissionDialog() {
+        viewModelScope.launch {
+            preferencesRepository.showedPermissionDialog()
+        }
+    }
+    
     fun delete(timeData: TimeData) {
         viewModelScope.launch {
             val notify = repository
@@ -156,9 +169,6 @@ class HomeScreenViewModel(
         var middle = (start + end) / 2
 
         while (start <= end) {
-            Log.d("start", start.toString())
-            Log.d("end", end.toString())
-            Log.d("middle", middle.toString())
             if (addItemFinishDateTime == tmpList[start].finishDateTime) {
                 return start
             }

@@ -78,6 +78,9 @@ dependencies {
 
     implementation(libs.androidx.datastore.preferences)
     
+    // パーミッション用のライブラリ
+    implementation("com.google.accompanist:accompanist-permissions:0.35.1-alpha")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
