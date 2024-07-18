@@ -16,14 +16,6 @@ interface NotificationInfoInterface {
     val type: TimeType
 }
 
-data class NotificationInfo (
-    override val title: String,
-    override val text: String,
-    override val notifyId: Int,
-    override val triggerTimeMilliSeconds: Long,
-    override val type: TimeType
-) : NotificationInfoInterface
-
 object NotifyIntentKey {
     const val TITLE = "title"
     const val TEXT = "text"
