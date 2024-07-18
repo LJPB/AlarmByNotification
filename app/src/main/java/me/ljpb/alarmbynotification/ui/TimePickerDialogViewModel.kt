@@ -121,7 +121,8 @@ class TimePickerDialogViewModel(
 //        } else {
 //            return !(timerState.hour == 0 && timerState.minute == 0)
 //        }
-            return !(timerState.hour == 0 && timerState.minute == 0)
+        if (isAlarm) return true
+        return !(timerState.hour == 0 && timerState.minute == 0)
     }
     
     /**
