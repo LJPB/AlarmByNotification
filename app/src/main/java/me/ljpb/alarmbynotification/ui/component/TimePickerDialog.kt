@@ -127,8 +127,10 @@ private fun DialogContent(
             // okボタン
             TextButton(
                 onClick = { 
-                    onPositiveClick()
-                    onDismissRequest()
+                    if (timePickerDialogViewModel.canAdd()) {
+                        onPositiveClick()
+                        onDismissRequest()
+                    }
                 }
             ) {
                 Text(text = stringResource(id = R.string.ok))

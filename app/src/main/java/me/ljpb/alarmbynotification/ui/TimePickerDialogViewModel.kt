@@ -113,6 +113,17 @@ class TimePickerDialogViewModel(
         }
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
+    fun canAdd(): Boolean {
+//        if (isAlarm) {
+//            val currentTime = LocalTime.now()
+//            return !(alarmState.hour == currentTime.hour && alarmState.minute == currentTime.minute)
+//        } else {
+//            return !(timerState.hour == 0 && timerState.minute == 0)
+//        }
+            return !(timerState.hour == 0 && timerState.minute == 0)
+    }
+    
     /**
      * 表示中のダイアログの切り替え
      */
