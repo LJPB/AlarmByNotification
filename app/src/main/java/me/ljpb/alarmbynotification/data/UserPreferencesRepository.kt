@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 
-class DialogDefaultContentPreferencesRepository(
+class UserPreferencesRepository(
     private val dataStore: DataStore<Preferences>
 ) {
     private companion object {
