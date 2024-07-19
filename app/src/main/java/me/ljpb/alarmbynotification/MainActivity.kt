@@ -5,6 +5,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -16,7 +18,7 @@ import me.ljpb.alarmbynotification.ui.ViewModelProvider
 import me.ljpb.alarmbynotification.ui.theme.AlarmByNotificationTheme
 
 class MainActivity : ComponentActivity() {
-    @OptIn(ExperimentalPermissionsApi::class)
+    @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -37,7 +39,11 @@ class MainActivity : ComponentActivity() {
                 } else {
                     createNotificationChannel(this)
                 }
+                
+                val windowSize = calculateWindowSizeClass(this)
+
                 HomeScreen(
+                    windowSize = windowSize.widthSizeClass,
                     homeScreenViewModel = homeScreenViewModel,
                     timePickerDialogViewModel = timePickerDialogViewModel
                 )

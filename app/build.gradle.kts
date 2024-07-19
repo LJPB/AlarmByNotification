@@ -60,7 +60,6 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    
     // ViewModel
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     // ViewModel utilities for Compose
@@ -80,6 +79,9 @@ dependencies {
     
     // パーミッション用のライブラリ
     implementation("com.google.accompanist:accompanist-permissions:0.35.1-alpha")
+
+    // アダプティブレイアウト用
+    implementation("androidx.compose.material3:material3-window-size-class:1.2.1")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

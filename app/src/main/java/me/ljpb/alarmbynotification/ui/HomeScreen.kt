@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -42,6 +43,7 @@ import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTooltipState
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -82,12 +84,20 @@ import java.time.LocalDateTime
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
+    windowSize: WindowWidthSizeClass,
     homeScreenViewModel: HomeScreenViewModel,
     timePickerDialogViewModel: TimePickerDialogViewModel,
 ) {
     val currentTime by homeScreenViewModel.currentDateTime.collectAsState()
     val scope = rememberCoroutineScope()
     val dialogDefaultContentIsAlarm by homeScreenViewModel.dialogDefaultContentIsAlarm.collectAsState()
+    val fabAction = { // ラムダ式
+        if (dialogDefaultContentIsAlarm) {
+            timePickerDialogViewModel.showAlarmDialog()
+        } else {
+            timePickerDialogViewModel.showTimerDialog()
+        }
+    }
     scope.launch {
         homeScreenViewModel.updateCurrentDateTime()
     }
@@ -101,19 +111,17 @@ fun HomeScreen(
         },
         floatingActionButtonPosition = FabPosition.Center,
         floatingActionButton = {
-            FloatingActionButton {
-                if (dialogDefaultContentIsAlarm) {
-                    timePickerDialogViewModel.showAlarmDialog()
-                } else {
-                    timePickerDialogViewModel.showTimerDialog()
-                }
+            if (windowSize == WindowWidthSizeClass.Compact) {
+                FloatingActionButton(onClick = fabAction)
             }
         }
     ) { innerPadding ->
         HomeScreenContent(
             innerPadding = innerPadding,
             timePickerDialogViewModel = timePickerDialogViewModel,
-            homeScreenViewModel = homeScreenViewModel
+            homeScreenViewModel = homeScreenViewModel,
+            windowSize = windowSize,
+            actionButtonOnClick = fabAction
         )
     }
 }
@@ -205,9 +213,11 @@ private fun TimeList(
 @Composable
 private fun HomeScreenContent(
     modifier: Modifier = Modifier,
+    windowSize: WindowWidthSizeClass,
     innerPadding: PaddingValues,
     timePickerDialogViewModel: TimePickerDialogViewModel,
-    homeScreenViewModel: HomeScreenViewModel
+    homeScreenViewModel: HomeScreenViewModel,
+    actionButtonOnClick: () -> Unit,
 ) {
     val setTimeList by homeScreenViewModel.setTimeList.collectAsState()
     val setTimeIsEmpty = setTimeList.isEmpty()
@@ -236,53 +246,90 @@ private fun HomeScreenContent(
             focusRequester.requestFocus()
         }
     }
+
+    /*
+        通知権限の許可を促すダイアログ・・・NotificationPermissionDialog
+        通知権限の許可ダイアログ・・・OSのやつ
+    */
+    if (Build.VERSION.SDK_INT >= 33 && !isShowedDialog) {
+        // Android13以上で，アプリ起動後にまだ通知権限の許可を促すダイアログを表示していない場合
+        val context = LocalContext.current
+        val isShowedPermissionDialog by homeScreenViewModel.isShowedPermissionDialog.collectAsState()
+
+        val notificationPermissionState = rememberPermissionState(
+            android.Manifest.permission.POST_NOTIFICATIONS
+        )
+        if (!notificationPermissionState.status.isGranted) {
+            NotificationPermissionDialog(onDismissRequest = { isShowedDialog = true }) {
+                if (isShowedPermissionDialog) {
+                    // 通知権限の許可ダイアログを過去に一度表示している場合は，通知設定画面に遷移する
+                    val intent = Intent()
+                    intent.action = android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS
+                    intent.putExtra("app_package", context.packageName)
+                    intent.putExtra("app_uid", context.applicationInfo.uid)
+                    intent.putExtra(
+                        "android.provider.extra.APP_PACKAGE",
+                        context.packageName
+                    )
+                    context.startActivity(intent)
+                } else {
+                    // 通知権限の許可ダイアログを一度も表示したことがない場合
+                    notificationPermissionState.launchPermissionRequest()
+                    homeScreenViewModel.showPermissionDialog()
+                }
+            }
+        }
+    }    
     
-    Column {
-        /*
-            通知権限の許可を促すダイアログ・・・NotificationPermissionDialog
-            通知権限の許可ダイアログ・・・OSのやつ
-         */
-        if (Build.VERSION.SDK_INT >= 33 && !isShowedDialog) {
-            // Android13以上で，アプリ起動後にまだ通知権限の許可を促すダイアログを表示していない場合
-            val context = LocalContext.current
-            val isShowedPermissionDialog by homeScreenViewModel.isShowedPermissionDialog.collectAsState()
-            
-            val notificationPermissionState = rememberPermissionState(
-                android.Manifest.permission.POST_NOTIFICATIONS
-            )
-            if (!notificationPermissionState.status.isGranted) {
-                NotificationPermissionDialog(onDismissRequest = { isShowedDialog = true }) {
-                    if (isShowedPermissionDialog) {
-                        // 通知権限の許可ダイアログを過去に一度表示している場合は，通知設定画面に遷移する
-                        val intent = Intent()
-                        intent.action = android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS
-                        intent.putExtra("app_package", context.packageName)
-                        intent.putExtra("app_uid", context.applicationInfo.uid)
-                        intent.putExtra(
-                            "android.provider.extra.APP_PACKAGE",
-                            context.packageName
-                        )
-                        context.startActivity(intent)
+    when (windowSize) {
+        WindowWidthSizeClass.Compact -> {
+            Column {
+                if (setTimeIsEmpty) {
+                    Empty()
+                } else {
+                    TimeList(
+                        setTimeList = setTimeList,
+                        homeScreenViewModel = homeScreenViewModel,
+                        onTitleClick = homeScreenViewModel::showTitleInputDialog,
+                        onDeleteClick = homeScreenViewModel::delete,
+                        innerPadding = innerPadding,
+                    )
+                }
+            }
+        }
+        
+        else -> {
+            Row {
+                Box(
+                    modifier = Modifier.weight(1f)
+                ){
+                    if (setTimeIsEmpty) {
+                        Empty()
                     } else {
-                        // 通知権限の許可ダイアログを一度も表示したことがない場合
-                        notificationPermissionState.launchPermissionRequest()
-                        homeScreenViewModel.showPermissionDialog()
+                        TimeList(
+                            setTimeList = setTimeList,
+                            homeScreenViewModel = homeScreenViewModel,
+                            onTitleClick = homeScreenViewModel::showTitleInputDialog,
+                            onDeleteClick = homeScreenViewModel::delete,
+                            innerPadding = innerPadding,
+                        )
                     }
                 }
-            } 
-        }
-        if (setTimeIsEmpty) {
-            Empty()
-        } else {
-            TimeList(
-                setTimeList = setTimeList,
-                homeScreenViewModel = homeScreenViewModel,
-                onTitleClick = homeScreenViewModel::showTitleInputDialog,
-                onDeleteClick = homeScreenViewModel::delete,
-                innerPadding = innerPadding,
-            )
+                Box(
+                    modifier = Modifier
+                        .width(128.dp)
+                        .fillMaxHeight()
+                        .padding(innerPadding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    FloatingActionButton {
+                        actionButtonOnClick()
+                    }
+                }
+            }
         }
     }
+    
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -405,9 +452,11 @@ private fun HomeScreenTopAppBar(
 
 @Composable
 private fun FloatingActionButton(
+    modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
     LargeFloatingActionButton(
+        modifier = modifier,
         onClick = onClick,
         shape = CircleShape,
     ) {
