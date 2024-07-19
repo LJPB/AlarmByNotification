@@ -11,6 +11,8 @@
     <string name="add">追加</string>
     <string name="add_alarm">アラームを追加</string>
     <string name="add_timer">タイマーを追加 (23時間59分後まで)</string>
+    <string name="notify_timer_hm">%1$s時間%2$s分経過</string>
+    <string name="notify_timer_m">%1$s分経過</string>
     
     <string name="set_title">タイトルを入力</string>
     

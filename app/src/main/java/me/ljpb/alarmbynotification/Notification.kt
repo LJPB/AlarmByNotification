@@ -15,6 +15,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import me.ljpb.alarmbynotification.data.NotificationInfoInterface
 import me.ljpb.alarmbynotification.data.NotifyIntentKey
+import me.ljpb.alarmbynotification.data.TimeType
 import me.ljpb.alarmbynotification.receiver.NotifyReceiver
 
 
@@ -148,12 +149,26 @@ fun timerNotify(
  */
 fun setNotification(context: Context, notificationInfo: NotificationInfoInterface) {
     val intent = Intent(context, NotifyReceiver::class.java)
-    intent.putExtra(NotifyIntentKey.TITLE, notificationInfo.title)
-    intent.putExtra(NotifyIntentKey.TEXT, notificationInfo.text)
     intent.putExtra(NotifyIntentKey.NOTIFY_ID, notificationInfo.notifyId)
+    intent.putExtra(NotifyIntentKey.TITLE, notificationInfo.title)
     intent.putExtra(NotifyIntentKey.TYPE, notificationInfo.type.name)
     intent.putExtra(NotifyIntentKey.TRIGGER_TIME_MILLI, notificationInfo.triggerTimeMilliSeconds)
     intent.putExtra(NotifyIntentKey.ZONE_ID, notificationInfo.zoneId)
+
+    val text = if (notificationInfo.type == TimeType.Alarm) {
+        notificationInfo.text
+    } else {
+        val hm = notificationInfo.text.split(":")
+        if (hm.size < 2) {
+            ""
+        } else if (hm[0] == "0") {
+            context.getString(R.string.notify_timer_m, hm[1])
+        } else {
+            context.getString(R.string.notify_timer_hm, hm[0], hm[1])
+        }
+    }
+    
+    intent.putExtra(NotifyIntentKey.TEXT, text)
     
     val pendingIntent = PendingIntent.getBroadcast(
         context,

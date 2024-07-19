@@ -9,6 +9,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+import me.ljpb.alarmbynotification.Utility.localDateTimeToFormattedTime
 import me.ljpb.alarmbynotification.data.NotificationInfoInterface
 import me.ljpb.alarmbynotification.data.NotificationRepositoryInterface
 import me.ljpb.alarmbynotification.data.TimeType
@@ -64,6 +65,7 @@ class TimePickerDialogViewModel(
         val triggerTimeSeconds: Long
         val currentDateTime = ZonedDateTime.now()
         val zoneId = currentDateTime.zone.id
+        val text: String
         if (isAlarm) {
             type = TimeType.Alarm
 
@@ -84,25 +86,31 @@ class TimePickerDialogViewModel(
             } else {
                 0  // todo
             }
-            triggerTimeSeconds = currentDateTime
+            val triggerDateTime = currentDateTime
                 .plusMinutes(addMinutes)
                 .minusSeconds(currentDateTime.second.toLong())  // 秒は無視する
                 .minusNanos(currentDateTime.nano.toLong())
-                .toEpochSecond()
-        
+            
+            text = localDateTimeToFormattedTime(
+                localDateTime = triggerDateTime.toLocalDateTime(),
+                isFormat24 = alarmState.is24hour,
+                displaySecond = false
+            )
+            triggerTimeSeconds = triggerDateTime.toEpochSecond()
         } else {
             type = TimeType.Timer
             triggerTimeSeconds = currentDateTime
                 .plusHours(timerState.hour.toLong())
                 .plusMinutes(timerState.minute.toLong())
                 .toEpochSecond()
+            text = "${timerState.hour}:${timerState.minute}"
         }
 
         val notifyId = UUID.randomUUID().hashCode()
         val notification = NotificationEntity(
             notifyId = notifyId,
             title = "",
-            text = "",
+            text = text,
             triggerTimeMilliSeconds = triggerTimeSeconds * 1000,
             type = type,
             zoneId = zoneId
