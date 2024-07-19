@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import me.ljpb.alarmbynotification.R
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,7 +34,12 @@ fun NotificationPermissionDialog(
     onDismissRequest: () -> Unit,
     onPositiveClick: () -> Unit,
 ) {
-    BasicAlertDialog(onDismissRequest = onDismissRequest) {
+    BasicAlertDialog(
+        onDismissRequest = onDismissRequest,
+        properties = DialogProperties(
+            dismissOnClickOutside = false
+        )
+    ) {
         Surface(
             modifier = modifier
                 .width(280.dp)
