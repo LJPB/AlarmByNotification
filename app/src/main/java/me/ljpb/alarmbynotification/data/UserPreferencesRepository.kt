@@ -14,14 +14,7 @@ class UserPreferencesRepository(
     private val dataStore: DataStore<Preferences>
 ) {
     private companion object {
-        val IS_ALARM = booleanPreferencesKey("dialog_default_content")
         val SHOW_PERMISSION_DIALOG = booleanPreferencesKey("move_setting_screen")
-    }
-
-    suspend fun changeDialogDefaultContent(isAlarm: Boolean) {
-        dataStore.edit {
-            it[IS_ALARM] = isAlarm
-        }
     }
     
     suspend fun showedPermissionDialog() {
@@ -29,18 +22,6 @@ class UserPreferencesRepository(
             it[SHOW_PERMISSION_DIALOG] = true
         }
     }
-
-    val isAlarmDefault: Flow<Boolean> = dataStore.data
-        .catch {
-            if(it is IOException) {
-                emit(emptyPreferences())
-            } else {
-                throw it
-            }
-        }
-        .map {
-            it[IS_ALARM] ?: true
-        }
     
     val isShowedPermissionDialog: Flow<Boolean> = dataStore.data
         .catch {

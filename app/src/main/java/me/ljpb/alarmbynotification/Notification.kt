@@ -15,7 +15,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import me.ljpb.alarmbynotification.data.NotificationInfoInterface
 import me.ljpb.alarmbynotification.data.NotifyIntentKey
-import me.ljpb.alarmbynotification.data.TimeType
 import me.ljpb.alarmbynotification.receiver.NotifyReceiver
 
 
@@ -48,13 +47,6 @@ fun createNotificationChannel(context: Context) {
         context = context,
         channelId = context.getString(R.string.alarm_channel_id),
         channelName = context.getString(R.string.alarm_channel_name),
-        importance = NotificationManager.IMPORTANCE_HIGH
-    )
-    // タイマーの通知チャンネル
-    createNotificationChannelHelper(
-        context = context,
-        channelId = context.getString(R.string.timer_channel_id),
-        channelName = context.getString(R.string.timer_channel_name),
         importance = NotificationManager.IMPORTANCE_HIGH
     )
 }
@@ -120,29 +112,6 @@ fun alarmNotify(
 }
 
 /**
- * タイマー通知の発行
- * @param context
- * @param title 通知に表示するタイトル
- * @param text 通知に表示する本文
- * @param notifyId 通知を区別するID
- */
-fun timerNotify(
-    context: Context,
-    title: String,
-    text: String,
-    notifyId: Int
-) {
-    notify(
-        context = context,
-        channelId = context.getString(R.string.timer_channel_id),
-        title = title,
-        text = text,
-        icon = R.drawable.timer_notification_icon,
-        notifyId = notifyId
-    )
-}
-
-/**
  * 通知のセット
  * @param context
  * @param notificationInfo 登録する通知の情報
@@ -151,24 +120,9 @@ fun setNotification(context: Context, notificationInfo: NotificationInfoInterfac
     val intent = Intent(context, NotifyReceiver::class.java)
     intent.putExtra(NotifyIntentKey.NOTIFY_ID, notificationInfo.notifyId)
     intent.putExtra(NotifyIntentKey.TITLE, notificationInfo.title)
-    intent.putExtra(NotifyIntentKey.TYPE, notificationInfo.type.name)
+    intent.putExtra(NotifyIntentKey.TEXT, notificationInfo.text)
     intent.putExtra(NotifyIntentKey.TRIGGER_TIME_MILLI, notificationInfo.triggerTimeMilliSeconds)
     intent.putExtra(NotifyIntentKey.ZONE_ID, notificationInfo.zoneId)
-
-    val text = if (notificationInfo.type == TimeType.Alarm) {
-        notificationInfo.text
-    } else {
-        val hm = notificationInfo.text.split(":")
-        if (hm.size < 2) {
-            ""
-        } else if (hm[0] == "0") {
-            context.getString(R.string.notify_timer_m, hm[1])
-        } else {
-            context.getString(R.string.notify_timer_hm, hm[0], hm[1])
-        }
-    }
-    
-    intent.putExtra(NotifyIntentKey.TEXT, text)
     
     val pendingIntent = PendingIntent.getBroadcast(
         context,

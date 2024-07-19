@@ -2,26 +2,16 @@
     <string name="app_name">Alarm By Notification</string>
     
     <string name="delete_alarm">アラームを削除する</string>
-    <string name="delete_timer">タイマーを削除する</string>
-    
     <string name="untitled">名称未設定</string>
-    
     <string name="empty">セットされた時間はありません</string>
     
     <string name="add">追加</string>
     <string name="add_alarm">アラームを追加</string>
-    <string name="add_timer">タイマーを追加 (23時間59分後まで)</string>
-    <string name="notify_timer_hm">%1$s時間%2$s分経過</string>
-    <string name="notify_timer_m">%1$s分経過</string>
-    
     <string name="set_title">タイトルを入力</string>
     
     <string name="request_permission_title">通知を許可する</string>
     <string name="request_permission_detail">設定した時間に通知を受け取るために必要です。</string>
     <string name="allow">許可</string>
-    
-    <string name="change_default">デフォルトの切り替え</string>
-    
     
     <string name="cancel">キャンセル</string>
     <string name="ok">OK</string>
@@ -29,6 +19,4 @@
     <string name="alarm_channel_name">アラーム</string>
     <string name="alarm_channel_id">ALARM_CHANNEL</string>
     
-    <string name="timer_channel_name">タイマー</string>
-    <string name="timer_channel_id">TIMER_CHANNEL</string>
 </resources>

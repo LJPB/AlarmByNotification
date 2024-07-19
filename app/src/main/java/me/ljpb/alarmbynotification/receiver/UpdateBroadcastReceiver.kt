@@ -29,8 +29,8 @@ class UpdateBroadcastReceiver : BroadcastReceiver() {
                         .firstOrNull()
                         ?.forEach {
                             val currentTime = System.currentTimeMillis()
-                            // 過ぎていたら
                             if (it.triggerTimeMilliSeconds > currentTime) {
+                                // 過ぎていたら
                                 deleteNotification(context, notificationInfo = it)
                             } else {
                                 setNotification(context = context, notificationInfo = it)

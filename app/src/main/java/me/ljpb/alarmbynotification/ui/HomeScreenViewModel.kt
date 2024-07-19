@@ -41,11 +41,10 @@ class HomeScreenViewModel(
             notificationEntities.map { notification ->
                 val zonedDateTime =
                     Instant.ofEpochSecond(notification.triggerTimeMilliSeconds / 1000)
-                        .atZone(ZoneId.systemDefault())
+                        .atZone(ZoneId.of(notification.zoneId))
                 TimeData(
                     id = notification.notifyId,
-                    name = notification.title,
-                    type = notification.type,
+                    title = notification.title,
                     finishDateTime = zonedDateTime
                 )
             }
@@ -55,23 +54,14 @@ class HomeScreenViewModel(
             started = SharingStarted.WhileSubscribed(2_000L),
             initialValue = listOf()
         )
-
-    val dialogDefaultContentIsAlarm: StateFlow<Boolean> = preferencesRepository.isAlarmDefault
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(2_000L),
-            initialValue = false
-        )
-
-    // addedItemTriggerTimeMilliSecondsの初期値
-    private val initialSeconds = -1L
-
+    
     // setTimeListに新たに追加された通知
     private var addedItemInfo by mutableStateOf<NotificationInfoInterface>(notificationEmptyEntity)
 
     var titleInputDialogIsShow by mutableStateOf(false)
         private set
 
+    // アラームリストでタップしたアラームのTimeData
     private var selectedTimeDate: TimeData? = null
 
     // 通知権限の許可取得ダイアログが一度表示されたかどうか
@@ -98,7 +88,7 @@ class HomeScreenViewModel(
             hiddenTitleInputDialog()
             return ""
         }
-        return selectedTimeDate!!.name
+        return selectedTimeDate!!.title
     }
 
     fun setTitle(title: String) {
@@ -111,12 +101,6 @@ class HomeScreenViewModel(
                 val newNotify = notify.copy(title = title)
                 repository.updateNotification(newNotify)
             }
-        }
-    }
-    
-    fun changeDefaultContent(defaultIsAlarm: Boolean) {
-        viewModelScope.launch {
-            preferencesRepository.changeDialogDefaultContent(defaultIsAlarm)
         }
     }
 

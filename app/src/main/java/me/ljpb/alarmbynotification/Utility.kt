@@ -1,6 +1,5 @@
 package me.ljpb.alarmbynotification
 
-import me.ljpb.alarmbynotification.data.TimeType
 import me.ljpb.alarmbynotification.data.room.NotificationEntity
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -31,7 +30,6 @@ object Utility {
         title = "",
         text = "",
         triggerTimeMilliSeconds = 0L,
-        type = TimeType.Alarm,
         zoneId = ""
     )
 

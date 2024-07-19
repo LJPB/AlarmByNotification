@@ -9,9 +9,7 @@ import kotlinx.coroutines.launch
 import me.ljpb.alarmbynotification.NotificationApplication
 import me.ljpb.alarmbynotification.alarmNotify
 import me.ljpb.alarmbynotification.data.NotifyIntentKey
-import me.ljpb.alarmbynotification.data.TimeType
 import me.ljpb.alarmbynotification.data.room.NotificationEntity
-import me.ljpb.alarmbynotification.timerNotify
 
 class NotifyReceiver : BroadcastReceiver() {
     @OptIn(DelicateCoroutinesApi::class)
@@ -21,23 +19,16 @@ class NotifyReceiver : BroadcastReceiver() {
             val text = intent.getStringExtra(NotifyIntentKey.TEXT) ?: ""
             val notifyId = intent.getIntExtra(NotifyIntentKey.NOTIFY_ID, 1)
             val triggerTime = intent.getLongExtra(NotifyIntentKey.TRIGGER_TIME_MILLI, 1)
-            val type = intent.getStringExtra(NotifyIntentKey.TYPE) ?: ""
             val zoneId = intent.getStringExtra(NotifyIntentKey.ZONE_ID) ?: ""
-            when (type) {
-                TimeType.Alarm.name -> alarmNotify(
-                    context = context,
-                    title = title,
-                    text = text,
-                    notifyId = notifyId
-                )
-
-                TimeType.Timer.name -> timerNotify(
-                    context = context,
-                    title = title,
-                    text = text,
-                    notifyId = notifyId
-                )
-            }
+          
+            alarmNotify(
+                context = context,
+                title = title,
+                text = text,
+                notifyId = notifyId
+            )
+            
+            // 鳴らした通知は削除する
             val application = context.applicationContext as NotificationApplication
             val repository = application.container.notificationRepository
             val pendingResult = goAsync()
@@ -49,7 +40,6 @@ class NotifyReceiver : BroadcastReceiver() {
                             title = title,
                             text = text,
                             triggerTimeMilliSeconds = triggerTime,
-                            type = type.toTimeType(),
                             zoneId = zoneId
                         )
                     )
@@ -59,7 +49,4 @@ class NotifyReceiver : BroadcastReceiver() {
             }
         }
     }
-    
-    private fun String.toTimeType(): TimeType = if (this == TimeType.Alarm.name) TimeType.Alarm else TimeType.Timer
-    
 }

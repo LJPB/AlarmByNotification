@@ -2,9 +2,7 @@ package me.ljpb.alarmbynotification.data.room
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import androidx.room.TypeConverter
 import me.ljpb.alarmbynotification.data.NotificationInfoInterface
-import me.ljpb.alarmbynotification.data.TimeType
 
 @Entity(tableName = "notifications")
 data class NotificationEntity(
@@ -13,14 +11,5 @@ data class NotificationEntity(
     override val title: String,
     override val text: String,
     override val triggerTimeMilliSeconds: Long,
-    override val type: TimeType,
     override val zoneId: String
 ) : NotificationInfoInterface
-
-class NotificationEntityTypeConverter {
-    @TypeConverter
-    fun timeTypeToString(timeType: TimeType): String = timeType.name
-    
-    @TypeConverter
-    fun stringToTimeType(timeType: String): TimeType = enumValueOf<TimeType>(timeType)
-}
