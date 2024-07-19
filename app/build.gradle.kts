@@ -83,6 +83,8 @@ dependencies {
     // アダプティブレイアウト用
     implementation("androidx.compose.material3:material3-window-size-class:1.2.1")
 
+    implementation("com.github.vsnappy1:ComposeDatePicker:2.2.0")
+    
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
