@@ -18,5 +18,5 @@ data class AlarmInfoEntity (
     override val hour: Int,
     override val min: Int,
     override val zoneId: String,
-    override val name: String,
+    override val name: String = "",
 ) : AlarmInfoEntityInterface
