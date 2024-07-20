@@ -41,9 +41,8 @@ class MainActivity : ComponentActivity() {
                 }
                 
                 val windowSize = calculateWindowSizeClass(this)
-
                 HomeScreen(
-                    windowSize = windowSize.widthSizeClass,
+                    windowSize = windowSize,
                     homeScreenViewModel = homeScreenViewModel,
                     timePickerDialogViewModel = timePickerDialogViewModel
                 )

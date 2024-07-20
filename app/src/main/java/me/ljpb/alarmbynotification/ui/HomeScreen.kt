@@ -38,6 +38,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -73,7 +74,7 @@ import java.time.LocalDateTime
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
-    windowSize: WindowWidthSizeClass,
+    windowSize: WindowSizeClass,
     homeScreenViewModel: HomeScreenViewModel,
     timePickerDialogViewModel: TimePickerDialogViewModel,
 ) {
@@ -88,7 +89,7 @@ fun HomeScreen(
         },
         floatingActionButtonPosition = FabPosition.Center,
         floatingActionButton = {
-            if (windowSize == WindowWidthSizeClass.Compact) {
+            if (windowSize.widthSizeClass == WindowWidthSizeClass.Compact) {
                 FloatingActionButton {
                     timePickerDialogViewModel.showAlarmDialog()
                 }
@@ -178,7 +179,7 @@ private fun AlarmList(
 @Composable
 private fun HomeScreenContent(
     modifier: Modifier = Modifier,
-    windowSize: WindowWidthSizeClass,
+    windowSize: WindowSizeClass,
     innerPadding: PaddingValues,
     timePickerDialogViewModel: TimePickerDialogViewModel,
     homeScreenViewModel: HomeScreenViewModel,
@@ -194,6 +195,7 @@ private fun HomeScreenContent(
         TimePickerDialog(
             onDismissRequest = timePickerDialogViewModel::hiddenDialog,
             onPositiveClick = { timePickerDialogViewModel.add(homeScreenViewModel::setAddedItem) },
+            windowSizeClass = windowSize,
             timePickerDialogViewModel = timePickerDialogViewModel,
         )
     }
@@ -245,7 +247,7 @@ private fun HomeScreenContent(
         }
     }    
     
-    when (windowSize) {
+    when (windowSize.widthSizeClass) {
         WindowWidthSizeClass.Compact -> {
             Column {
                 if (setTimeIsEmpty) {
