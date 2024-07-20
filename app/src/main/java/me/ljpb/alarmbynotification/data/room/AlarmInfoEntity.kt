@@ -8,6 +8,7 @@ interface AlarmInfoEntityInterface {
     val hour: Int
     val min: Int
     val zoneId: String
+    val name: String
 }
 
 @Entity("alarms")
@@ -17,4 +18,5 @@ data class AlarmInfoEntity (
     override val hour: Int,
     override val min: Int,
     override val zoneId: String,
+    override val name: String,
 ) : AlarmInfoEntityInterface
