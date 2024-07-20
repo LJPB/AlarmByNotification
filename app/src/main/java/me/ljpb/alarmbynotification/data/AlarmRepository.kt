@@ -9,7 +9,7 @@ interface AlarmRepositoryInterface {
     suspend fun update(alarmInfo: AlarmInfoEntity)
     suspend fun delete(id: Long)
     fun getItem(id: Long): Flow<AlarmInfoEntity?>
-    fun getAllItem(): Flow<List<AlarmInfoEntity>?>
+    fun getAllItemOrderByTimeAsc(): Flow<List<AlarmInfoEntity>?>
 }
 
 class AlarmRepository(private val dao: AlarmDao) : AlarmRepositoryInterface {
@@ -29,7 +29,7 @@ class AlarmRepository(private val dao: AlarmDao) : AlarmRepositoryInterface {
         return dao.getItem(id)
     }
 
-    override fun getAllItem(): Flow<List<AlarmInfoEntity>?> {
-        return dao.getAllItem()
+    override fun getAllItemOrderByTimeAsc(): Flow<List<AlarmInfoEntity>?> {
+        return dao.getAllItemOrderByTimeAsc()
     }
 }

@@ -21,6 +21,6 @@ interface AlarmDao {
     @Query("select * from alarms where id = :id")
     fun getItem(id: Long): Flow<AlarmInfoEntity?>
 
-    @Query("select * from alarms")
-    fun getAllItem(): Flow<List<AlarmInfoEntity>?>
+    @Query("select * from alarms order by hour asc, min asc")
+    fun getAllItemOrderByTimeAsc(): Flow<List<AlarmInfoEntity>?>
 }
