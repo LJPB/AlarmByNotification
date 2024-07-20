@@ -10,98 +10,106 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import me.ljpb.alarmbynotification.Utility.notificationEmptyEntity
-import me.ljpb.alarmbynotification.data.NotificationInfoInterface
-import me.ljpb.alarmbynotification.data.NotificationRepositoryInterface
-import me.ljpb.alarmbynotification.data.TimeData
+import me.ljpb.alarmbynotification.data.AlarmInfo
+import me.ljpb.alarmbynotification.data.AlarmRepository
 import me.ljpb.alarmbynotification.data.UserPreferencesRepository
-import java.time.Instant
+import me.ljpb.alarmbynotification.data.room.AlarmInfoEntity
+import me.ljpb.alarmbynotification.data.room.AlarmInfoInterface
 import java.time.LocalDateTime
-import java.time.ZoneId
 
 // 現在時刻を取得するための更新間隔
 const val DELAY_TIME: Long = 100L
 
+val INITIAL_ID: Long? = null
+
 class HomeScreenViewModel(
-    private val repository: NotificationRepositoryInterface,
+    private val alarmRepository: AlarmRepository,
     private val preferencesRepository: UserPreferencesRepository,
 ) : ViewModel() {
     private val _currentDateTime = MutableStateFlow(LocalDateTime.now())
     val currentDateTime: StateFlow<LocalDateTime> = _currentDateTime.asStateFlow()
 
-    val setTimeList: StateFlow<List<TimeData>> = repository
-        .getAllNotifications()
-        .map { notificationEntities ->
-            if (notificationEntities.isNullOrEmpty()) return@map listOf()
-            notificationEntities.map { notification ->
-                val zonedDateTime =
-                    Instant.ofEpochSecond(notification.triggerTimeMilliSeconds / 1000)
-                        .atZone(ZoneId.of(notification.zoneId))
-                TimeData(
-                    id = notification.notifyId,
-                    title = notification.title,
-                    finishDateTime = zonedDateTime
-                )
-            }
+    val alarmList: StateFlow<List<AlarmInfo>> = alarmRepository
+        .getAllItemOrderByTimeAsc()
+        .map { alarmList ->
+            if (alarmList.isNullOrEmpty()) return@map listOf()
+            alarmList.map { alarm -> alarm.toAlarmInfo() }
         }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(2_000L),
             initialValue = listOf()
         )
-    
-    // setTimeListに新たに追加された通知
-    private var addedItemInfo by mutableStateOf<NotificationInfoInterface>(notificationEmptyEntity)
 
-    var titleInputDialogIsShow by mutableStateOf(false)
+    var isShowTitleInputDialog by mutableStateOf(false)
         private set
 
-    // アラームリストでタップしたアラームのTimeData
-    private var selectedTimeDate: TimeData? = null
+    // アラームリストでタップしたアラーム
+    private var selectedAlarm: AlarmInfo? = null
+
+    // 新たに追加したアラームのID
+    private var idOfAddedAlarm by mutableStateOf<Long?>(INITIAL_ID)
 
     // 通知権限の許可取得ダイアログが一度表示されたかどうか
-    var isShowedPermissionDialog: StateFlow<Boolean> = preferencesRepository.isShowedPermissionDialog
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(2_000L),
-            initialValue = true
-        )
-     
+    var isShowedPermissionDialog: StateFlow<Boolean> =
+        preferencesRepository.isShowedPermissionDialog
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(2_000L),
+                initialValue = true
+            )
 
-    fun showTitleInputDialog(timeData: TimeData) {
-        titleInputDialogIsShow = true
-        selectedTimeDate = timeData
+    /**
+     * アラームを選択するときに呼び出すメソッド
+     */
+    fun selectAlarm(alarm: AlarmInfoInterface): HomeScreenViewModel {
+        selectedAlarm = alarm as AlarmInfo
+        return this
     }
 
-    fun hiddenTitleInputDialog() {
-        titleInputDialogIsShow = false
-        selectedTimeDate = null
+    fun showTitleInputDialog() {
+        isShowTitleInputDialog = true
     }
 
-    fun getDefaultTitle(): String {
-        if (selectedTimeDate == null) {
-            hiddenTitleInputDialog()
-            return ""
-        }
-        return selectedTimeDate!!.title
+    fun hiddenTitleInputDialog(): HomeScreenViewModel {
+        isShowTitleInputDialog = false
+        return this
     }
 
-    fun setTitle(title: String) {
-        if (selectedTimeDate == null) return
-        viewModelScope.launch {
-            val notify = repository
-                .getNotification(selectedTimeDate!!.id)
-                .firstOrNull()
-            if (notify != null) {
-                val newNotify = notify.copy(title = title)
-                repository.updateNotification(newNotify)
+    fun setAlarmName(name: String): HomeScreenViewModel {
+        if (selectedAlarm != null) {
+            viewModelScope.launch {
+                alarmRepository.update(selectedAlarm!!.toAlarmInfoEntity().copy(name = name))
             }
         }
+        return this
+    }
+    
+    fun getSelectedAlarmName(): String {
+        if (selectedAlarm != null) {
+            selectedAlarm!!.name
+        }
+        return ""
+    }
+
+    /**
+     * 選択したアラームを解除する
+     */
+    fun releaseSelectedAlarm() {
+        selectedAlarm = null
+    }
+
+    fun delete(): HomeScreenViewModel {
+        if (selectedAlarm != null) {
+            viewModelScope.launch {
+                alarmRepository.delete(selectedAlarm!!.id)
+            }
+        }
+        return this
     }
 
     fun showPermissionDialog() {
@@ -110,17 +118,6 @@ class HomeScreenViewModel(
         }
     }
     
-    fun delete(timeData: TimeData) {
-        viewModelScope.launch {
-            val notify = repository
-                .getNotification(timeData.id)
-                .firstOrNull()
-            if (notify != null) {
-                repository.deleteNotification(notify)
-            }
-        }
-    }
-
     suspend fun updateCurrentDateTime() {
         while (true) {
             _currentDateTime.update { LocalDateTime.now() }
@@ -128,45 +125,58 @@ class HomeScreenViewModel(
         }
     }
 
-    fun setAddedItem(notificationInfo: NotificationInfoInterface) {
-        addedItemInfo = notificationInfo
+    // === 以下，追加したアラームへスクロールするための機能 ===
+    /**
+     * 新たに追加したアラームのID(DBのプライマリキー)を保存
+     */
+    fun setAddItemId(id: Long) {
+        idOfAddedAlarm = id
     }
 
-    fun initAddedItem() {
-        addedItemInfo = notificationEmptyEntity
+    fun initAddItemId() {
+        idOfAddedAlarm = INITIAL_ID
     }
 
+    /**
+     * アラームを追加した後，アラームを削除する場合，idOfAddedAlarmが変更されてなかった場合，idOfAddedAlarmの位置へスクロールしてしまう
+     * これを防ぐために，idOfAddedAlarmが初期値かどうかを判定して，初期値ならばスクロールしないようにする
+     */
     fun isScroll(): Boolean {
-        // addedItemInfoが初期値ならスクロールしない
-        // setTimeListからアイテムが削除された場合にスクロールしないようにするためのもの
-        return addedItemInfo != notificationEmptyEntity
+        return idOfAddedAlarm != INITIAL_ID
     }
 
+    /**
+     * 新たに追加したアラームのリスト内でのIndexを返す
+     */
     fun getAddedItemIndex(): Int {
-        val addItemFinishDateTime = Instant.ofEpochSecond(addedItemInfo.triggerTimeMilliSeconds / 1000)
-            .atZone(ZoneId.of(addedItemInfo.zoneId))
-        val tmpList = setTimeList.value
-        var start = 0
-        var end = tmpList.size - 1
-        var middle = (start + end) / 2
-
-        while (start <= end) {
-            if (addItemFinishDateTime == tmpList[start].finishDateTime) {
-                return start
+        if (idOfAddedAlarm == INITIAL_ID) return 0
+        val tmpList = alarmList.value
+        for (i in tmpList.indices) {
+            if (tmpList[i].id == idOfAddedAlarm) {
+                return i
             }
-            if (addItemFinishDateTime == tmpList[end].finishDateTime) {
-                return end
-            }
-            if (addItemFinishDateTime == tmpList[middle].finishDateTime) {
-                return middle
-            }
-            if (addItemFinishDateTime.isAfter(tmpList[middle].finishDateTime)) {
-                start = middle + 1
-            } else if (addItemFinishDateTime.isBefore(tmpList[middle].finishDateTime)) {
-                end = middle - 1
-            }
-            middle = (start + end) / 2
         }
         return 0
     }
+    // === 以上，追加したアラームへスクロールするための機能 ===
+}
+
+private fun AlarmInfoEntity.toAlarmInfo(): AlarmInfo {
+    return AlarmInfo(
+        id = this.id,
+        hour = this.hour,
+        min = this.min,
+        name = this.name,
+        zoneId = this.zoneId
+    )
+}
+
+private fun AlarmInfo.toAlarmInfoEntity(): AlarmInfoEntity {
+    return AlarmInfoEntity(
+        id = this.id,
+        hour = this.hour,
+        min = this.min,
+        name = this.name,
+        zoneId = this.zoneId
+    )
 }

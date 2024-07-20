@@ -39,7 +39,7 @@ class MainActivity : ComponentActivity() {
                 } else {
                     createNotificationChannel(this)
                 }
-                
+                val appContainer = AppDataContainer(this)
                 val windowSize = calculateWindowSizeClass(this)
                 HomeScreen(
                     windowSize = windowSize,

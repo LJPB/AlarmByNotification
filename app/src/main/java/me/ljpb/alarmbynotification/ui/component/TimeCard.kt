@@ -1,6 +1,5 @@
 package me.ljpb.alarmbynotification.ui.component
 
-import android.text.format.DateFormat
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,32 +17,31 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.ljpb.alarmbynotification.R
-import me.ljpb.alarmbynotification.Utility.localDateTimeToFormattedTime
-import me.ljpb.alarmbynotification.data.TimeData
-import java.time.LocalDateTime
+import me.ljpb.alarmbynotification.Utility.getFormattedTime
+import me.ljpb.alarmbynotification.data.AlarmInfo
+import me.ljpb.alarmbynotification.data.room.AlarmInfoInterface
 
+/**
+ * @param onTitleClick アラームのタイトルをタップした時のイベント
+ * @param onDeleteClick アラームを削除するイベント
+ * @param is24Hour 24時間表記?
+ */
 @Composable
 fun AlarmCard(
     modifier: Modifier = Modifier,
     onTitleClick: () -> Unit,
     onDeleteClick: () -> Unit,
-    timeData: TimeData
+    alarm: AlarmInfoInterface,
+    is24Hour: Boolean,
 ) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-    ) {
+    Card(modifier = modifier.fillMaxWidth()) {
         CardContent(
             modifier = Modifier
                 .padding(
@@ -53,33 +51,31 @@ fun AlarmCard(
                 .fillMaxWidth(),
             onTitleClick = onTitleClick,
             onDeleteClick = onDeleteClick,
-            timeData = timeData,
+            alarm = alarm,
+            is24Hour = is24Hour
         )
     }
 }
 
-/**
- * @param onTitleClick アラームのタイトルを設定する
- * @param onDeleteClick アラームを削除する
- * @param timeData カードに表示する時刻のデータ
- */
 @Composable
 private fun CardContent(
     modifier: Modifier = Modifier,
     onTitleClick: () -> Unit,
     onDeleteClick: () -> Unit,
-    timeData: TimeData,
+    alarm: AlarmInfoInterface,
+    is24Hour: Boolean,
 ) {
     val icon = ALARM_ICON
     val iconDescription = stringResource(id = R.string.alarm_channel_name)
     val deleteDescription = stringResource(id = R.string.delete_alarm)
 
-    val title = if (timeData.title.trim().isNotEmpty()) timeData.title else stringResource(id = R.string.untitled)
+    val title =
+        if (alarm.name.trim().isNotEmpty()) alarm.name else stringResource(id = R.string.untitled)
 
     Column(
         modifier = modifier
     ) {
-        // アラームのタイトル
+        // アラームカードのタイトル
         Row(
             modifier = Modifier.clickable { onTitleClick() },
             verticalAlignment = Alignment.CenterVertically
@@ -100,9 +96,12 @@ private fun CardContent(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-
-            AlarmTime(timeData = timeData.finishDateTime.toLocalDateTime())
-
+            AlarmTime(
+                hour = alarm.hour,
+                min = alarm.min,
+                is24Hour = is24Hour,
+                zoneId = alarm.zoneId
+            )
             // アラーム削除ボタン
             IconButton(
                 onClick = onDeleteClick,
@@ -119,15 +118,16 @@ private fun CardContent(
 
 @Composable
 private fun AlarmTime(
-    timeData: LocalDateTime,
+    hour: Int,
+    min: Int,
+    zoneId: String,
+    is24Hour: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
-    val isFormat24 by remember { mutableStateOf(DateFormat.is24HourFormat(context)) }
-    val formattedTime = localDateTimeToFormattedTime(timeData, isFormat24, false)
+    val formattedTime = getFormattedTime(hour, min, is24Hour)
     Text(
         text = formattedTime,
-        style = MaterialTheme.typography.displayLarge,
+        style = MaterialTheme.typography.displayMedium,
     )
 }
 
@@ -135,17 +135,10 @@ private fun AlarmTime(
 @Preview(showSystemUi = true)
 @Composable
 private fun AlarmCardPreview() {
-//    TimeCard(
-//        modifier = Modifier.padding(16.dp),
-//        currentTime = LocalDateTime.now(),
-//        finishTime = TimeData(
-//            id = 1,
-//            finishDateTime = LocalDateTime.now(),
-//            name = "aaa",
-//            type = TimeType.Alarm,
-//        ),
-//        onTimeClick = {},
-//        onTitleClick = {},
-//        onDeleteClick = {}
-//    )
+    AlarmCard(
+        onTitleClick = { /*TODO*/ },
+        onDeleteClick = { /*TODO*/ },
+        is24Hour = true,
+        alarm = AlarmInfo(0, 0, 0, "", "")
+    )
 }

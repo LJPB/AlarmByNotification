@@ -1,51 +1,62 @@
 package me.ljpb.alarmbynotification.ui
 
-import android.app.Application
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TimePickerState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import me.ljpb.alarmbynotification.Utility.localDateTimeToFormattedTime
-import me.ljpb.alarmbynotification.data.NotificationInfoInterface
+import me.ljpb.alarmbynotification.Utility.getZoneId
+import me.ljpb.alarmbynotification.data.AlarmRepositoryInterface
 import me.ljpb.alarmbynotification.data.NotificationRepositoryInterface
-import me.ljpb.alarmbynotification.data.room.NotificationEntity
+import me.ljpb.alarmbynotification.data.room.AlarmInfoEntity
 import java.time.LocalTime
-import java.time.ZonedDateTime
-import java.util.UUID
 
 class TimePickerDialogViewModel(
     private val repository: NotificationRepositoryInterface,
-    app: Application,
-) : AndroidViewModel(app) {
+    private val alarmRepository: AlarmRepositoryInterface,
+) : ViewModel() {
     // アラームにセットする時刻を管理する
     @OptIn(ExperimentalMaterial3Api::class)
     lateinit var alarmState: TimePickerState
         private set
-
+    
     // ダイアログの表示状態
     var isShow by mutableStateOf(false)
         private set
 
     init {
-        setAlarmInitialState()
+        setAlarmInitialState(true)
     }
 
-    fun showAlarmDialog(hour: Int? = null, min: Int? = null, is24Hour: Boolean? = null) {
+    fun showAlarmDialog(hour: Int? = null, min: Int? = null, is24Hour: Boolean) {
+        if (hour != null && min != null) {
+            setAlarmState(hour, min, is24Hour)
+        } else {
+            setAlarmInitialState(is24Hour)
+        }
         isShow = true
-        setAlarmInitialState(hour = hour, min = min, is24Hour = is24Hour)
     }
-
 
     fun hiddenDialog() {
         isShow = false
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
-    fun add(setAddedItemToTmp: (NotificationInfoInterface) -> Unit) {
+    fun add(setAddedItemId: (Long) -> Unit) {
+        val zoneId = getZoneId()
+        val alarmInfoEntity = AlarmInfoEntity(
+            hour = alarmState.hour,
+            min = alarmState.minute,
+            zoneId = zoneId,
+        )
+        viewModelScope.launch {
+            val id = alarmRepository.insert(alarmInfoEntity)
+            setAddedItemId(id)
+        }
+        /*
         val triggerTimeSeconds: Long
         val currentDateTime = ZonedDateTime.now()
         val zoneId = currentDateTime.zone.id
@@ -67,7 +78,7 @@ class TimePickerDialogViewModel(
         } else {
             0  // todo
         }
-        
+
         val triggerDateTime = currentDateTime
             .plusMinutes(addMinutes)
             .minusSeconds(currentDateTime.second.toLong())  // 秒は無視する
@@ -92,35 +103,31 @@ class TimePickerDialogViewModel(
         viewModelScope.launch {
             repository.insertNotification(notification)
         }
+         */
     }
 
     /**
-     * 追加するアラームの時刻を管理するプロパティを初期値に戻す
+     * 追加するアラームの時刻を管理するプロパティを初期値(呼び出した時点での時刻)に戻す
      */
-    @OptIn(ExperimentalMaterial3Api::class)
-    private fun setAlarmInitialState(
-        hour: Int? = null,
-        min: Int? = null,
-        is24Hour: Boolean? = null,
-    ) {
+    private fun setAlarmInitialState(is24Hour: Boolean) {
         val currentTime = LocalTime.now()
-        val initialHour: Int
-        val initialMinute: Int
-        val initialIs24Hour = is24Hour ?: android.text.format.DateFormat.is24HourFormat(
-            getApplication<Application>().applicationContext
-        )
-        if (hour == null || min == null) {
-            initialHour = currentTime.hour
-            initialMinute = currentTime.minute
-        } else {
-            initialHour = hour
-            initialMinute = min
-        }
-        alarmState = TimePickerState(
-            initialHour = initialHour,
-            initialMinute = initialMinute,
-            is24Hour = initialIs24Hour
+        val initialHour = currentTime.hour
+        val initialMinute = currentTime.minute
+        setAlarmState(
+            hour = initialHour,
+            min = initialMinute,
+            is24 = is24Hour
         )
     }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    private fun setAlarmState(hour: Int, min: Int, is24: Boolean) {
+        alarmState = TimePickerState(
+            initialHour = hour,
+            initialMinute = min,
+            is24Hour = is24
+        )
+    }
+    
 
 }

@@ -78,9 +78,11 @@ fun TimePickerDialog(
 ) {
     // 表示しているダイアログはTimePicker?
     var isPicker by rememberSaveable { mutableStateOf(true) }
+    val timePickerState = timePickerDialogViewModel.alarmState
+    
     // 横画面?
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
-
+    
     val screenType: ScreenType
     // ダイアログの大きさに関するフラグ
     val usePlatformDefaultWidth: Boolean
@@ -146,7 +148,7 @@ fun TimePickerDialog(
                 screenType = screenType,
                 isPicker = isPicker,
                 iconButtonOnClick = { isPicker = !isPicker },
-                timePickerState = timePickerDialogViewModel.timePickerState,
+                timePickerState = timePickerState,
             )
         }
     }

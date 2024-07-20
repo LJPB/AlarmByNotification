@@ -11,17 +11,16 @@ object ViewModelProvider {
             val application = (this[APPLICATION_KEY] as NotificationApplication)
             val repository = application.container.notificationRepository
             TimePickerDialogViewModel(
-                app = application,
                 repository = repository,
+                alarmRepository = application.container.alarmRepository
             )
         }
         initializer {
             val application = (this[APPLICATION_KEY] as NotificationApplication)
-            val repository = application.container.notificationRepository
             val preferencesRepository = application.container.preferencesRepository
             HomeScreenViewModel(
-                repository = repository,
-                preferencesRepository = preferencesRepository
+                alarmRepository = application.container.alarmRepository,
+                preferencesRepository = preferencesRepository,
             )
         }
     }

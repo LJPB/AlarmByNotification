@@ -1,8 +1,12 @@
 package me.ljpb.alarmbynotification
 
 import me.ljpb.alarmbynotification.data.room.NotificationEntity
+import java.time.DateTimeException
 import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.zone.ZoneRulesException
 
 object Utility {
     /** 与えられたLocalDateTimeの時刻をフォーマットした文字列に変換 (例 : LocalDateTime → 16:00, 04:00 p.m.)
@@ -24,7 +28,25 @@ object Utility {
         }
         return localDateTime.format(timeFormat)
     }
+    
+    fun getFormattedTime(hour: Int, min: Int, is24Hour: Boolean): String {
+        val localTime = LocalTime.of(hour, min)
+        val timeFormat = if (is24Hour) {
+            DateTimeFormatter.ofPattern("HH:mm")
+        } else {
+            DateTimeFormatter.ofPattern("KK:mm a")
+        }
+        return localTime.format(timeFormat)
+    }
 
+    fun getZoneId(): String = try {
+        ZoneId.systemDefault().id
+    } catch (_: ZoneRulesException) {
+        "UTC"
+    } catch (_: DateTimeException) {
+        "UTC"
+    }
+    
     val notificationEmptyEntity = NotificationEntity(
         notifyId = 0,
         title = "",
@@ -32,5 +54,4 @@ object Utility {
         triggerTimeMilliSeconds = 0L,
         zoneId = ""
     )
-
 }

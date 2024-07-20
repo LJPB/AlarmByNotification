@@ -3,7 +3,7 @@ package me.ljpb.alarmbynotification.data.room
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-interface AlarmInfoEntityInterface {
+interface AlarmInfoInterface {
     val id: Long
     val hour: Int
     val min: Int
@@ -19,4 +19,4 @@ data class AlarmInfoEntity (
     override val min: Int,
     override val zoneId: String,
     override val name: String = "",
-) : AlarmInfoEntityInterface
+) : AlarmInfoInterface

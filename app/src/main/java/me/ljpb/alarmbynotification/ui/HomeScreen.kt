@@ -64,7 +64,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.launch
 import me.ljpb.alarmbynotification.R
 import me.ljpb.alarmbynotification.Utility
-import me.ljpb.alarmbynotification.data.TimeData
+import me.ljpb.alarmbynotification.data.room.AlarmInfoInterface
 import me.ljpb.alarmbynotification.ui.component.AlarmCard
 import me.ljpb.alarmbynotification.ui.component.NotificationPermissionDialog
 import me.ljpb.alarmbynotification.ui.component.TimePickerDialog
@@ -80,6 +80,7 @@ fun HomeScreen(
 ) {
     val currentTime by homeScreenViewModel.currentDateTime.collectAsState()
     val scope = rememberCoroutineScope()
+    val is24Hour = DateFormat.is24HourFormat(LocalContext.current)
     scope.launch {
         homeScreenViewModel.updateCurrentDateTime()
     }
@@ -91,7 +92,7 @@ fun HomeScreen(
         floatingActionButton = {
             if (windowSize.widthSizeClass == WindowWidthSizeClass.Compact) {
                 FloatingActionButton {
-                    timePickerDialogViewModel.showAlarmDialog()
+                    timePickerDialogViewModel.showAlarmDialog(is24Hour = is24Hour)
                 }
             }
         }
@@ -101,7 +102,8 @@ fun HomeScreen(
             timePickerDialogViewModel = timePickerDialogViewModel,
             homeScreenViewModel = homeScreenViewModel,
             windowSize = windowSize,
-            actionButtonOnClick = { timePickerDialogViewModel.showAlarmDialog() }
+            is24Hour = is24Hour,
+            actionButtonOnClick = { timePickerDialogViewModel.showAlarmDialog(is24Hour = is24Hour) }
         )
     }
 }
@@ -131,9 +133,10 @@ private fun Empty(
 private fun AlarmList(
     modifier: Modifier = Modifier,
     innerPadding: PaddingValues,
-    setTimeList: List<TimeData>,
-    onTitleClick: (TimeData) -> Unit,
-    onDeleteClick: (TimeData) -> Unit,
+    alarmList: List<AlarmInfoInterface>,
+    onTitleClick: (AlarmInfoInterface) -> Unit,
+    onDeleteClick: (AlarmInfoInterface) -> Unit,
+    is24Hour: Boolean,
     homeScreenViewModel: HomeScreenViewModel
 ) {
     val listState = rememberLazyListState()
@@ -142,15 +145,16 @@ private fun AlarmList(
         state = listState,
         modifier = modifier.padding(innerPadding)
     ) {
-        items(setTimeList) { time ->
+        items(alarmList) { alarm ->
             AlarmCard(
-                onTitleClick = { onTitleClick(time) },
-                onDeleteClick = { onDeleteClick(time) },
-                timeData = time,
+                onTitleClick = { onTitleClick(alarm) },
+                onDeleteClick = { onDeleteClick(alarm) },
+                alarm = alarm,
                 modifier = Modifier.padding(
                     vertical = dimensionResource(id = R.dimen.padding_small),
                     horizontal = dimensionResource(id = R.dimen.padding_medium)
-                )
+                ),
+                is24Hour = is24Hour
             )
         }
         item {
@@ -158,18 +162,17 @@ private fun AlarmList(
         }
     }
 
-    LaunchedEffect(setTimeList.size) {
+    LaunchedEffect(alarmList.size) {
         if (listState.layoutInfo.totalItemsCount > 0) {
             if (homeScreenViewModel.isScroll()) {
                 val index = homeScreenViewModel.getAddedItemIndex()
                 listState.animateScrollToItem(index)
-                homeScreenViewModel.initAddedItem()
+                homeScreenViewModel.initAddItemId()
             }
         }
     }
 
 }
-
 
 /**
  * HomeScreenに実際に配置するコンポーザブル
@@ -184,29 +187,34 @@ private fun HomeScreenContent(
     timePickerDialogViewModel: TimePickerDialogViewModel,
     homeScreenViewModel: HomeScreenViewModel,
     actionButtonOnClick: () -> Unit,
+    is24Hour: Boolean,
 ) {
-    val setTimeList by homeScreenViewModel.setTimeList.collectAsState()
-    val setTimeIsEmpty = setTimeList.isEmpty()
-    
+    val alarmList by homeScreenViewModel.alarmList.collectAsState()
+
     // 通知権限の許可を促すダイアログを一度表示したかどうか
     var isShowedDialog by remember { mutableStateOf(false) }
-    
+
     if (timePickerDialogViewModel.isShow) {
         TimePickerDialog(
             onDismissRequest = timePickerDialogViewModel::hiddenDialog,
-            onPositiveClick = { timePickerDialogViewModel.add(homeScreenViewModel::setAddedItem) },
+            onPositiveClick = { timePickerDialogViewModel.add(homeScreenViewModel::setAddItemId) },
             windowSizeClass = windowSize,
             timePickerDialogViewModel = timePickerDialogViewModel,
+            // todo ここでis24Hourを渡す
         )
     }
 
-    if (homeScreenViewModel.titleInputDialogIsShow) {
+    if (homeScreenViewModel.isShowTitleInputDialog) {
         val focusRequester = remember { FocusRequester() }
         TitleInputDialog(
-            onDismissRequest = homeScreenViewModel::hiddenTitleInputDialog,
-            onPositiveClick = homeScreenViewModel::setTitle,
+            onDismissRequest = {
+                homeScreenViewModel
+                    .hiddenTitleInputDialog()
+                    .releaseSelectedAlarm()
+            },
+            onPositiveClick = homeScreenViewModel::setAlarmName,
             focusRequester = focusRequester,
-            defaultTitle = homeScreenViewModel.getDefaultTitle()
+            defaultTitle = homeScreenViewModel.getSelectedAlarmName()
         )
         LaunchedEffect(Unit) {
             focusRequester.requestFocus()
@@ -245,42 +253,26 @@ private fun HomeScreenContent(
                 }
             }
         }
-    }    
-    
+    }
+
     when (windowSize.widthSizeClass) {
         WindowWidthSizeClass.Compact -> {
-            Column {
-                if (setTimeIsEmpty) {
-                    Empty()
-                } else {
-                    AlarmList(
-                        setTimeList = setTimeList,
-                        homeScreenViewModel = homeScreenViewModel,
-                        onTitleClick = homeScreenViewModel::showTitleInputDialog,
-                        onDeleteClick = homeScreenViewModel::delete,
-                        innerPadding = innerPadding,
-                    )
-                }
-            }
+            HomeScreenContentBody(
+                innerPadding = innerPadding,
+                alarmList = alarmList,
+                homeScreenViewModel = homeScreenViewModel,
+                is24Hour = is24Hour
+            )
         }
-        
-        else -> {
+        else -> {  // 横画面やタブレットなど画面の幅が広い場合
             Row {
-                Box(
-                    modifier = Modifier.weight(1f)
-                ){
-                    if (setTimeIsEmpty) {
-                        Empty()
-                    } else {
-                        AlarmList(
-                            setTimeList = setTimeList,
-                            homeScreenViewModel = homeScreenViewModel,
-                            onTitleClick = homeScreenViewModel::showTitleInputDialog,
-                            onDeleteClick = homeScreenViewModel::delete,
-                            innerPadding = innerPadding,
-                        )
-                    }
-                }
+                HomeScreenContentBody(
+                    modifier = Modifier.weight(1f),
+                    innerPadding = innerPadding,
+                    alarmList = alarmList,
+                    homeScreenViewModel = homeScreenViewModel,
+                    is24Hour = is24Hour
+                )
                 Box(
                     modifier = Modifier
                         .width(128.dp)
@@ -295,7 +287,42 @@ private fun HomeScreenContent(
             }
         }
     }
-    
+}
+
+@Composable
+fun HomeScreenContentBody(
+    modifier: Modifier = Modifier,
+    innerPadding: PaddingValues,
+    alarmList: List<AlarmInfoInterface>,
+    homeScreenViewModel: HomeScreenViewModel,
+    is24Hour: Boolean,
+) {
+    val alarmListIsEmpty = alarmList.isEmpty()
+    Box(
+        modifier = modifier
+    ) {
+        if (alarmListIsEmpty) {
+            Empty()
+        } else {
+            AlarmList(
+                alarmList = alarmList,
+                homeScreenViewModel = homeScreenViewModel,
+                onTitleClick = {
+                    homeScreenViewModel
+                        .selectAlarm(it)
+                        .showTitleInputDialog()
+                },
+                onDeleteClick = {
+                    homeScreenViewModel
+                        .selectAlarm(it)
+                        .delete()
+                        .releaseSelectedAlarm()
+                },
+                innerPadding = innerPadding,
+                is24Hour = is24Hour,
+            )
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
