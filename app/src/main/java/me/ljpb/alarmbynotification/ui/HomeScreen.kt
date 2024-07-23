@@ -228,7 +228,11 @@ private fun HomeScreenContent(
                     .hiddenTitleInputDialog()
                     .releaseSelectedAlarm()
             },
-            onPositiveClick = homeScreenViewModel::setAlarmName,
+            onPositiveClick = { 
+                homeScreenViewModel
+                    .updateAlarmName(it)
+                    .releaseSelectedAlarm()
+            },
             focusRequester = focusRequester,
             defaultTitle = homeScreenViewModel.getSelectedAlarmName()
         )

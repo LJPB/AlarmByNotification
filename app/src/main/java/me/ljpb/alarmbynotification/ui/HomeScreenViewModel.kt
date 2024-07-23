@@ -106,9 +106,21 @@ class HomeScreenViewModel(
         return this
     }
 
-    fun setAlarmName(name: String): HomeScreenViewModel {
+    fun updateAlarmName(name: String): HomeScreenViewModel {
         if (selectedAlarm != null) {
             viewModelScope.launch {
+                // セットしたアラームのタイトルを変更したとき，通知のタイトルも変える
+                val notify = notificationList.value.find { it.alarmId == selectedAlarm!!.id }
+                if (notify != null) {
+                    notificationRepository.updateNotification(
+                        (notify as NotificationEntity).copy(
+                            notifyName = name
+                        )
+                    )
+                }
+            }
+            viewModelScope.launch {
+                // アラームデータベースの更新
                 alarmRepository.update(selectedAlarm!!.toAlarmInfoEntity().copy(name = name))
             }
         }
@@ -150,7 +162,7 @@ class HomeScreenViewModel(
                 if (targetNotify == null) return this
                 viewModelScope.launch {
                     notificationRepository.deleteNotification(targetNotify as NotificationEntity)
-                }  
+                }
             }
         }
         return this
