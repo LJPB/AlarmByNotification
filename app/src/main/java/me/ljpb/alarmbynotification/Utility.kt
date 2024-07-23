@@ -1,6 +1,5 @@
 package me.ljpb.alarmbynotification
 
-import me.ljpb.alarmbynotification.data.room.NotificationEntity
 import java.time.DateTimeException
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -64,12 +63,5 @@ object Utility {
     } catch (_: DateTimeException) {
         "UTC"
     }
-
-    val notificationEmptyEntity = NotificationEntity(
-        notifyId = 0,
-        title = "",
-        text = "",
-        triggerTimeMilliSeconds = 0L,
-        zoneId = ""
-    )
+    
 }

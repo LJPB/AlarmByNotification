@@ -15,16 +15,14 @@ class NotifyReceiver : BroadcastReceiver() {
     @OptIn(DelicateCoroutinesApi::class)
     override fun onReceive(context: Context?, intent: Intent?) {
         if (context != null && intent != null) {
-            val title = intent.getStringExtra(NotifyIntentKey.TITLE) ?: ""
-            val text = intent.getStringExtra(NotifyIntentKey.TEXT) ?: ""
             val notifyId = intent.getIntExtra(NotifyIntentKey.NOTIFY_ID, 1)
             val triggerTime = intent.getLongExtra(NotifyIntentKey.TRIGGER_TIME_MILLI, 1)
             val zoneId = intent.getStringExtra(NotifyIntentKey.ZONE_ID) ?: ""
           
             alarmNotify(
                 context = context,
-                title = title,
-                text = text,
+                title = "title",
+                text = "text",
                 notifyId = notifyId
             )
             
@@ -36,9 +34,8 @@ class NotifyReceiver : BroadcastReceiver() {
                 try {
                     repository.deleteNotification(
                         NotificationEntity(
+                            alarmId = 1,
                             notifyId = notifyId,
-                            title = title,
-                            text = text,
                             triggerTimeMilliSeconds = triggerTime,
                             zoneId = zoneId
                         )

@@ -21,7 +21,7 @@ interface NotificationDao {
     @Query("select * from notifications where notifyId = :notifyId")
     fun getItem(notifyId: Int): Flow<NotificationEntity>
     
-    @Query("select * from notifications order by triggerTimeMilliSeconds asc")
+    @Query("select * from notifications")
     fun getAllItem(): Flow<List<NotificationEntity>?>
     
     @Query("select count(*) from notifications")

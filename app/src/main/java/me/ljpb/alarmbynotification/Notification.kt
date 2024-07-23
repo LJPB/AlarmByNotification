@@ -119,8 +119,6 @@ fun alarmNotify(
 fun setNotification(context: Context, notificationInfo: NotificationInfoInterface) {
     val intent = Intent(context, NotifyReceiver::class.java)
     intent.putExtra(NotifyIntentKey.NOTIFY_ID, notificationInfo.notifyId)
-    intent.putExtra(NotifyIntentKey.TITLE, notificationInfo.title)
-    intent.putExtra(NotifyIntentKey.TEXT, notificationInfo.text)
     intent.putExtra(NotifyIntentKey.TRIGGER_TIME_MILLI, notificationInfo.triggerTimeMilliSeconds)
     intent.putExtra(NotifyIntentKey.ZONE_ID, notificationInfo.zoneId)
     
