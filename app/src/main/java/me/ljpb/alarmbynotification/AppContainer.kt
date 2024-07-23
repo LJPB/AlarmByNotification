@@ -24,9 +24,10 @@ interface AppContainer {
 
 class AppDataContainer(private val context: Context) : AppContainer {
     override val notificationRepository: NotificationRepositoryInterface by lazy {
+        val directBootContext = context.createDeviceProtectedStorageContext()
         NotificationRepository(
             context = context,
-            dao = NotificationDatabase.getDatabase(context).notificationDao()
+            dao = NotificationDatabase.getDatabase(directBootContext).notificationDao()
         )
     }
     override val preferencesRepository: UserPreferencesRepository by lazy {
