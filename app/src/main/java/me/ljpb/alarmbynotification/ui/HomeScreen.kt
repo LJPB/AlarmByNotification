@@ -137,10 +137,12 @@ private fun AlarmList(
     alarmList: List<AlarmInfoInterface>,
     onTitleClick: (AlarmInfoInterface) -> Unit,
     onDeleteClick: (AlarmInfoInterface) -> Unit,
+    onEnableChange: (AlarmInfoInterface, Boolean) -> Unit,
     is24Hour: Boolean,
     homeScreenViewModel: HomeScreenViewModel
 ) {
     val listState = rememberLazyListState()
+    val notificationList by homeScreenViewModel.notificationList.collectAsState()
     var expandCardIndex by remember { mutableIntStateOf(-1) }
     LazyColumn(
         state = listState,
@@ -153,8 +155,8 @@ private fun AlarmList(
                     onDeleteClick(alarm)
                     expandCardIndex = -1
                 },
-                onEnableChange = {},
-                enable = false,
+                onEnableChange = { enable -> onEnableChange(alarm, enable) },
+                enable = notificationList.find { it.alarmId == alarm.id } != null,  // notificationListに含まれていれば(findがnull出なければ)有効
                 alarm = alarm,
                 modifier = Modifier.padding(
                     vertical = dimensionResource(id = R.dimen.padding_small),
@@ -330,7 +332,14 @@ fun HomeScreenContentBody(
                 onDeleteClick = {
                     homeScreenViewModel
                         .selectAlarm(it)
+                        .changeEnableTo(false)
                         .delete()
+                        .releaseSelectedAlarm()
+                },
+                onEnableChange = { alarm, enable ->
+                    homeScreenViewModel
+                        .selectAlarm(alarm)
+                        .changeEnableTo(enable)
                         .releaseSelectedAlarm()
                 },
                 innerPadding = innerPadding,

@@ -14,12 +14,18 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import me.ljpb.alarmbynotification.Utility.getMilliSecondsOfNextTime
 import me.ljpb.alarmbynotification.data.AlarmInfo
 import me.ljpb.alarmbynotification.data.AlarmRepository
+import me.ljpb.alarmbynotification.data.NotificationInfoInterface
+import me.ljpb.alarmbynotification.data.NotificationRepositoryInterface
 import me.ljpb.alarmbynotification.data.UserPreferencesRepository
 import me.ljpb.alarmbynotification.data.room.AlarmInfoEntity
 import me.ljpb.alarmbynotification.data.room.AlarmInfoInterface
+import me.ljpb.alarmbynotification.data.room.NotificationEntity
 import java.time.LocalDateTime
+import java.time.ZonedDateTime
+import java.util.UUID
 
 // 現在時刻を取得するための更新間隔
 const val DELAY_TIME: Long = 100L
@@ -28,6 +34,7 @@ val INITIAL_ID: Long? = null
 
 class HomeScreenViewModel(
     private val alarmRepository: AlarmRepository,
+    private val notificationRepository: NotificationRepositoryInterface,
     private val preferencesRepository: UserPreferencesRepository,
 ) : ViewModel() {
     private val _currentDateTime = MutableStateFlow(LocalDateTime.now())
@@ -38,6 +45,18 @@ class HomeScreenViewModel(
         .map { alarmList ->
             if (alarmList.isNullOrEmpty()) return@map listOf()
             alarmList.map { alarm -> alarm.toAlarmInfo() }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(2_000L),
+            initialValue = listOf()
+        )
+
+    val notificationList: StateFlow<List<NotificationInfoInterface>> = notificationRepository
+        .getAllNotifications()
+        .map { notification ->
+            if (notification.isNullOrEmpty()) return@map listOf()
+            notification.map { it }
         }
         .stateIn(
             scope = viewModelScope,
@@ -62,6 +81,13 @@ class HomeScreenViewModel(
                 started = SharingStarted.WhileSubscribed(2_000L),
                 initialValue = true
             )
+
+    fun isEnabled(alarmId: Long): Boolean {
+        notificationList.value.forEach { notification ->
+            if (notification.alarmId == alarmId) return true // 関数から抜けてる
+        }
+        return false
+    }
 
     /**
      * アラームを選択するときに呼び出すメソッド
@@ -88,12 +114,46 @@ class HomeScreenViewModel(
         }
         return this
     }
-    
+
     fun getSelectedAlarmName(): String {
         if (selectedAlarm != null) {
             selectedAlarm!!.name
         }
         return ""
+    }
+
+    fun changeEnableTo(enabled: Boolean): HomeScreenViewModel {
+        if (selectedAlarm != null) {
+            val alarmId = selectedAlarm!!.id
+            val zoneId = selectedAlarm!!.zoneId
+            val name = selectedAlarm!!.name
+            if (enabled) { // アラームを有効にした場合
+                // TODO: TimePickerDialogViewModelのaddと同じ処理だからまとめる
+                val triggerTimeMilliSeconds = getMilliSecondsOfNextTime(
+                    selectedAlarm!!.hour,
+                    selectedAlarm!!.min,
+                    ZonedDateTime.now()
+                )
+                val notifyId = UUID.randomUUID().hashCode()
+                viewModelScope.launch {
+                    val notification = NotificationEntity(
+                        notifyId = notifyId,
+                        alarmId = alarmId,
+                        triggerTimeMilliSeconds = triggerTimeMilliSeconds,
+                        notifyName = name,
+                        zoneId = zoneId
+                    )
+                    notificationRepository.insertNotification(notification)
+                }
+            } else {
+                val targetNotify = notificationList.value.find { it.alarmId == alarmId }
+                if (targetNotify == null) return this
+                viewModelScope.launch {
+                    notificationRepository.deleteNotification(targetNotify as NotificationEntity)
+                }  
+            }
+        }
+        return this
     }
 
     /**
@@ -117,7 +177,7 @@ class HomeScreenViewModel(
             preferencesRepository.showedPermissionDialog()
         }
     }
-    
+
     suspend fun updateCurrentDateTime() {
         while (true) {
             _currentDateTime.update { LocalDateTime.now() }

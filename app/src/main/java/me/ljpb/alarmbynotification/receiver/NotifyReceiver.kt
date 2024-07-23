@@ -37,6 +37,7 @@ class NotifyReceiver : BroadcastReceiver() {
                             alarmId = 1,
                             notifyId = notifyId,
                             triggerTimeMilliSeconds = triggerTime,
+                            notifyName = "",
                             zoneId = zoneId
                         )
                     )

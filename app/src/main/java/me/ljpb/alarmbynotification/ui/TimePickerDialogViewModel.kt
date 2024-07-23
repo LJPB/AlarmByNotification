@@ -8,14 +8,18 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+import me.ljpb.alarmbynotification.Utility.getMilliSecondsOfNextTime
 import me.ljpb.alarmbynotification.Utility.getZoneId
 import me.ljpb.alarmbynotification.data.AlarmRepositoryInterface
 import me.ljpb.alarmbynotification.data.NotificationRepositoryInterface
 import me.ljpb.alarmbynotification.data.room.AlarmInfoEntity
+import me.ljpb.alarmbynotification.data.room.NotificationEntity
 import java.time.LocalTime
+import java.time.ZonedDateTime
+import java.util.UUID
 
 class TimePickerDialogViewModel(
-    private val repository: NotificationRepositoryInterface,
+    private val notificationRepository: NotificationRepositoryInterface,
     private val alarmRepository: AlarmRepositoryInterface,
 ) : ViewModel() {
     // アラームにセットする時刻を管理する
@@ -52,58 +56,24 @@ class TimePickerDialogViewModel(
             min = alarmState.minute,
             zoneId = zoneId,
         )
-        viewModelScope.launch {
-            val id = alarmRepository.insert(alarmInfoEntity)
-            setAddedItemId(id)
-        }
-        /*
-        val triggerTimeSeconds: Long
-        val currentDateTime = ZonedDateTime.now()
-        val zoneId = currentDateTime.zone.id
-        val text: String
-        val setTimeAsMinute = alarmState.hour * 60 + alarmState.minute
-        val currentTimeAsMinute = currentDateTime.hour * 60 + currentDateTime.minute
-
-        // セットした時刻と(日付を無視した)現在時刻の差
-        val dif = setTimeAsMinute - currentTimeAsMinute
-
-        val addMinutes = if (dif > 0) {
-            // セットした時刻 - (日付を無視した)現在時刻 > 0なら，セットした時刻は現在と同じ日付の時刻ということ
-            // よって差分を足せば，現在の日付でセットした時刻を得られる
-            dif.toLong()
-        } else if (dif < 0) {
-            // セットした時刻 - (日付を無視した)現在時刻 < 0なら，セットした時刻は現在の翌日の時刻ということ
-            // よって，現在の1日後から差分の絶対値を引けば(difは負だから+difする)，現在の翌日でセットした時刻を得られる
-            (24 * 60 + dif).toLong()
-        } else {
-            0  // todo
-        }
-
-        val triggerDateTime = currentDateTime
-            .plusMinutes(addMinutes)
-            .minusSeconds(currentDateTime.second.toLong())  // 秒は無視する
-            .minusNanos(currentDateTime.nano.toLong())
-
-        text = localDateTimeToFormattedTime(
-            localDateTime = triggerDateTime.toLocalDateTime(),
-            isFormat24 = alarmState.is24hour,
-            displaySecond = false
+        val triggerTimeMilliSeconds = getMilliSecondsOfNextTime(
+            alarmInfoEntity.hour,
+            alarmInfoEntity.min,
+            ZonedDateTime.now()
         )
-        triggerTimeSeconds = triggerDateTime.toEpochSecond()
-
         val notifyId = UUID.randomUUID().hashCode()
-        val notification = NotificationEntity(
-            notifyId = notifyId,
-            title = "",
-            text = text,
-            triggerTimeMilliSeconds = triggerTimeSeconds * 1000,
-            zoneId = zoneId
-        )
-        setAddedItemToTmp(notification.copy())
         viewModelScope.launch {
-            repository.insertNotification(notification)
+            val alarmId = alarmRepository.insert(alarmInfoEntity)
+            val notification = NotificationEntity(
+                notifyId = notifyId,
+                alarmId = alarmId,
+                triggerTimeMilliSeconds = triggerTimeMilliSeconds,
+                notifyName = "",
+                zoneId = zoneId
+            )
+            notificationRepository.insertNotification(notification)
+            setAddedItemId(alarmId)
         }
-         */
     }
 
     /**

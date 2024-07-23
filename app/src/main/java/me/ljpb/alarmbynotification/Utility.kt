@@ -4,6 +4,7 @@ import java.time.DateTimeException
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.zone.ZoneRulesException
 
@@ -55,6 +56,30 @@ object Utility {
         return formattedTime
     }
 
+    /**
+     * 引数で渡された[triggerHour]時間[triggerMinutes]分が[currentTime]を基準にして何ミリ秒後かを返す。
+     * 例えば，現在時刻が10:00 amで引数として09:00 amが渡されたら，翌日の09:00 amまでのミリ秒数を返す。
+     * 現在の時刻と同じ場合は，翌日の時刻とみなす。
+     */
+    fun getMilliSecondsOfNextTime(
+        triggerHour: Int,
+        triggerMinutes: Int,
+        currentTime: ZonedDateTime
+    ): Long {
+        val currentHour = currentTime.hour
+        val currentMin = currentTime.minute
+        val currentTimeAsMinutes = currentHour * 60 + currentMin
+        
+        val triggerTimeAsMinutes = triggerHour * 60 + triggerMinutes
+        
+        // 引数で渡した時間 - 現在時間
+        val diff = if (currentTimeAsMinutes >= triggerTimeAsMinutes) {
+            24 * 60 - (currentTimeAsMinutes - triggerTimeAsMinutes)
+        } else {
+            triggerTimeAsMinutes - currentTimeAsMinutes
+        }
+        return currentTime.plusMinutes(diff.toLong()).toEpochSecond() * 1000 // ミリ秒化
+    }
 
     fun getZoneId(): String = try {
         ZoneId.systemDefault().id
@@ -63,5 +88,5 @@ object Utility {
     } catch (_: DateTimeException) {
         "UTC"
     }
-    
+
 }
