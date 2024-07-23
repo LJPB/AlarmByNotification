@@ -8,6 +8,16 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.zone.ZoneRulesException
 
+/**
+ * 環境に合わせてフォーマットした時間の文字列を管理
+ * @param time 時間の部分(04:00 pmの04:00の部分)
+ * @param period 午前/午後の部分(04:00 pmのpmの部分)
+ */
+data class FormattedTime(
+    val time: String,
+    val period: String
+)
+
 object Utility {
     /** 与えられたLocalDateTimeの時刻をフォーマットした文字列に変換 (例 : LocalDateTime → 16:00, 04:00 p.m.)
      * @param localDateTime
@@ -28,16 +38,24 @@ object Utility {
         }
         return localDateTime.format(timeFormat)
     }
-    
-    fun getFormattedTime(hour: Int, min: Int, is24Hour: Boolean): String {
+
+    // フォーマットした時間をFormattedTimeにして返す
+    fun getFormattedTime(hour: Int, min: Int, is24Hour: Boolean): FormattedTime {
         val localTime = LocalTime.of(hour, min)
-        val timeFormat = if (is24Hour) {
-            DateTimeFormatter.ofPattern("HH:mm")
+        val formattedTime = if (is24Hour) {
+            FormattedTime(
+                time = localTime.format(DateTimeFormatter.ofPattern("HH:mm")),
+                period = ""
+            )
         } else {
-            DateTimeFormatter.ofPattern("KK:mm a")
+            FormattedTime(
+                time = localTime.format(DateTimeFormatter.ofPattern("KK:mm")),
+                period = localTime.format(DateTimeFormatter.ofPattern(" a"))
+            )
         }
-        return localTime.format(timeFormat)
+        return formattedTime
     }
+
 
     fun getZoneId(): String = try {
         ZoneId.systemDefault().id
@@ -46,7 +64,7 @@ object Utility {
     } catch (_: DateTimeException) {
         "UTC"
     }
-    
+
     val notificationEmptyEntity = NotificationEntity(
         notifyId = 0,
         title = "",

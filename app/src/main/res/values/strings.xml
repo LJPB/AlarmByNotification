@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Alarm By Notification</string>
     
-    <string name="delete_alarm">アラームを削除する</string>
+    <string name="delete_alarm">削除</string>
     <string name="untitled">名称未設定</string>
     <string name="empty">セットされた時間はありません</string>
     
@@ -10,6 +10,9 @@
     <string name="set_title">タイトルを入力</string>
     <string name="input_time">時間を入力</string>
     <string name="picker_time">時間を選択</string>
+
+    <string name="to_open_card">展開する</string>
+    <string name="to_close_card">閉じる</string>
     
     <string name="request_permission_title">通知を許可する</string>
     <string name="request_permission_detail">設定した時間に通知を受け取るために必要です。</string>

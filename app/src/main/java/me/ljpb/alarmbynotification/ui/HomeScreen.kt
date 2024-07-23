@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -44,6 +44,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -140,21 +141,34 @@ private fun AlarmList(
     homeScreenViewModel: HomeScreenViewModel
 ) {
     val listState = rememberLazyListState()
-
+    var expandCardIndex by remember { mutableIntStateOf(-1) }
     LazyColumn(
         state = listState,
         modifier = modifier.padding(innerPadding)
     ) {
-        items(alarmList) { alarm ->
+        itemsIndexed(alarmList) { index, alarm ->
             AlarmCard(
                 onTitleClick = { onTitleClick(alarm) },
-                onDeleteClick = { onDeleteClick(alarm) },
+                onDeleteClick = {
+                    onDeleteClick(alarm)
+                    expandCardIndex = -1
+                },
+                onEnableChange = {},
+                enable = false,
                 alarm = alarm,
                 modifier = Modifier.padding(
                     vertical = dimensionResource(id = R.dimen.padding_small),
                     horizontal = dimensionResource(id = R.dimen.padding_medium)
                 ),
-                is24Hour = is24Hour
+                is24Hour = is24Hour,
+                expanded = expandCardIndex == index,
+                onExpandedChange = {
+                    expandCardIndex = if (expandCardIndex == index) {
+                        -1
+                    } else {
+                        index
+                    } 
+                }
             )
         }
         item {
@@ -264,6 +278,7 @@ private fun HomeScreenContent(
                 is24Hour = is24Hour
             )
         }
+
         else -> {  // 横画面やタブレットなど画面の幅が広い場合
             Row {
                 HomeScreenContentBody(
