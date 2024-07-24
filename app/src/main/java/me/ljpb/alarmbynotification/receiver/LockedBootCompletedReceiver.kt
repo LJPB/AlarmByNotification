@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import me.ljpb.alarmbynotification.NotificationApplication
 import me.ljpb.alarmbynotification.setNotification
 
+
 /**
  * 端末が再起動した時に通知を再セットするためのクラス
  */
@@ -33,6 +34,7 @@ class LockedBootCompletedReceiver : BroadcastReceiver() {
                             val currentTime = System.currentTimeMillis()
                             if (notification.triggerTimeMilliSeconds < currentTime) {
                                 // 過ぎていたら
+                                setNotification(context = context, notificationInfo = notification)
                                 repository.deleteNotification(notification)
                             } else {
                                 setNotification(context = context, notificationInfo = notification)
