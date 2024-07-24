@@ -46,7 +46,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import me.ljpb.alarmbynotification.R
-import me.ljpb.alarmbynotification.ui.TimePickerDialogViewModel
 import me.ljpb.alarmbynotification.ui.component.ScreenType.CompactCompact
 import me.ljpb.alarmbynotification.ui.component.ScreenType.CompactLandscape
 import me.ljpb.alarmbynotification.ui.component.ScreenType.NormalLandscape
@@ -74,11 +73,10 @@ fun TimePickerDialog(
     onDismissRequest: () -> Unit,
     onPositiveClick: () -> Unit,
     windowSizeClass: WindowSizeClass,
-    timePickerDialogViewModel: TimePickerDialogViewModel,
+    timePickerState: TimePickerState,
 ) {
     // 表示しているダイアログはTimePicker?
     var isPicker by rememberSaveable { mutableStateOf(true) }
-    val timePickerState = timePickerDialogViewModel.alarmState
     
     // 横画面?
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE

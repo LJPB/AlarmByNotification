@@ -45,6 +45,7 @@ import me.ljpb.alarmbynotification.data.room.AlarmInfoInterface
 fun AlarmCard(
     modifier: Modifier = Modifier,
     onTitleClick: () -> Unit,
+    onTimeClick: () -> Unit,
     onDeleteClick: () -> Unit,
     onEnableChange: (Boolean) -> Unit,
     onExpandedChange: () -> Unit,
@@ -68,6 +69,7 @@ fun AlarmCard(
             alarm = alarm,
             is24Hour = is24Hour,
             onEnableChange = onEnableChange,
+            onTimeClick = onTimeClick,
             enable = enable,
             expanded = expanded,
             onExpandedChange = { onExpandedChange() }
@@ -79,6 +81,7 @@ fun AlarmCard(
 private fun CardContent(
     modifier: Modifier = Modifier,
     onTitleClick: () -> Unit,
+    onTimeClick: () -> Unit,
     onDeleteClick: () -> Unit,
     onEnableChange: (Boolean) -> Unit,
     onExpandedChange: () -> Unit,
@@ -129,19 +132,21 @@ private fun CardContent(
             )
         }
 
-        // アラームの有効/無効化スイッチ
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // アラームの時間
             AlarmTime(
                 hour = alarm.hour,
                 min = alarm.min,
                 is24Hour = is24Hour,
                 zoneId = alarm.zoneId,
-                enable = enable
+                enable = enable,
+                modifier = Modifier.clickable { onTimeClick() }
             )
+            // アラームの有効/無効化スイッチ
             Switch(
                 checked = enable,
                 onCheckedChange = onEnableChange
@@ -222,7 +227,8 @@ private fun AlarmCardEnablePreview() {
         ),
         is24Hour = true,
         expanded = true,
-        onExpandedChange = {}
+        onExpandedChange = {},
+        onTimeClick = {}
     )
 }
 

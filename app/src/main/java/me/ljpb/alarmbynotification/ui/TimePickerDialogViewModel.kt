@@ -11,8 +11,10 @@ import kotlinx.coroutines.launch
 import me.ljpb.alarmbynotification.Utility.getMilliSecondsOfNextTime
 import me.ljpb.alarmbynotification.Utility.getZoneId
 import me.ljpb.alarmbynotification.data.AlarmRepositoryInterface
+import me.ljpb.alarmbynotification.data.NotificationInfoInterface
 import me.ljpb.alarmbynotification.data.NotificationRepositoryInterface
 import me.ljpb.alarmbynotification.data.room.AlarmInfoEntity
+import me.ljpb.alarmbynotification.data.room.AlarmInfoInterface
 import me.ljpb.alarmbynotification.data.room.NotificationEntity
 import java.time.LocalTime
 import java.time.ZonedDateTime
@@ -27,8 +29,12 @@ class TimePickerDialogViewModel(
     lateinit var alarmState: TimePickerState
         private set
     
-    // ダイアログの表示状態
-    var isShow by mutableStateOf(false)
+    // 新しくアラームを追加するためのダイアログの表示状態
+    var isShowAddDialog by mutableStateOf(false)
+        private set
+
+    // 既存のアラームの時間を変更すためのダイアログの表示状態
+    var isShowUpdateDialog by mutableStateOf(false)
         private set
 
     init {
@@ -41,12 +47,22 @@ class TimePickerDialogViewModel(
         } else {
             setAlarmInitialState(is24Hour)
         }
-        isShow = true
+        isShowAddDialog = true
     }
 
     fun hiddenDialog() {
-        isShow = false
+        isShowAddDialog = false
     }
+    
+    fun showUpdateDialog(alarm: AlarmInfoInterface, is24Hour: Boolean) {
+        setAlarmState(alarm.hour, alarm.min, is24Hour)
+        isShowUpdateDialog = true
+    }
+    
+    fun hiddenUpdateDialog() {
+        isShowUpdateDialog = false
+    }
+    
 
     @OptIn(ExperimentalMaterial3Api::class)
     fun add(setAddedItemId: (Long) -> Unit) {
@@ -71,8 +87,46 @@ class TimePickerDialogViewModel(
                 notifyName = "",
                 zoneId = zoneId
             )
-            notificationRepository.insertNotification(notification)
             setAddedItemId(alarmId)
+            notificationRepository.insertNotification(notification)
+        }
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    fun updateTime(targetAlarm: AlarmInfoInterface?, targetNotify: NotificationInfoInterface?) {
+        if (targetAlarm != null) {
+            val timeZone = getZoneId()
+            val hour = alarmState.hour
+            val min = alarmState.minute
+            viewModelScope.launch {
+                alarmRepository.update(
+                    AlarmInfoEntity(
+                        id = targetAlarm.id,
+                        name = targetAlarm.name,
+                        hour = hour,
+                        min = min,
+                        zoneId = timeZone
+                    )
+                )
+            }
+            
+            if (targetNotify != null) { // 時間変更対象となるアラームを有効化していた場合
+                viewModelScope.launch {
+                    notificationRepository.updateNotification(
+                        NotificationEntity(
+                            notifyId = targetNotify.notifyId,
+                            alarmId = targetNotify.alarmId,
+                            triggerTimeMilliSeconds = getMilliSecondsOfNextTime(
+                                hour,
+                                min,
+                                ZonedDateTime.now()
+                            ),
+                            notifyName = targetNotify.notifyName,
+                            zoneId = timeZone,
+                        )
+                    )
+                }
+            }
         }
     }
 

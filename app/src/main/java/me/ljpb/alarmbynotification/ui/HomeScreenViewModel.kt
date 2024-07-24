@@ -40,25 +40,21 @@ class HomeScreenViewModel(
     private val _currentDateTime = MutableStateFlow(LocalDateTime.now())
     val currentDateTime: StateFlow<LocalDateTime> = _currentDateTime.asStateFlow()
 
-    val alarmList: StateFlow<List<AlarmInfo>> = alarmRepository
-        .getAllItemOrderByTimeAsc()
-        .map { alarmList ->
+    val alarmList: StateFlow<List<AlarmInfoInterface>> =
+        alarmRepository.getAllItemOrderByTimeAsc().map { alarmList ->
             if (alarmList.isNullOrEmpty()) return@map listOf()
-            alarmList.map { alarm -> alarm.toAlarmInfo() }
-        }
-        .stateIn(
+            alarmList.map { alarm -> alarm.toAlarmInfoInterface() }
+        }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(2_000L),
             initialValue = listOf()
         )
 
-    val notificationList: StateFlow<List<NotificationInfoInterface>> = notificationRepository
-        .getAllNotifications()
-        .map { notification ->
+    val notificationList: StateFlow<List<NotificationInfoInterface>> =
+        notificationRepository.getAllNotifications().map { notification ->
             if (notification.isNullOrEmpty()) return@map listOf()
             notification.map { it }
-        }
-        .stateIn(
+        }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(2_000L),
             initialValue = listOf()
@@ -67,38 +63,35 @@ class HomeScreenViewModel(
     var isShowTitleInputDialog by mutableStateOf(false)
         private set
 
+    var isShowChangeTimeDialog by mutableStateOf(false)
+        private set
+
     // アラームリストでタップしたアラーム
-    private var selectedAlarm: AlarmInfo? = null
+    private var selectedAlarm: AlarmInfoInterface? = null
 
     // 新たに追加したアラームのID
     private var idOfAddedAlarm by mutableStateOf<Long?>(INITIAL_ID)
 
     // 通知権限の許可取得ダイアログが一度表示されたかどうか
     var isShowedPermissionDialog: StateFlow<Boolean> =
-        preferencesRepository.isShowedPermissionDialog
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(2_000L),
-                initialValue = true
-            )
-
-    fun isEnabled(alarmId: Long): Boolean {
-        notificationList.value.forEach { notification ->
-            if (notification.alarmId == alarmId) return true // 関数から抜けてる
-        }
-        return false
-    }
+        preferencesRepository.isShowedPermissionDialog.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(2_000L),
+            initialValue = true
+        )
+    
 
     /**
      * アラームを選択するときに呼び出すメソッド
      */
     fun selectAlarm(alarm: AlarmInfoInterface): HomeScreenViewModel {
-        selectedAlarm = alarm as AlarmInfo
+        selectedAlarm = alarm
         return this
     }
 
-    fun showTitleInputDialog() {
+    fun showTitleInputDialog(): HomeScreenViewModel {
         isShowTitleInputDialog = true
+        return this
     }
 
     fun hiddenTitleInputDialog(): HomeScreenViewModel {
@@ -127,6 +120,10 @@ class HomeScreenViewModel(
         return this
     }
 
+    fun getSelectedAlarm(): AlarmInfoInterface? {
+        return selectedAlarm
+    }
+
     fun getSelectedAlarmName(): String {
         if (selectedAlarm != null) {
             selectedAlarm!!.name
@@ -142,9 +139,7 @@ class HomeScreenViewModel(
             if (enabled) { // アラームを有効にした場合
                 // TODO: TimePickerDialogViewModelのaddと同じ処理だからまとめる
                 val triggerTimeMilliSeconds = getMilliSecondsOfNextTime(
-                    selectedAlarm!!.hour,
-                    selectedAlarm!!.min,
-                    ZonedDateTime.now()
+                    selectedAlarm!!.hour, selectedAlarm!!.min, ZonedDateTime.now()
                 )
                 val notifyId = UUID.randomUUID().hashCode()
                 viewModelScope.launch {
@@ -157,7 +152,7 @@ class HomeScreenViewModel(
                     )
                     notificationRepository.insertNotification(notification)
                 }
-            } else {
+            } else { // アラームを無効にした場合
                 val targetNotify = notificationList.value.find { it.alarmId == alarmId }
                 if (targetNotify == null) return this
                 viewModelScope.launch {
@@ -197,6 +192,13 @@ class HomeScreenViewModel(
         }
     }
 
+    fun getNotifyOfSelectedAlarm(): NotificationInfoInterface? {
+        if (selectedAlarm != null) {
+            return notificationList.value.find { it.alarmId == selectedAlarm!!.id }
+        }
+        return null
+    }
+
     // === 以下，追加したアラームへスクロールするための機能 ===
     /**
      * 新たに追加したアラームのID(DBのプライマリキー)を保存
@@ -233,22 +235,16 @@ class HomeScreenViewModel(
     // === 以上，追加したアラームへスクロールするための機能 ===
 }
 
-private fun AlarmInfoEntity.toAlarmInfo(): AlarmInfo {
+
+// === 以下クラス外 ===
+private fun AlarmInfoEntity.toAlarmInfoInterface(): AlarmInfoInterface {
     return AlarmInfo(
-        id = this.id,
-        hour = this.hour,
-        min = this.min,
-        name = this.name,
-        zoneId = this.zoneId
+        id = this.id, hour = this.hour, min = this.min, name = this.name, zoneId = this.zoneId
     )
 }
 
-private fun AlarmInfo.toAlarmInfoEntity(): AlarmInfoEntity {
+private fun AlarmInfoInterface.toAlarmInfoEntity(): AlarmInfoEntity {
     return AlarmInfoEntity(
-        id = this.id,
-        hour = this.hour,
-        min = this.min,
-        name = this.name,
-        zoneId = this.zoneId
+        id = this.id, hour = this.hour, min = this.min, name = this.name, zoneId = this.zoneId
     )
 }

@@ -136,6 +136,7 @@ private fun AlarmList(
     innerPadding: PaddingValues,
     alarmList: List<AlarmInfoInterface>,
     onTitleClick: (AlarmInfoInterface) -> Unit,
+    onTimeClick: (AlarmInfoInterface) -> Unit,
     onDeleteClick: (AlarmInfoInterface) -> Unit,
     onEnableChange: (AlarmInfoInterface, Boolean) -> Unit,
     is24Hour: Boolean,
@@ -169,8 +170,9 @@ private fun AlarmList(
                         -1
                     } else {
                         index
-                    } 
-                }
+                    }
+                },
+                onTimeClick = { onTimeClick(alarm) }
             )
         }
         item {
@@ -194,7 +196,7 @@ private fun AlarmList(
  * HomeScreenに実際に配置するコンポーザブル
  * 状態に応じてEmptyとAlarmListを切り替える
  */
-@OptIn(ExperimentalPermissionsApi::class)
+@OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun HomeScreenContent(
     modifier: Modifier = Modifier,
@@ -210,15 +212,34 @@ private fun HomeScreenContent(
     // 通知権限の許可を促すダイアログを一度表示したかどうか
     var isShowedDialog by remember { mutableStateOf(false) }
 
-    if (timePickerDialogViewModel.isShow) {
+    if (timePickerDialogViewModel.isShowAddDialog) {
         TimePickerDialog(
             onDismissRequest = timePickerDialogViewModel::hiddenDialog,
             onPositiveClick = { timePickerDialogViewModel.add(homeScreenViewModel::setAddItemId) },
             windowSizeClass = windowSize,
-            timePickerDialogViewModel = timePickerDialogViewModel,
-            // todo ここでis24Hourを渡す
+            timePickerState = timePickerDialogViewModel.alarmState,
         )
     }
+
+    if (timePickerDialogViewModel.isShowUpdateDialog) {
+        val targetAlarm = homeScreenViewModel.getSelectedAlarm()
+        val targetNotify = homeScreenViewModel.getNotifyOfSelectedAlarm()
+        TimePickerDialog(
+            onDismissRequest = {
+                homeScreenViewModel.releaseSelectedAlarm()
+                timePickerDialogViewModel.hiddenUpdateDialog()
+            },
+            onPositiveClick = {
+                timePickerDialogViewModel.updateTime(
+                    targetAlarm = targetAlarm,
+                    targetNotify = targetNotify
+                )
+            },
+            windowSizeClass = windowSize,
+            timePickerState = timePickerDialogViewModel.alarmState,
+        )
+    }
+
 
     if (homeScreenViewModel.isShowTitleInputDialog) {
         val focusRequester = remember { FocusRequester() }
@@ -228,7 +249,7 @@ private fun HomeScreenContent(
                     .hiddenTitleInputDialog()
                     .releaseSelectedAlarm()
             },
-            onPositiveClick = { 
+            onPositiveClick = {
                 homeScreenViewModel
                     .updateAlarmName(it)
                     .releaseSelectedAlarm()
@@ -281,7 +302,8 @@ private fun HomeScreenContent(
                 innerPadding = innerPadding,
                 alarmList = alarmList,
                 homeScreenViewModel = homeScreenViewModel,
-                is24Hour = is24Hour
+                is24Hour = is24Hour,
+                timePickerDialogViewModel = timePickerDialogViewModel
             )
         }
 
@@ -292,7 +314,8 @@ private fun HomeScreenContent(
                     innerPadding = innerPadding,
                     alarmList = alarmList,
                     homeScreenViewModel = homeScreenViewModel,
-                    is24Hour = is24Hour
+                    is24Hour = is24Hour,
+                    timePickerDialogViewModel = timePickerDialogViewModel
                 )
                 Box(
                     modifier = Modifier
@@ -316,6 +339,7 @@ fun HomeScreenContentBody(
     innerPadding: PaddingValues,
     alarmList: List<AlarmInfoInterface>,
     homeScreenViewModel: HomeScreenViewModel,
+    timePickerDialogViewModel: TimePickerDialogViewModel,
     is24Hour: Boolean,
 ) {
     val alarmListIsEmpty = alarmList.isEmpty()
@@ -332,6 +356,10 @@ fun HomeScreenContentBody(
                     homeScreenViewModel
                         .selectAlarm(it)
                         .showTitleInputDialog()
+                },
+                onTimeClick = {
+                    homeScreenViewModel.selectAlarm(it)
+                    timePickerDialogViewModel.showUpdateDialog(alarm = it, is24Hour = is24Hour)
                 },
                 onDeleteClick = {
                     homeScreenViewModel
