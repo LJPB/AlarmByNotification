@@ -119,7 +119,9 @@ fun alarmNotify(
 fun setNotification(context: Context, notificationInfo: NotificationInfoInterface) {
     val intent = Intent(context, NotifyReceiver::class.java)
     intent.putExtra(NotifyIntentKey.NOTIFY_ID, notificationInfo.notifyId)
+    intent.putExtra(NotifyIntentKey.ALARM_ID, notificationInfo.alarmId)
     intent.putExtra(NotifyIntentKey.TRIGGER_TIME_MILLI, notificationInfo.triggerTimeMilliSeconds)
+    intent.putExtra(NotifyIntentKey.NOTIFY_NAME, notificationInfo.notifyName)
     intent.putExtra(NotifyIntentKey.ZONE_ID, notificationInfo.zoneId)
     
     val pendingIntent = PendingIntent.getBroadcast(

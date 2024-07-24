@@ -8,7 +8,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import me.ljpb.alarmbynotification.NotificationApplication
-import me.ljpb.alarmbynotification.deleteNotification
 import me.ljpb.alarmbynotification.setNotification
 
 class UpdateBroadcastReceiver : BroadcastReceiver() {
@@ -27,13 +26,13 @@ class UpdateBroadcastReceiver : BroadcastReceiver() {
                     repository
                         .getAllNotifications()
                         .firstOrNull()
-                        ?.forEach {
+                        ?.forEach { notification ->
                             val currentTime = System.currentTimeMillis()
-                            if (it.triggerTimeMilliSeconds > currentTime) {
+                            if (notification.triggerTimeMilliSeconds > currentTime) {
                                 // 過ぎていたら
-                                deleteNotification(context, notificationInfo = it)
+                                repository.deleteNotification(notification)
                             } else {
-                                setNotification(context = context, notificationInfo = it)
+                                setNotification(context = context, notificationInfo = notification)
                             }
                         }
                 } finally {

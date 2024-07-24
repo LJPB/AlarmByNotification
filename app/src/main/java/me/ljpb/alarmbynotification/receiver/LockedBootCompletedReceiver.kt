@@ -8,19 +8,16 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import me.ljpb.alarmbynotification.NotificationApplication
-import me.ljpb.alarmbynotification.deleteNotification
 import me.ljpb.alarmbynotification.setNotification
 
 /**
  * 端末が再起動した時に通知を再セットするためのクラス
  */
-class BootCompletedReceiver : BroadcastReceiver() {
+class LockedBootCompletedReceiver : BroadcastReceiver() {
     @OptIn(DelicateCoroutinesApi::class)
     override fun onReceive(context: Context?, intent: Intent?) {
         if (context == null || intent == null) return
-        
-        if (intent.action == Intent.ACTION_BOOT_COMPLETED){
-
+        if (intent.action == Intent.ACTION_LOCKED_BOOT_COMPLETED) {
             val application = context.applicationContext as NotificationApplication
             val repository = application.container.notificationRepository
             
@@ -30,13 +27,13 @@ class BootCompletedReceiver : BroadcastReceiver() {
                     repository
                         .getAllNotifications()
                         .firstOrNull()
-                        ?.forEach { 
+                        ?.forEach { notification ->
                             val currentTime = System.currentTimeMillis()
-                            if (it.triggerTimeMilliSeconds > currentTime) {
+                            if (notification.triggerTimeMilliSeconds > currentTime) {
                                 // 過ぎていたら
-                                deleteNotification(context, notificationInfo = it)
+                                repository.deleteNotification(notification)
                             } else {
-                                setNotification(context = context, notificationInfo = it)
+                                setNotification(context = context, notificationInfo = notification)
                             }
                         }
                 } finally {
