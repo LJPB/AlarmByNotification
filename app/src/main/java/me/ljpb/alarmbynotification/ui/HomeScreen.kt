@@ -184,7 +184,7 @@ private fun AlarmList(
                         index
                     }
                 },
-                onTimeClick = { onTimeClick(alarm) }
+                onTimeClick = { onTimeClick(alarm) },
             )
         }
         item {

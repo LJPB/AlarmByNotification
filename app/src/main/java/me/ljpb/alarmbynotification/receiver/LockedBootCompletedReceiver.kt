@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import me.ljpb.alarmbynotification.NotificationApplication
 import me.ljpb.alarmbynotification.setNotification
@@ -20,14 +20,14 @@ class LockedBootCompletedReceiver : BroadcastReceiver() {
         if (intent.action == Intent.ACTION_LOCKED_BOOT_COMPLETED) {
             val application = context.applicationContext as NotificationApplication
             val repository = application.container.notificationRepository
-            
+
             val pendingResult = goAsync()
             GlobalScope.launch {
                 try {
                     repository
                         .getAllNotifications()
-                        .firstOrNull()
-                        ?.forEach { notification ->
+                        .first()
+                        .forEach { notification ->
                             val currentTime = System.currentTimeMillis()
                             if (notification.triggerTimeMilliSeconds > currentTime) {
                                 // 過ぎていたら

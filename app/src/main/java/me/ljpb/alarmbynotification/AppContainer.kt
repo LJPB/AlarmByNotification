@@ -6,7 +6,6 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import me.ljpb.alarmbynotification.data.AlarmRepository
 import me.ljpb.alarmbynotification.data.NotificationRepository
-import me.ljpb.alarmbynotification.data.NotificationRepositoryInterface
 import me.ljpb.alarmbynotification.data.UserPreferencesRepository
 import me.ljpb.alarmbynotification.data.room.AlarmDatabase
 
@@ -20,13 +19,13 @@ private val Context.notificationDatastore: DataStore<Preferences> by preferences
 )
 
 interface AppContainer {
-    val notificationRepository: NotificationRepositoryInterface
+    val notificationRepository: NotificationRepository
     val preferencesRepository: UserPreferencesRepository
     val alarmRepository: AlarmRepository
 }
 
 class AppDataContainer(private val context: Context) : AppContainer {
-    override val notificationRepository: NotificationRepositoryInterface by lazy {
+    override val notificationRepository: NotificationRepository by lazy {
         val directBootContext = context.createDeviceProtectedStorageContext()
         NotificationRepository(
             context = directBootContext,

@@ -30,7 +30,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.ljpb.alarmbynotification.R
 import me.ljpb.alarmbynotification.Utility.getFormattedTime
-import me.ljpb.alarmbynotification.data.AlarmInfo
 import me.ljpb.alarmbynotification.data.room.AlarmInfoInterface
 
 /**
@@ -215,21 +214,21 @@ private fun AlarmTime(
 @Preview(showSystemUi = true)
 @Composable
 private fun AlarmCardEnablePreview() {
-    AlarmCard(
-        onTitleClick = {},
-        onDeleteClick = { },
-        onEnableChange = {},
-        enable = false,
-        alarm = AlarmInfo(0, 0, 0, "", ""),
-        modifier = Modifier.padding(
-            vertical = dimensionResource(id = R.dimen.padding_small),
-            horizontal = dimensionResource(id = R.dimen.padding_medium)
-        ),
-        is24Hour = true,
-        expanded = true,
-        onExpandedChange = {},
-        onTimeClick = {}
-    )
+//    AlarmCard(
+//        onTitleClick = {},
+//        onDeleteClick = { },
+//        onEnableChange = {},
+//        enable = false,
+//        alarm = AlarmInfo(0, 0, 0, "", ""),
+//        modifier = Modifier.padding(
+//            vertical = dimensionResource(id = R.dimen.padding_small),
+//            horizontal = dimensionResource(id = R.dimen.padding_medium)
+//        ),
+//        is24Hour = true,
+//        expanded = true,
+//        onExpandedChange = {},
+//        onTimeClick = {}
+//    )
 }
 
 @Preview(showSystemUi = true)

@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 import me.ljpb.alarmbynotification.Utility.getMilliSecondsOfNextTime
 import me.ljpb.alarmbynotification.data.AlarmInfo
 import me.ljpb.alarmbynotification.data.AlarmRepository
-import me.ljpb.alarmbynotification.data.NotificationRepositoryInterface
+import me.ljpb.alarmbynotification.data.NotificationRepository
 import me.ljpb.alarmbynotification.data.UserPreferencesRepository
 import me.ljpb.alarmbynotification.data.room.AlarmInfoEntity
 import me.ljpb.alarmbynotification.data.room.AlarmInfoInterface
@@ -33,7 +33,7 @@ val INITIAL_ID: Long? = null
 
 class HomeScreenViewModel(
     private val alarmRepository: AlarmRepository,
-    private val notificationRepository: NotificationRepositoryInterface,
+    private val notificationRepository: NotificationRepository,
     private val preferencesRepository: UserPreferencesRepository,
 ) : ViewModel() {
     private val _currentDateTime = MutableStateFlow(LocalDateTime.now())
@@ -63,7 +63,7 @@ class HomeScreenViewModel(
 
     var isShowChangeTimeDialog by mutableStateOf(false)
         private set
-
+    
     // アラームリストでタップしたアラーム
     private var selectedAlarm: AlarmInfoInterface? = null
 

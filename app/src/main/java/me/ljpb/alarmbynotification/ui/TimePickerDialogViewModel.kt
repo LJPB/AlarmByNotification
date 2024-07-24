@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 import me.ljpb.alarmbynotification.Utility.getMilliSecondsOfNextTime
 import me.ljpb.alarmbynotification.Utility.getZoneId
 import me.ljpb.alarmbynotification.data.AlarmRepositoryInterface
-import me.ljpb.alarmbynotification.data.NotificationRepositoryInterface
+import me.ljpb.alarmbynotification.data.NotificationRepository
 import me.ljpb.alarmbynotification.data.room.AlarmInfoEntity
 import me.ljpb.alarmbynotification.data.room.AlarmInfoInterface
 import me.ljpb.alarmbynotification.data.room.NotificationEntity
@@ -20,7 +20,7 @@ import java.time.ZonedDateTime
 import java.util.UUID
 
 class TimePickerDialogViewModel(
-    private val notificationRepository: NotificationRepositoryInterface,
+    private val notificationRepository: NotificationRepository,
     private val alarmRepository: AlarmRepositoryInterface,
 ) : ViewModel() {
     // アラームにセットする時刻を管理する

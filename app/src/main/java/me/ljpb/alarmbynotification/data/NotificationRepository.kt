@@ -20,8 +20,8 @@ import me.ljpb.alarmbynotification.setNotification
 class NotificationRepository(
     private val context: Context, 
     private val dataStore: DataStore<Preferences>,
-) : NotificationRepositoryInterface {
-
+) {
+    
     private val notifications: Flow<List<NotificationEntity>> = dataStore.data
         .catch { 
             if (it is IOException) {
@@ -40,28 +40,28 @@ class NotificationRepository(
                 .filterNotNull()
         }
     
-    override suspend fun insertNotification(notification: NotificationEntity) {
+    suspend fun insertNotification(notification: NotificationEntity) {
         dataStore.edit { 
             it[notification.preferenceKey()] = notification.toJson()
         }
         setNotification(context, notification)
     }
 
-    override suspend fun updateNotification(notification: NotificationEntity) {
+    suspend fun updateNotification(notification: NotificationEntity) {
         dataStore.edit {
             it[notification.preferenceKey()] = notification.toJson()
         }
         setNotification(context, notification)
     }
 
-    override suspend fun deleteNotification(notification: NotificationEntity) {
+    suspend fun deleteNotification(notification: NotificationEntity) {
         dataStore.edit {
             it.remove(notification.preferenceKey())
         }
         deleteNotification(context, notification)
     }
 
-    override fun getAllNotifications(): Flow<List<NotificationEntity>> {
+    fun getAllNotifications(): Flow<List<NotificationEntity>> {
         return notifications
     }
 }
