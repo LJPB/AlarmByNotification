@@ -10,14 +10,18 @@ import kotlinx.coroutines.launch
 import me.ljpb.alarmbynotification.NotificationApplication
 import me.ljpb.alarmbynotification.setNotification
 
-class UpdateBroadcastReceiver : BroadcastReceiver() {
+
+/**
+ * 端末が再起動した時に通知を再セットするためのクラス
+ */
+class NotificationResetReceiver : BroadcastReceiver() {
     @OptIn(DelicateCoroutinesApi::class)
     override fun onReceive(context: Context?, intent: Intent?) {
         if (context == null || intent == null) return
-        if (intent.action == Intent.ACTION_LOCKED_BOOT_COMPLETED) {
+        if (intent.action == Intent.ACTION_LOCKED_BOOT_COMPLETED || intent.action == Intent.ACTION_MY_PACKAGE_REPLACED) {
             val application = context.applicationContext as NotificationApplication
             val repository = application.container.notificationRepository
-
+            
             val pendingResult = goAsync()
             GlobalScope.launch {
                 try {
@@ -30,6 +34,7 @@ class UpdateBroadcastReceiver : BroadcastReceiver() {
                             val currentTime = System.currentTimeMillis()
                             if (notification.triggerTimeMilliSeconds < currentTime) {
                                 // 過ぎていたら
+                                setNotification(context = context, notificationInfo = notification)
                                 repository.deleteNotification(notification)
                             } else {
                                 setNotification(context = context, notificationInfo = notification)
