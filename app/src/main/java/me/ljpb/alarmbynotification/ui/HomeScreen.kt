@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
 import android.text.format.DateFormat
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -26,6 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.BasicAlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
@@ -149,6 +151,16 @@ private fun AlarmList(
         state = listState,
         modifier = modifier.padding(innerPadding)
     ) {
+        item {
+            Button(onClick = { 
+                Log.d(
+                    "status",
+                    notificationList.toString()
+                )
+            }) {
+                Text(text = "getPreferenceDataStoreStatus")
+            }
+        }
         itemsIndexed(alarmList) { index, alarm ->
             AlarmCard(
                 onTitleClick = { onTitleClick(alarm) },

@@ -9,11 +9,14 @@ import me.ljpb.alarmbynotification.data.NotificationRepository
 import me.ljpb.alarmbynotification.data.NotificationRepositoryInterface
 import me.ljpb.alarmbynotification.data.UserPreferencesRepository
 import me.ljpb.alarmbynotification.data.room.AlarmDatabase
-import me.ljpb.alarmbynotification.data.room.NotificationDatabase
 
 private const val DIALOG_DEFAULT_CONTENT_PREFERENCE_NAME = "dialog_default_content"
-private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
+private const val NOTIFICATION_PREFERENCE_NAME = "notifications"
+private val Context.dialogDataStore: DataStore<Preferences> by preferencesDataStore(
     name = DIALOG_DEFAULT_CONTENT_PREFERENCE_NAME
+)
+private val Context.notificationDatastore: DataStore<Preferences> by preferencesDataStore(
+    name = NOTIFICATION_PREFERENCE_NAME
 )
 
 interface AppContainer {
@@ -26,12 +29,12 @@ class AppDataContainer(private val context: Context) : AppContainer {
     override val notificationRepository: NotificationRepositoryInterface by lazy {
         val directBootContext = context.createDeviceProtectedStorageContext()
         NotificationRepository(
-            context = context,
-            dao = NotificationDatabase.getDatabase(directBootContext).notificationDao()
+            context = directBootContext,
+            dataStore = directBootContext.notificationDatastore
         )
     }
     override val preferencesRepository: UserPreferencesRepository by lazy {
-        UserPreferencesRepository(context.dataStore)
+        UserPreferencesRepository(context.dialogDataStore)
     }
     override val alarmRepository: AlarmRepository by lazy {
         AlarmRepository(

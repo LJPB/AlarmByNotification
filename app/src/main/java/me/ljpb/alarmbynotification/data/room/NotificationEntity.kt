@@ -1,15 +1,20 @@
 package me.ljpb.alarmbynotification.data.room
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-import me.ljpb.alarmbynotification.data.NotificationInfoInterface
+import kotlinx.serialization.Serializable
 
-@Entity(tableName = "notifications")
+@Serializable
 data class NotificationEntity(
-    @PrimaryKey(autoGenerate = false)
-    override val notifyId: Int,
-    override val alarmId: Long,
-    override val triggerTimeMilliSeconds: Long,
-    override val notifyName: String,
-    override val zoneId: String
-) : NotificationInfoInterface
+    val notifyId: Int,
+    val alarmId: Long,
+    val triggerTimeMilliSeconds: Long,
+    val notifyName: String,
+    val zoneId: String
+)
+
+object NotifyIntentKey {
+    const val NOTIFY_ID = "notifyId"
+    const val ALARM_ID = "alarmId"
+    const val TRIGGER_TIME_MILLI = "triggerTime"
+    const val NOTIFY_NAME = "notifyName"
+    const val ZONE_ID = "zoneId"
+}

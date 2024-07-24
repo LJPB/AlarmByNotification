@@ -11,7 +11,6 @@ import kotlinx.coroutines.launch
 import me.ljpb.alarmbynotification.Utility.getMilliSecondsOfNextTime
 import me.ljpb.alarmbynotification.Utility.getZoneId
 import me.ljpb.alarmbynotification.data.AlarmRepositoryInterface
-import me.ljpb.alarmbynotification.data.NotificationInfoInterface
 import me.ljpb.alarmbynotification.data.NotificationRepositoryInterface
 import me.ljpb.alarmbynotification.data.room.AlarmInfoEntity
 import me.ljpb.alarmbynotification.data.room.AlarmInfoInterface
@@ -93,7 +92,7 @@ class TimePickerDialogViewModel(
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
-    fun updateTime(targetAlarm: AlarmInfoInterface?, targetNotify: NotificationInfoInterface?) {
+    fun updateTime(targetAlarm: AlarmInfoInterface?, targetNotify: NotificationEntity?) {
         if (targetAlarm != null) {
             val timeZone = getZoneId()
             val hour = alarmState.hour

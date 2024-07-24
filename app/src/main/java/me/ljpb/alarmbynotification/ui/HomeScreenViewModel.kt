@@ -17,7 +17,6 @@ import kotlinx.coroutines.launch
 import me.ljpb.alarmbynotification.Utility.getMilliSecondsOfNextTime
 import me.ljpb.alarmbynotification.data.AlarmInfo
 import me.ljpb.alarmbynotification.data.AlarmRepository
-import me.ljpb.alarmbynotification.data.NotificationInfoInterface
 import me.ljpb.alarmbynotification.data.NotificationRepositoryInterface
 import me.ljpb.alarmbynotification.data.UserPreferencesRepository
 import me.ljpb.alarmbynotification.data.room.AlarmInfoEntity
@@ -50,15 +49,14 @@ class HomeScreenViewModel(
             initialValue = listOf()
         )
 
-    val notificationList: StateFlow<List<NotificationInfoInterface>> =
-        notificationRepository.getAllNotifications().map { notification ->
-            if (notification.isNullOrEmpty()) return@map listOf()
-            notification.map { it }
-        }.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(2_000L),
-            initialValue = listOf()
-        )
+    val notificationList: StateFlow<List<NotificationEntity>> =
+        notificationRepository
+            .getAllNotifications()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(2_000L),
+                initialValue = listOf()
+            )
 
     var isShowTitleInputDialog by mutableStateOf(false)
         private set
@@ -192,7 +190,7 @@ class HomeScreenViewModel(
         }
     }
 
-    fun getNotifyOfSelectedAlarm(): NotificationInfoInterface? {
+    fun getNotifyOfSelectedAlarm(): NotificationEntity? {
         if (selectedAlarm != null) {
             return notificationList.value.find { it.alarmId == selectedAlarm!!.id }
         }

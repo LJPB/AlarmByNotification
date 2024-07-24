@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     id("com.google.devtools.ksp")
+    kotlin("plugin.serialization") version "1.9.0"
 }
 
 android {
@@ -68,9 +69,13 @@ dependencies {
     // Material Icons
     implementation (libs.androidx.material.icons.extended)
 
+    // room
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     
+    // serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+
     annotationProcessor(libs.androidx.room.room.compiler)
     // To use Kotlin Symbol Processing (KSP)
     ksp(libs.androidx.room.room.compiler)
