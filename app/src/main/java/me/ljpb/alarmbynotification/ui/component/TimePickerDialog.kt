@@ -1,6 +1,7 @@
 package me.ljpb.alarmbynotification.ui.component
 
 import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,8 +34,9 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -71,21 +73,25 @@ enum class ScreenType {
 fun TimePickerDialog(
     modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit,
-    onPositiveClick: () -> Unit,
+    onPositiveClick: (Boolean) -> Unit,
+    recentlyIsTimePicker: Boolean,
     windowSizeClass: WindowSizeClass,
     timePickerState: TimePickerState,
 ) {
-    // 表示しているダイアログはTimePicker?
-    var isPicker by rememberSaveable { mutableStateOf(true) }
+    // 表示しているダイアログはTimePicker? 初期値は，前回表示した種類と同じ(初回起動時はtrue)
+    var currentIsPicker by remember { mutableStateOf(recentlyIsTimePicker) }
     
+    var compositionCount by remember { mutableIntStateOf(0) }
+    compositionCount++
+    Log.d("compositionCount", "$compositionCount")
     // 横画面?
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
-    
+
     val screenType: ScreenType
     // ダイアログの大きさに関するフラグ
     val usePlatformDefaultWidth: Boolean
     val dialogModifier: Modifier
-    
+
     when {
         windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact
                 && windowSizeClass.heightSizeClass == WindowHeightSizeClass.Compact -> { // 縦横ともにCompact
@@ -96,23 +102,25 @@ fun TimePickerDialog(
                 .wrapContentHeight()
                 .padding(24.dp)
         }
+
         isLandscape && windowSizeClass.heightSizeClass == WindowHeightSizeClass.Compact -> { // 一般的な端末の横画面
             // && windowSizeClass.widthSizeClass != WindowWidthSizeClass.Compact である必要に注意
             screenType = ScreenType.CompactLandscape
-            if (isPicker) {
+            if (currentIsPicker) {
                 // 横画面にした時のTimePickerが収まらないからサイズを調整する必要がある
-                usePlatformDefaultWidth = false 
+                usePlatformDefaultWidth = false
                 dialogModifier = modifier
                     .wrapContentWidth()
                     .fillMaxHeight() // 横画面にした時のTimePickerが収まらないから広げる必要がある
             } else {
                 // TimeInputは収まるため，fillMaxHeightで無駄に広げないようにするために，分岐している
-                usePlatformDefaultWidth = true 
+                usePlatformDefaultWidth = true
                 dialogModifier = modifier
                     .wrapContentWidth()
                     .wrapContentHeight()
             }
         }
+
         isLandscape -> {
             screenType = ScreenType.NormalLandscape
             usePlatformDefaultWidth = false
@@ -120,6 +128,7 @@ fun TimePickerDialog(
                 .wrapContentWidth()
                 .wrapContentHeight()
         }
+
         else -> {
             screenType = ScreenType.NormalPortrait
             usePlatformDefaultWidth = true
@@ -133,7 +142,7 @@ fun TimePickerDialog(
         modifier = dialogModifier,
         properties = DialogProperties(
             usePlatformDefaultWidth = usePlatformDefaultWidth,
-            dismissOnClickOutside = isPicker  // TimeInputのときキーボードを閉じると同時に背景をタップしてダイアログが閉じてしまうウザさを回避するためのもの
+            dismissOnClickOutside = currentIsPicker  // TimeInputのときキーボードを閉じると同時に背景をタップしてダイアログが閉じてしまうウザさを回避するためのもの
         )
     ) {
         Surface(
@@ -142,10 +151,10 @@ fun TimePickerDialog(
         ) {
             DialogContent(
                 onDismissRequest = onDismissRequest,
-                onPositiveClick = onPositiveClick,
+                onPositiveClick = { onPositiveClick(currentIsPicker) },
                 screenType = screenType,
-                isPicker = isPicker,
-                iconButtonOnClick = { isPicker = !isPicker },
+                isPicker = currentIsPicker,
+                iconButtonOnClick = { currentIsPicker = !currentIsPicker },
                 timePickerState = timePickerState,
             )
         }
@@ -176,7 +185,7 @@ private fun DialogContent(
         iconButtonDescription = stringResource(id = R.string.picker_time)
         dialogTitle = stringResource(id = R.string.input_time)
     }
-    
+
     when (screenType) {
         ScreenType.CompactCompact -> {
             DialogContentCompactBody(
@@ -185,6 +194,7 @@ private fun DialogContent(
                 timePickerState = timePickerState,
             )
         }
+
         ScreenType.CompactLandscape -> {
             if (isPicker) {
                 DialogContentCompactLandscapePickerBody(
@@ -210,6 +220,7 @@ private fun DialogContent(
                 )
             }
         }
+
         else -> {
             DialogContentBody(
                 onDismissRequest = onDismissRequest,
@@ -402,7 +413,7 @@ private fun TimePickerDialogPreview() {
             DialogContentCompactBody(
                 onDismissRequest = {},
                 onPositiveClick = {},
-                timePickerState = TimePickerState(0,0,false),
+                timePickerState = TimePickerState(0, 0, false),
             )
         }
     }

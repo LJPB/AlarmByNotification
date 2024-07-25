@@ -7,12 +7,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import me.ljpb.alarmbynotification.Utility.getMilliSecondsOfNextTime
 import me.ljpb.alarmbynotification.Utility.getZoneId
 import me.ljpb.alarmbynotification.data.AlarmRepositoryInterface
 import me.ljpb.alarmbynotification.data.NotificationInfoInterface
 import me.ljpb.alarmbynotification.data.NotificationRepositoryInterface
+import me.ljpb.alarmbynotification.data.UserPreferencesRepository
 import me.ljpb.alarmbynotification.data.room.AlarmInfoEntity
 import me.ljpb.alarmbynotification.data.room.AlarmInfoInterface
 import me.ljpb.alarmbynotification.data.room.NotificationEntity
@@ -23,12 +27,13 @@ import java.util.UUID
 class TimePickerDialogViewModel(
     private val notificationRepository: NotificationRepositoryInterface,
     private val alarmRepository: AlarmRepositoryInterface,
+    private val preferencesRepository: UserPreferencesRepository
 ) : ViewModel() {
     // アラームにセットする時刻を管理する
     @OptIn(ExperimentalMaterial3Api::class)
     lateinit var alarmState: TimePickerState
         private set
-    
+
     // 新しくアラームを追加するためのダイアログの表示状態
     var isShowAddDialog by mutableStateOf(false)
         private set
@@ -36,6 +41,14 @@ class TimePickerDialogViewModel(
     // 既存のアラームの時間を変更すためのダイアログの表示状態
     var isShowUpdateDialog by mutableStateOf(false)
         private set
+
+    // TimePickerDialogダイアログで最後に表示した時間選択コンポーネントが
+    // TimePickerかTimeInputか
+    val isTimePicker: StateFlow<Boolean> = preferencesRepository.isTimePicker.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(2_000L),
+        initialValue = true
+    )
 
     init {
         setAlarmInitialState(true)
@@ -53,17 +66,23 @@ class TimePickerDialogViewModel(
     fun hiddenDialog() {
         isShowAddDialog = false
     }
-    
+
     fun showUpdateDialog(alarm: AlarmInfoInterface, is24Hour: Boolean) {
         setAlarmState(alarm.hour, alarm.min, is24Hour)
         isShowUpdateDialog = true
     }
-    
+
     fun hiddenUpdateDialog() {
         isShowUpdateDialog = false
     }
-    
 
+    /**
+     *  TimePickerDialogで最後に表示した時間選択コンポーネントの種類を[isTimePicker]がtrueならTimePicker, falseならTimeInputとして記憶する
+     */
+    fun setRecentlyComponentIsTimePicker(isTimePicker: Boolean) = viewModelScope.launch {
+        preferencesRepository.recentlyIsTimePicker(isTimePicker)
+    }
+    
     @OptIn(ExperimentalMaterial3Api::class)
     fun add(setAddedItemId: (Long) -> Unit) {
         val zoneId = getZoneId()
@@ -109,7 +128,7 @@ class TimePickerDialogViewModel(
                     )
                 )
             }
-            
+
             if (targetNotify != null) { // 時間変更対象となるアラームを有効化していた場合
                 viewModelScope.launch {
                     notificationRepository.updateNotification(
@@ -152,6 +171,6 @@ class TimePickerDialogViewModel(
             is24Hour = is24
         )
     }
-    
+
 
 }

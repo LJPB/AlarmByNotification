@@ -149,7 +149,7 @@ private fun AlarmList(
     val notificationList by homeScreenViewModel.notificationList.collectAsState()
     var expandCardIndex by remember { mutableIntStateOf(-1) }
     val view = LocalView.current
-    
+
     LazyColumn(
         state = listState,
         modifier = modifier.padding(innerPadding)
@@ -227,14 +227,22 @@ private fun HomeScreenContent(
 ) {
     val alarmList by homeScreenViewModel.alarmList.collectAsState()
 
+    // TimePickerダイアログの時間を選択するコンポーネントで最後に表示した種類が
+    // TimePickerがTimeInputかを記憶して，最後に表示したものと同じ種類のコンポーネントを表示できるようにする
+    val recentlyIsTimePicker by timePickerDialogViewModel.isTimePicker.collectAsState()
+
     // 通知権限の許可を促すダイアログを一度表示したかどうか
     var isShowedDialog by remember { mutableStateOf(false) }
 
     if (timePickerDialogViewModel.isShowAddDialog) {
         TimePickerDialog(
             onDismissRequest = timePickerDialogViewModel::hiddenDialog,
-            onPositiveClick = { timePickerDialogViewModel.add(homeScreenViewModel::setAddItemId) },
+            onPositiveClick = { currentIsPicker ->
+                timePickerDialogViewModel.add(homeScreenViewModel::setAddItemId)
+                timePickerDialogViewModel.setRecentlyComponentIsTimePicker(currentIsPicker)
+            },
             windowSizeClass = windowSize,
+            recentlyIsTimePicker = recentlyIsTimePicker,
             timePickerState = timePickerDialogViewModel.alarmState,
         )
     }
@@ -254,6 +262,7 @@ private fun HomeScreenContent(
                 )
             },
             windowSizeClass = windowSize,
+            recentlyIsTimePicker = recentlyIsTimePicker,
             timePickerState = timePickerDialogViewModel.alarmState,
         )
     }
