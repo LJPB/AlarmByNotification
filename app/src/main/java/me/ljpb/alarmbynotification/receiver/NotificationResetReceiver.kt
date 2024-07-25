@@ -14,7 +14,7 @@ class UpdateBroadcastReceiver : BroadcastReceiver() {
     @OptIn(DelicateCoroutinesApi::class)
     override fun onReceive(context: Context?, intent: Intent?) {
         if (context == null || intent == null) return
-        if (intent.action == Intent.ACTION_MY_PACKAGE_REPLACED) {
+        if (intent.action == Intent.ACTION_LOCKED_BOOT_COMPLETED) {
             val application = context.applicationContext as NotificationApplication
             val repository = application.container.notificationRepository
 
@@ -30,7 +30,6 @@ class UpdateBroadcastReceiver : BroadcastReceiver() {
                             val currentTime = System.currentTimeMillis()
                             if (notification.triggerTimeMilliSeconds < currentTime) {
                                 // 過ぎていたら
-                                setNotification(context = context, notificationInfo = notification)
                                 repository.deleteNotification(notification)
                             } else {
                                 setNotification(context = context, notificationInfo = notification)
