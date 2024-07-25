@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -28,7 +29,7 @@ class MainActivity : ComponentActivity() {
                     viewModel(factory = ViewModelProvider.Factory)
                 val timePickerDialogViewModel: TimePickerDialogViewModel =
                     viewModel(factory = ViewModelProvider.Factory)
-                
+
                 if (Build.VERSION.SDK_INT >= 33) {
                     val notificationPermissionState = rememberPermissionState(
                         android.Manifest.permission.POST_NOTIFICATIONS
@@ -39,7 +40,12 @@ class MainActivity : ComponentActivity() {
                 } else {
                     createNotificationChannel(this)
                 }
-                val appContainer = AppDataContainer(this)
+
+                val context = this
+                LaunchedEffect(Unit) {
+                    homeScreenViewModel.resettingNotify(context)
+                }
+                
                 val windowSize = calculateWindowSizeClass(this)
                 HomeScreen(
                     windowSize = windowSize,

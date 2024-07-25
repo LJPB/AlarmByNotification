@@ -81,7 +81,8 @@ fun HomeScreen(
 ) {
     val currentTime by homeScreenViewModel.currentDateTime.collectAsState()
     val scope = rememberCoroutineScope()
-    val is24Hour = DateFormat.is24HourFormat(LocalContext.current)
+    val context = LocalContext.current
+    val is24Hour = DateFormat.is24HourFormat(context)
     scope.launch {
         homeScreenViewModel.updateCurrentDateTime()
     }

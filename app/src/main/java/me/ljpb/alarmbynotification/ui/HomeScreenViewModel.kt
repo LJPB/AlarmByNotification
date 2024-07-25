@@ -1,5 +1,6 @@
 package me.ljpb.alarmbynotification.ui
 
+import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import me.ljpb.alarmbynotification.Utility
 import me.ljpb.alarmbynotification.Utility.getMilliSecondsOfNextTime
 import me.ljpb.alarmbynotification.data.AlarmInfo
 import me.ljpb.alarmbynotification.data.AlarmRepository
@@ -233,6 +235,10 @@ class HomeScreenViewModel(
         return 0
     }
     // === 以上，追加したアラームへスクロールするための機能 ===
+    
+    suspend fun resettingNotify(context: Context) {
+        Utility.resettingNotify(context, notificationRepository)
+    }
 }
 
 
