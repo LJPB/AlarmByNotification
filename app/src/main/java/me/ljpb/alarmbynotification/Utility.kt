@@ -1,5 +1,8 @@
 package me.ljpb.alarmbynotification
 
+import android.content.Context
+import kotlinx.coroutines.flow.firstOrNull
+import me.ljpb.alarmbynotification.data.NotificationRepositoryInterface
 import java.time.DateTimeException
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -72,22 +75,22 @@ object Utility {
         val currentSec = currentTime.second
         val currentTimeAsMinutes = currentHour * 60 + currentMin
         val triggerTimeAsMinutes = triggerHour * 60 + triggerMinutes
-        
+
         // 引数で渡した時間 - 現在時間
         val diff = if (currentTimeAsMinutes >= triggerTimeAsMinutes) {
             24 * 60 - (currentTimeAsMinutes - triggerTimeAsMinutes)
         } else {
             triggerTimeAsMinutes - currentTimeAsMinutes
         }
-        
+
         val triggerDateTime = currentTime
             // 分単位で計算したいため，秒を0にしている
             // たとえば現在時刻が10時10分10秒で，triggerTimeが11時10分のとき，minusSecondsがなければ，triggerDateTimeは11時10分10秒になってしまう
             // この秒差をなくすために，currentTimeからcurrentTimeの秒数を引いている
-            .minusSeconds(currentSec.toLong()) 
+            .minusSeconds(currentSec.toLong())
             .plusMinutes(diff.toLong())
             .toEpochSecond() * 1000 // ミリ秒化
-        
+
         return triggerDateTime
     }
 
@@ -97,6 +100,24 @@ object Utility {
         "UTC"
     } catch (_: DateTimeException) {
         "UTC"
+    }
+
+    suspend fun resettingNotify(context: Context, repository: NotificationRepositoryInterface) {
+        repository
+            .getAllNotifications()
+            .firstOrNull()
+            ?.forEach { notification ->
+                // ========== 注意 ==========
+                // triggerTimeMilliSecondsは秒単位の時間の1000倍でミリ秒を表現しているため，1秒未満は全て0となっている。
+                val currentTime = System.currentTimeMillis()
+                if (notification.triggerTimeMilliSeconds < currentTime) {
+                    // 過ぎていたら
+                    setNotification(context = context, notificationInfo = notification)
+                    repository.deleteNotification(notification)
+                } else {
+                    setNotification(context = context, notificationInfo = notification)
+                }
+            }
     }
 
 }

@@ -5,10 +5,9 @@ import android.content.Context
 import android.content.Intent
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import me.ljpb.alarmbynotification.NotificationApplication
-import me.ljpb.alarmbynotification.setNotification
+import me.ljpb.alarmbynotification.Utility.resettingNotify
 
 class UpdateBroadcastReceiver : BroadcastReceiver() {
     @OptIn(DelicateCoroutinesApi::class)
@@ -21,21 +20,7 @@ class UpdateBroadcastReceiver : BroadcastReceiver() {
             val pendingResult = goAsync()
             GlobalScope.launch {
                 try {
-                    repository
-                        .getAllNotifications()
-                        .firstOrNull()
-                        ?.forEach { notification ->
-                            // ========== 注意 ==========
-                            // triggerTimeMilliSecondsは秒単位の時間の1000倍でミリ秒を表現しているため，1秒未満は全て0となっている。
-                            val currentTime = System.currentTimeMillis()
-                            if (notification.triggerTimeMilliSeconds < currentTime) {
-                                // 過ぎていたら
-                                setNotification(context = context, notificationInfo = notification)
-                                repository.deleteNotification(notification)
-                            } else {
-                                setNotification(context = context, notificationInfo = notification)
-                            }
-                        }
+                    resettingNotify(context, repository)
                 } finally {
                     pendingResult.finish()
                 }
