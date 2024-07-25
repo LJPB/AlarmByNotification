@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
 import android.text.format.DateFormat
+import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -54,6 +55,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -146,6 +148,8 @@ private fun AlarmList(
     val listState = rememberLazyListState()
     val notificationList by homeScreenViewModel.notificationList.collectAsState()
     var expandCardIndex by remember { mutableIntStateOf(-1) }
+    val view = LocalView.current
+    
     LazyColumn(
         state = listState,
         modifier = modifier.padding(innerPadding)
@@ -157,7 +161,20 @@ private fun AlarmList(
                     onDeleteClick(alarm)
                     expandCardIndex = -1
                 },
-                onEnableChange = { enable -> onEnableChange(alarm, enable) },
+                onEnableChange = { enable ->
+                    view.performHapticFeedback(
+                        if (Build.VERSION.SDK_INT >= 34) {
+                            if (enable) {
+                                HapticFeedbackConstants.TOGGLE_ON
+                            } else {
+                                HapticFeedbackConstants.TOGGLE_OFF
+                            }
+                        } else {
+                            HapticFeedbackConstants.CONFIRM
+                        }
+                    )
+                    onEnableChange(alarm, enable)
+                },
                 enable = notificationList.find { it.alarmId == alarm.id } != null,  // notificationListに含まれていれば(findがnull出なければ)有効
                 alarm = alarm,
                 modifier = Modifier.padding(
