@@ -13,10 +13,11 @@ import java.time.zone.ZoneRulesException
  * @param time 時間の部分(04:00 pmの04:00の部分)
  * @param period 午前/午後の部分(04:00 pmのpmの部分)
  */
-data class FormattedTime(
-    val time: String,
-    val period: String
-)
+class FormattedTime(val time: String, val period: String) {
+    override fun toString(): String {
+        return time + period
+    }
+}
 
 object Utility {
     /** 与えられたLocalDateTimeの時刻をフォーマットした文字列に変換 (例 : LocalDateTime → 16:00, 04:00 p.m.)
