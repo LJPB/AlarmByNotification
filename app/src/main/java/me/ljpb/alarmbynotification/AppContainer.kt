@@ -11,9 +11,9 @@ import me.ljpb.alarmbynotification.data.UserPreferencesRepository
 import me.ljpb.alarmbynotification.data.room.AlarmDatabase
 import me.ljpb.alarmbynotification.data.room.NotificationDatabase
 
-private const val DIALOG_DEFAULT_CONTENT_PREFERENCE_NAME = "dialog_default_content"
+private const val USER_PREFERENCE = "user_preference"
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
-    name = DIALOG_DEFAULT_CONTENT_PREFERENCE_NAME
+    name = USER_PREFERENCE
 )
 
 interface AppContainer {
