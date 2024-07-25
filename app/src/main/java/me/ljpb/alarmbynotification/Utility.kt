@@ -68,8 +68,8 @@ object Utility {
     ): Long {
         val currentHour = currentTime.hour
         val currentMin = currentTime.minute
+        val currentSec = currentTime.second
         val currentTimeAsMinutes = currentHour * 60 + currentMin
-        
         val triggerTimeAsMinutes = triggerHour * 60 + triggerMinutes
         
         // 引数で渡した時間 - 現在時間
@@ -78,7 +78,16 @@ object Utility {
         } else {
             triggerTimeAsMinutes - currentTimeAsMinutes
         }
-        return currentTime.plusMinutes(diff.toLong()).toEpochSecond() * 1000 // ミリ秒化
+        
+        val triggerDateTime = currentTime
+            // 分単位で計算したいため，秒を0にしている
+            // たとえば現在時刻が10時10分10秒で，triggerTimeが11時10分のとき，minusSecondsがなければ，triggerDateTimeは11時10分10秒になってしまう
+            // この秒差をなくすために，currentTimeからcurrentTimeの秒数を引いている
+            .minusSeconds(currentSec.toLong()) 
+            .plusMinutes(diff.toLong())
+            .toEpochSecond() * 1000 // ミリ秒化
+        
+        return triggerDateTime
     }
 
     fun getZoneId(): String = try {
