@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -68,6 +69,9 @@ class HomeScreenViewModel(
     var isShowChangeTimeDialog by mutableStateOf(false)
         private set
 
+    var nowProcessing by mutableStateOf(false)
+        private set
+
     // アラームリストでタップしたアラーム
     private var selectedAlarm: AlarmInfoInterface? = null
 
@@ -81,7 +85,7 @@ class HomeScreenViewModel(
             started = SharingStarted.WhileSubscribed(2_000L),
             initialValue = true
         )
-    
+
 
     /**
      * アラームを選択するときに呼び出すメソッド
@@ -103,7 +107,8 @@ class HomeScreenViewModel(
 
     fun updateAlarmName(name: String): HomeScreenViewModel {
         if (selectedAlarm != null) {
-            viewModelScope.launch {
+            nowProcessing = true
+            val deferred = viewModelScope.async {
                 // セットしたアラームのタイトルを変更したとき，通知のタイトルも変える
                 val notify = notificationList.value.find { it.alarmId == selectedAlarm!!.id }
                 if (notify != null) {
@@ -113,11 +118,10 @@ class HomeScreenViewModel(
                         )
                     )
                 }
-            }
-            viewModelScope.launch {
-                // アラームデータベースの更新
                 alarmRepository.update(selectedAlarm!!.toAlarmInfoEntity().copy(name = name))
+                return@async false
             }
+            viewModelScope.launch { nowProcessing = deferred.await() }
         }
         return this
     }
@@ -135,16 +139,17 @@ class HomeScreenViewModel(
 
     fun changeEnableTo(enabled: Boolean): HomeScreenViewModel {
         if (selectedAlarm != null) {
+            nowProcessing = true
             val alarmId = selectedAlarm!!.id
             val zoneId = selectedAlarm!!.zoneId
             val name = selectedAlarm!!.name
-            if (enabled) { // アラームを有効にした場合
-                // TODO: TimePickerDialogViewModelのaddと同じ処理だからまとめる
-                val triggerTimeMilliSeconds = getMilliSecondsOfNextTime(
-                    selectedAlarm!!.hour, selectedAlarm!!.min, ZonedDateTime.now()
-                )
-                val notifyId = UUID.randomUUID().hashCode()
-                viewModelScope.launch {
+            val deferred = viewModelScope.async {
+                if (enabled) { // アラームを有効にした場合
+                    // TODO: TimePickerDialogViewModelのaddと同じ処理だからまとめる
+                    val triggerTimeMilliSeconds = getMilliSecondsOfNextTime(
+                        selectedAlarm!!.hour, selectedAlarm!!.min, ZonedDateTime.now()
+                    )
+                    val notifyId = UUID.randomUUID().hashCode()
                     val notification = NotificationEntity(
                         notifyId = notifyId,
                         alarmId = alarmId,
@@ -153,14 +158,14 @@ class HomeScreenViewModel(
                         zoneId = zoneId
                     )
                     notificationRepository.insertNotification(notification)
-                }
-            } else { // アラームを無効にした場合
-                val targetNotify = notificationList.value.find { it.alarmId == alarmId }
-                if (targetNotify == null) return this
-                viewModelScope.launch {
+                } else { // アラームを無効にした場合
+                    val targetNotify = notificationList.value.find { it.alarmId == alarmId }
+                    if (targetNotify == null) return@async false
                     notificationRepository.deleteNotification(targetNotify as NotificationEntity)
                 }
+                return@async false
             }
+            viewModelScope.launch { nowProcessing = deferred.await() }
         }
         return this
     }
@@ -174,9 +179,12 @@ class HomeScreenViewModel(
 
     fun delete(): HomeScreenViewModel {
         if (selectedAlarm != null) {
-            viewModelScope.launch {
+            nowProcessing = true
+            val deferred = viewModelScope.async {
                 alarmRepository.delete(selectedAlarm!!.id)
+                return@async false
             }
+            viewModelScope.launch { nowProcessing = deferred.await() }
         }
         return this
     }
@@ -235,7 +243,7 @@ class HomeScreenViewModel(
         return 0
     }
     // === 以上，追加したアラームへスクロールするための機能 ===
-    
+
     suspend fun resettingNotify(context: Context) {
         Utility.resettingNotify(context, notificationRepository)
     }

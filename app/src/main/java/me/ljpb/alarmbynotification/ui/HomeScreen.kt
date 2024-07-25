@@ -389,17 +389,21 @@ fun HomeScreenContentBody(
                     timePickerDialogViewModel.showUpdateDialog(alarm = it, is24Hour = is24Hour)
                 },
                 onDeleteClick = {
-                    homeScreenViewModel
-                        .selectAlarm(it)
-                        .changeEnableTo(false)
-                        .delete()
-                        .releaseSelectedAlarm()
+                    if (!homeScreenViewModel.nowProcessing) {
+                        homeScreenViewModel
+                            .selectAlarm(it)
+                            .changeEnableTo(false)
+                            .delete()
+                            .releaseSelectedAlarm()
+                    }
                 },
                 onEnableChange = { alarm, enable ->
-                    homeScreenViewModel
-                        .selectAlarm(alarm)
-                        .changeEnableTo(enable)
-                        .releaseSelectedAlarm()
+                    if (!homeScreenViewModel.nowProcessing) {
+                        homeScreenViewModel
+                            .selectAlarm(alarm)
+                            .changeEnableTo(enable)
+                            .releaseSelectedAlarm()
+                    }
                 },
                 innerPadding = innerPadding,
                 is24Hour = is24Hour,
