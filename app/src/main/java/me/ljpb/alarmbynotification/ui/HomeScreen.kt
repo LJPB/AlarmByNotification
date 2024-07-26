@@ -167,7 +167,7 @@ private fun AlarmList(
         state = listState,
         modifier = modifier.padding(innerPadding)
     ) {
-        itemsIndexed(alarmList) { index, alarm ->
+        itemsIndexed(alarmList, key = ({ index, alarm -> alarm.id })) { index, alarm ->
             AlarmCard(
                 onTitleClick = { onTitleClick(alarm) },
                 onDeleteClick = {
