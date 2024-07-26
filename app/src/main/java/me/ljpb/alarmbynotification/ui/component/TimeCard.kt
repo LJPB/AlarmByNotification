@@ -69,10 +69,9 @@ fun AlarmCard(
             containerColor = MaterialTheme.colorScheme.surfaceContainer
         )
     ) {
-        CardContent(
-            modifier = Modifier
-                .padding(dimensionResource(id = R.dimen.padding_medium))
-                .fillMaxWidth(),
+        CardContent(modifier = Modifier
+            .padding(dimensionResource(id = R.dimen.padding_medium))
+            .fillMaxWidth(),
             onTitleClick = onTitleClick,
             onDeleteClick = onDeleteClick,
             alarm = alarm,
@@ -81,8 +80,7 @@ fun AlarmCard(
             onTimeClick = onTimeClick,
             enable = enable,
             expanded = expanded,
-            onExpandedChange = { onExpandedChange() }
-        )
+            onExpandedChange = { onExpandedChange() })
     }
 }
 
@@ -125,8 +123,7 @@ private fun CardContent(
             // アラームカードのタイトル
             Box(modifier = Modifier
                 .clickable { onTitleClick() }
-                .defaultMinSize(minWidth = 24.dp)
-            ) {
+                .defaultMinSize(minWidth = 24.dp)) {
                 Text(
                     text = title,
                     style = MaterialTheme.typography.bodyMedium,
@@ -134,11 +131,9 @@ private fun CardContent(
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
-            Icon(
-                imageVector = expandIcon,
+            Icon(imageVector = expandIcon,
                 contentDescription = expandDescription,
-                modifier = Modifier.clickable { onExpandedChange() }
-            )
+                modifier = Modifier.clickable { onExpandedChange() })
         }
 
         Row(
@@ -147,18 +142,15 @@ private fun CardContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             // アラームの時間
-            AlarmTime(
-                hour = alarm.hour,
+            AlarmTime(hour = alarm.hour,
                 min = alarm.min,
                 is24Hour = is24Hour,
                 zoneId = alarm.zoneId,
                 enable = enable,
-                modifier = Modifier.clickable { onTimeClick() }
-            )
+                modifier = Modifier.clickable { onTimeClick() })
             // アラームの有効/無効化スイッチ
             Switch(
-                checked = enable,
-                onCheckedChange = onEnableChange
+                checked = enable, onCheckedChange = onEnableChange
             )
         }
 
@@ -176,16 +168,14 @@ private fun CardContent(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = alarm.zoneId,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = alarm.zoneId, color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 // 削除ボタン
                 Row(
-                    modifier = Modifier
-                        .clickable { onDeleteClick() },
+                    modifier = Modifier.clickable { onDeleteClick() },
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(
@@ -225,8 +215,7 @@ private fun AlarmTime(
     }
     val currentZoneId = getZoneId()
     Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically
+        modifier = modifier, verticalAlignment = Alignment.CenterVertically
     ) {
         // 時間
         Text(
@@ -243,7 +232,7 @@ private fun AlarmTime(
                 color = color,
             )
         }
-        
+
         if (currentZoneId != zoneId) {
             Text(
                 text = " ($zoneId)",
@@ -258,8 +247,7 @@ private fun AlarmTime(
 @Preview(showSystemUi = true)
 @Composable
 private fun AlarmCardEnablePreview() {
-    AlarmCard(
-        onTitleClick = {},
+    AlarmCard(onTitleClick = {},
         onDeleteClick = { },
         onEnableChange = {},
         enable = false,
@@ -271,8 +259,7 @@ private fun AlarmCardEnablePreview() {
         is24Hour = true,
         expanded = true,
         onExpandedChange = {},
-        onTimeClick = {}
-    )
+        onTimeClick = {})
 }
 
 @Preview(showSystemUi = true)

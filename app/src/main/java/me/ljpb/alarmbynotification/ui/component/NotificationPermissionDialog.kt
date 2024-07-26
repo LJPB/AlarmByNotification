@@ -35,8 +35,7 @@ fun NotificationPermissionDialog(
     onPositiveClick: () -> Unit,
 ) {
     BasicAlertDialog(
-        onDismissRequest = onDismissRequest,
-        properties = DialogProperties(
+        onDismissRequest = onDismissRequest, properties = DialogProperties(
             dismissOnClickOutside = false
         )
     ) {
@@ -72,7 +71,7 @@ fun NotificationPermissionDialog(
                     )
                 }
                 Spacer(modifier = Modifier.height(24.dp))
-                
+
                 Row {
                     Spacer(modifier = Modifier.weight(1f))
                     TextButton(onClick = onDismissRequest) {
@@ -93,8 +92,5 @@ fun NotificationPermissionDialog(
 @Preview
 @Composable
 private fun NotificationPermissionDialogPreview() {
-    NotificationPermissionDialog(
-        onDismissRequest = {},
-        onPositiveClick = {}
-    )
+    NotificationPermissionDialog(onDismissRequest = {}, onPositiveClick = {})
 }

@@ -15,12 +15,8 @@ abstract class NotificationDatabase : RoomDatabase() {
         fun getDatabase(context: Context): NotificationDatabase {
             return Instance ?: synchronized(this) {
                 Room.databaseBuilder(
-                    context,
-                    NotificationDatabase::class.java,
-                    "notification_database"
-                )
-                    .build()
-                    .also { Instance = it }
+                    context, NotificationDatabase::class.java, "notification_database"
+                ).build().also { Instance = it }
             }
         }
     }

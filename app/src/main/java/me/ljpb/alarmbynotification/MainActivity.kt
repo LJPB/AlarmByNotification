@@ -45,7 +45,7 @@ class MainActivity : ComponentActivity() {
                 LaunchedEffect(Unit) {
                     homeScreenViewModel.resettingNotify(context)
                 }
-                
+
                 val windowSize = calculateWindowSizeClass(this)
                 HomeScreen(
                     windowSize = windowSize,

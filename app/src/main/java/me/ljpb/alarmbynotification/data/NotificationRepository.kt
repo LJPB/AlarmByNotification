@@ -7,7 +7,8 @@ import me.ljpb.alarmbynotification.data.room.NotificationEntity
 import me.ljpb.alarmbynotification.deleteNotification
 import me.ljpb.alarmbynotification.setNotification
 
-class NotificationRepository(private val context: Context, private val dao: NotificationDao) : NotificationRepositoryInterface {
+class NotificationRepository(private val context: Context, private val dao: NotificationDao) :
+    NotificationRepositoryInterface {
     override suspend fun insertNotification(notification: NotificationEntity) {
         dao.insert(notification)
         setNotification(context, notification)

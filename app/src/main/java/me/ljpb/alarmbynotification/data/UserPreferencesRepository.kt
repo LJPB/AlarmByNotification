@@ -17,23 +17,21 @@ class UserPreferencesRepository(
         val SHOW_PERMISSION_DIALOG = booleanPreferencesKey("move_setting_screen")
         val TIME_PICKER = booleanPreferencesKey("time_picker")
     }
-    
+
     // [Android13以上] 通知権限の取得を促すダイアログを表示した
     suspend fun showedPermissionDialog() {
         dataStore.edit {
             it[SHOW_PERMISSION_DIALOG] = true
         }
     }
-    
-    val isShowedPermissionDialog: Flow<Boolean> = dataStore.data
-        .catch {
-            if(it is IOException) {
+
+    val isShowedPermissionDialog: Flow<Boolean> = dataStore.data.catch {
+            if (it is IOException) {
                 emit(emptyPreferences())
             } else {
                 throw it
             }
-        }
-        .map {
+        }.map {
             it[SHOW_PERMISSION_DIALOG] ?: false
         }
 
@@ -43,17 +41,15 @@ class UserPreferencesRepository(
             it[TIME_PICKER] = isTimePicker
         }
     }
-    
+
     // TimePickerDialogダイアログで最後に表示した時間選択コンポーネントはTimePicker?
-    val isTimePicker: Flow<Boolean> = dataStore.data
-        .catch {
-            if(it is IOException) {
+    val isTimePicker: Flow<Boolean> = dataStore.data.catch {
+            if (it is IOException) {
                 emit(emptyPreferences())
             } else {
                 throw it
             }
-        }
-        .map {
+        }.map {
             it[TIME_PICKER] ?: true
         }
 

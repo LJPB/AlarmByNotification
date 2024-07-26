@@ -61,23 +61,16 @@ fun createNotificationChannel(context: Context) {
  * @param notifyId 通知を区別するID
  */
 private fun notify(
-    context: Context,
-    channelId: String,
-    title: String,
-    text: String,
-    icon: Int,
-    notifyId: Int
+    context: Context, channelId: String, title: String, text: String, icon: Int, notifyId: Int
 ) {
-    val builder = NotificationCompat.Builder(context, channelId)
-        .setContentTitle(title)
-        .setContentText(text)
-        .setSmallIcon(icon)
+    val builder =
+        NotificationCompat.Builder(context, channelId).setContentTitle(title).setContentText(text)
+            .setSmallIcon(icon)
 
     with(NotificationManagerCompat.from(context)) {
         // 通知権限のチェック
         if (ActivityCompat.checkSelfPermission(
-                context,
-                Manifest.permission.POST_NOTIFICATIONS
+                context, Manifest.permission.POST_NOTIFICATIONS
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             // TODO 
@@ -96,10 +89,7 @@ private fun notify(
  * @param notifyId 通知を区別するID
  */
 fun alarmNotify(
-    context: Context,
-    title: String,
-    text: String,
-    notifyId: Int
+    context: Context, title: String, text: String, notifyId: Int
 ) {
     notify(
         context = context,
@@ -123,16 +113,15 @@ fun setNotification(context: Context, notificationInfo: NotificationInfoInterfac
     intent.putExtra(NotifyIntentKey.TRIGGER_TIME_MILLI, notificationInfo.triggerTimeMilliSeconds)
     intent.putExtra(NotifyIntentKey.NOTIFY_NAME, notificationInfo.notifyName)
     intent.putExtra(NotifyIntentKey.ZONE_ID, notificationInfo.zoneId)
-    
+
     val pendingIntent = PendingIntent.getBroadcast(
-        context,
-        notificationInfo.notifyId, // requestCode
-        intent,
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        context, notificationInfo.notifyId, // requestCode
+        intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
-    
+
     val alarmManager = context.getSystemService(ALARM_SERVICE) as AlarmManager
-    val alarmClockInfo = AlarmManager.AlarmClockInfo(notificationInfo.triggerTimeMilliSeconds, pendingIntent)
+    val alarmClockInfo =
+        AlarmManager.AlarmClockInfo(notificationInfo.triggerTimeMilliSeconds, pendingIntent)
     alarmManager.setAlarmClock(alarmClockInfo, pendingIntent)
 }
 
@@ -144,10 +133,8 @@ fun setNotification(context: Context, notificationInfo: NotificationInfoInterfac
 fun deleteNotification(context: Context, notificationInfo: NotificationInfoInterface) {
     val intent = Intent(context, NotifyReceiver::class.java)
     val pendingIntent = PendingIntent.getBroadcast(
-        context,
-        notificationInfo.notifyId, // requestCode
-        intent,
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        context, notificationInfo.notifyId, // requestCode
+        intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
     val alarmManager = context.getSystemService(ALARM_SERVICE) as AlarmManager
     pendingIntent.cancel()

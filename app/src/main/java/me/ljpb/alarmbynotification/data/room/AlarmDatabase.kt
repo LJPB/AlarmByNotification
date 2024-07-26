@@ -15,12 +15,8 @@ abstract class AlarmDatabase : RoomDatabase() {
         fun getDatabase(context: Context): AlarmDatabase {
             return Instance ?: synchronized(this) {
                 Room.databaseBuilder(
-                    context,
-                    AlarmDatabase::class.java,
-                    "alarm_database"
-                )
-                    .build()
-                    .also { Instance = it }
+                    context, AlarmDatabase::class.java, "alarm_database"
+                ).build().also { Instance = it }
             }
         }
     }

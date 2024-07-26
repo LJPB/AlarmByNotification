@@ -62,10 +62,7 @@ val ALARM_ICON = Icons.Default.Alarm
  * [NormalLandscape] 一般的な大きさの端末を除く，Normalの横画面
  */
 enum class ScreenType {
-    CompactCompact,
-    CompactLandscape,
-    NormalPortrait,
-    NormalLandscape,
+    CompactCompact, CompactLandscape, NormalPortrait, NormalLandscape,
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -80,7 +77,7 @@ fun TimePickerDialog(
 ) {
     // 表示しているダイアログはTimePicker? 初期値は，前回表示した種類と同じ(初回起動時はtrue)
     var currentIsPicker by remember { mutableStateOf(recentlyIsTimePicker) }
-    
+
     var compositionCount by remember { mutableIntStateOf(0) }
     compositionCount++
     Log.d("compositionCount", "$compositionCount")
@@ -93,8 +90,7 @@ fun TimePickerDialog(
     val dialogModifier: Modifier
 
     when {
-        windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact
-                && windowSizeClass.heightSizeClass == WindowHeightSizeClass.Compact -> { // 縦横ともにCompact
+        windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact && windowSizeClass.heightSizeClass == WindowHeightSizeClass.Compact -> { // 縦横ともにCompact
             screenType = ScreenType.CompactCompact
             usePlatformDefaultWidth = false
             dialogModifier = modifier
@@ -146,8 +142,7 @@ fun TimePickerDialog(
         )
     ) {
         Surface(
-            shape = MaterialTheme.shapes.large,
-            tonalElevation = AlertDialogDefaults.TonalElevation
+            shape = MaterialTheme.shapes.large, tonalElevation = AlertDialogDefaults.TonalElevation
         ) {
             DialogContent(
                 onDismissRequest = onDismissRequest,
@@ -260,13 +255,11 @@ private fun DialogContentBody(
         Spacer(modifier = Modifier.height(20.dp))
         if (isPicker) {
             TimePicker(
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-                state = timePickerState
+                modifier = Modifier.align(Alignment.CenterHorizontally), state = timePickerState
             )
         } else {
             TimeInput(
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-                state = timePickerState
+                modifier = Modifier.align(Alignment.CenterHorizontally), state = timePickerState
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -327,8 +320,7 @@ private fun DialogContentCompactLandscapePickerBody(
             layoutType = TimePickerLayoutType.Horizontal
         )
         Row(
-            modifier = Modifier
-                .align(Alignment.BottomCenter),
+            modifier = Modifier.align(Alignment.BottomCenter),
         ) {
             IconButton(onClick = iconButtonOnClick) {
                 Icon(
@@ -407,8 +399,7 @@ private fun TimePickerDialogPreview() {
         )
     ) {
         Surface(
-            shape = MaterialTheme.shapes.large,
-            tonalElevation = AlertDialogDefaults.TonalElevation
+            shape = MaterialTheme.shapes.large, tonalElevation = AlertDialogDefaults.TonalElevation
         ) {
             DialogContentCompactBody(
                 onDismissRequest = {},

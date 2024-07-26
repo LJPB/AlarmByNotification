@@ -25,18 +25,20 @@ class NotifyReceiver : BroadcastReceiver() {
             val notifyName = intent.getStringExtra(NotifyIntentKey.NOTIFY_NAME) ?: ""
             val triggerTime = intent.getLongExtra(NotifyIntentKey.TRIGGER_TIME_MILLI, 1)
             val zoneId = intent.getStringExtra(NotifyIntentKey.ZONE_ID) ?: ""
-          
+
             val instant = Instant.ofEpochMilli(triggerTime)
             val zonedDateTime = ZonedDateTime.ofInstant(instant, ZoneId.of(zoneId))
-            val formattedTime = getFormattedTime(zonedDateTime.hour, zonedDateTime.minute, DateFormat.is24HourFormat(context))
-            
+            val formattedTime = getFormattedTime(
+                zonedDateTime.hour, zonedDateTime.minute, DateFormat.is24HourFormat(context)
+            )
+
             alarmNotify(
                 context = context,
                 title = notifyName,
                 text = formattedTime.toString(),
                 notifyId = notifyId
             )
-            
+
             // 鳴らした通知は削除する
             val application = context.applicationContext as NotificationApplication
             val repository = application.container.notificationRepository

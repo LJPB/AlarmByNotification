@@ -6,8 +6,7 @@ import me.ljpb.alarmbynotification.data.NotificationInfoInterface
 
 @Entity(tableName = "notifications")
 data class NotificationEntity(
-    @PrimaryKey(autoGenerate = false)
-    override val notifyId: Int,
+    @PrimaryKey(autoGenerate = false) override val notifyId: Int,
     override val alarmId: Long,
     override val triggerTimeMilliSeconds: Long,
     override val notifyName: String,

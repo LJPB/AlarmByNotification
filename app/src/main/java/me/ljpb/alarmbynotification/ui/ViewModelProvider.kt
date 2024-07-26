@@ -6,8 +6,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import me.ljpb.alarmbynotification.NotificationApplication
 
 object ViewModelProvider {
-    val Factory = viewModelFactory { 
-        initializer { 
+    val Factory = viewModelFactory {
+        initializer {
             val application = (this[APPLICATION_KEY] as NotificationApplication)
             val notificationRepository = application.container.notificationRepository
             val alarmRepository = application.container.alarmRepository

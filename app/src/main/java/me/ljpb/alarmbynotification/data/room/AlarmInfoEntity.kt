@@ -12,9 +12,8 @@ interface AlarmInfoInterface {
 }
 
 @Entity("alarms")
-data class AlarmInfoEntity (
-    @PrimaryKey(autoGenerate = true)
-    override val id: Long = 0,
+data class AlarmInfoEntity(
+    @PrimaryKey(autoGenerate = true) override val id: Long = 0,
     override val hour: Int,
     override val min: Int,
     override val zoneId: String,

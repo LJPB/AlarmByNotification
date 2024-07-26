@@ -31,9 +31,7 @@ object Utility {
      * @param displaySecond 秒を表示するかどうか
      */
     fun localDateTimeToFormattedTime(
-        localDateTime: LocalDateTime,
-        isFormat24: Boolean = false,
-        displaySecond: Boolean = true
+        localDateTime: LocalDateTime, isFormat24: Boolean = false, displaySecond: Boolean = true
     ): String {
         val timeFormat = if (isFormat24) {
             val ptn = if (displaySecond) "HH:mm:ss" else "HH:mm"
@@ -50,8 +48,7 @@ object Utility {
         val localTime = LocalTime.of(hour, min)
         val formattedTime = if (is24Hour) {
             FormattedTime(
-                time = localTime.format(DateTimeFormatter.ofPattern("HH:mm")),
-                period = ""
+                time = localTime.format(DateTimeFormatter.ofPattern("HH:mm")), period = ""
             )
         } else {
             FormattedTime(
@@ -68,9 +65,7 @@ object Utility {
      * 現在の時刻と同じ場合は，翌日の時刻とみなす。
      */
     fun getMilliSecondsOfNextTime(
-        triggerHour: Int,
-        triggerMinutes: Int,
-        currentTime: ZonedDateTime
+        triggerHour: Int, triggerMinutes: Int, currentTime: ZonedDateTime
     ): Long {
         val currentHour = currentTime.hour
         val currentMin = currentTime.minute
@@ -89,29 +84,25 @@ object Utility {
             // 分単位で計算したいため，秒を0にしている
             // たとえば現在時刻が10時10分10秒で，triggerTimeが11時10分のとき，minusSecondsがなければ，triggerDateTimeは11時10分10秒になってしまう
             // この秒差をなくすために，currentTimeからcurrentTimeの秒数を引いている
-            .minusSeconds(currentSec.toLong())
-            .plusMinutes(diff.toLong())
+            .minusSeconds(currentSec.toLong()).plusMinutes(diff.toLong())
             .toEpochSecond() * 1000 // ミリ秒化
 
         return triggerDateTime
     }
 
     /**
-     * 指定の時間は[currentTime]から何時間何分後かをPair<Hour, Minutes>の形式(いずれもInt)で返す
+     * 指定の時間は[currentTime]から何時間何分後かをPair<hour: Long, minutes: Long>の形式で返す
      */
     fun getHowManyLater(
-        triggerHour: Int,
-        triggerMin: Int,
-        currentTime: ZonedDateTime
+        triggerHour: Int, triggerMin: Int, currentTime: ZonedDateTime
     ): Pair<Long, Long> {
         val triggerTimeMilliSeconds =
             getMilliSecondsOfNextTime(triggerHour, triggerMin, currentTime)
         val instant = Instant.ofEpochMilli(triggerTimeMilliSeconds)
         val triggerDateTime = ZonedDateTime.ofInstant(instant, currentTime.zone)
-        val duration = Duration
-            .between(currentTime.minusSeconds(currentTime.second.toLong()), triggerDateTime)
-            .plusMinutes(1)
-            .toMinutes()
+        val duration =
+            Duration.between(currentTime.minusSeconds(currentTime.second.toLong()), triggerDateTime)
+                .plusMinutes(1).toMinutes()
         return Pair(duration / 60, duration % 60)
     }
 
@@ -124,21 +115,18 @@ object Utility {
     }
 
     suspend fun resettingNotify(context: Context, repository: NotificationRepositoryInterface) {
-        repository
-            .getAllNotifications()
-            .firstOrNull()
-            ?.forEach { notification ->
-                // ========== 注意 ==========
-                // triggerTimeMilliSecondsは秒単位の時間の1000倍でミリ秒を表現しているため，1秒未満は全て0となっている。
-                val currentTime = System.currentTimeMillis()
-                if (notification.triggerTimeMilliSeconds < currentTime) {
-                    // 過ぎていたら
-                    setNotification(context = context, notificationInfo = notification)
-                    repository.deleteNotification(notification)
-                } else {
-                    setNotification(context = context, notificationInfo = notification)
-                }
+        repository.getAllNotifications().firstOrNull()?.forEach { notification ->
+            // ========== 注意 ==========
+            // triggerTimeMilliSecondsは秒単位の時間の1000倍でミリ秒を表現しているため，1秒未満は全て0となっている。
+            val currentTime = System.currentTimeMillis()
+            if (notification.triggerTimeMilliSeconds < currentTime) {
+                // 過ぎていたら
+                setNotification(context = context, notificationInfo = notification)
+                repository.deleteNotification(notification)
+            } else {
+                setNotification(context = context, notificationInfo = notification)
             }
+        }
     }
 
 }

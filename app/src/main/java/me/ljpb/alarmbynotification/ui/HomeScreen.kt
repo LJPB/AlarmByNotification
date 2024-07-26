@@ -100,8 +100,7 @@ fun HomeScreen(
 //        topBar = {
 //            HomeScreenTopAppBar()
 //        },
-        floatingActionButtonPosition = FabPosition.Center,
-        floatingActionButton = {
+        floatingActionButtonPosition = FabPosition.Center, floatingActionButton = {
             if (windowSize.widthSizeClass == WindowWidthSizeClass.Compact) {
                 FloatingActionButton {
                     if (!homeScreenViewModel.showDialog) {
@@ -111,8 +110,7 @@ fun HomeScreen(
                     }
                 }
             }
-        },
-        snackbarHost = {
+        }, snackbarHost = {
             SnackbarHost(hostState = snackbar)
         }
 
@@ -120,8 +118,7 @@ fun HomeScreen(
         if (alarmList == INITIAL_ALARM_LIST || notificationList == INITIAL_NOTIFY_LIST) {
             Loading(modifier = Modifier.padding(innerPadding))
         } else {
-            HomeScreenContent(
-                innerPadding = innerPadding,
+            HomeScreenContent(innerPadding = innerPadding,
                 timePickerDialogViewModel = timePickerDialogViewModel,
                 homeScreenViewModel = homeScreenViewModel,
                 windowSize = windowSize,
@@ -129,12 +126,11 @@ fun HomeScreen(
                 snackbar = snackbar,
                 alarmList = alarmList,
                 notificationList = notificationList,
-                actionButtonOnClick = { 
+                actionButtonOnClick = {
                     timePickerDialogViewModel.showAlarmAddDialog(is24Hour = is24Hour) {
                         homeScreenViewModel.showDialog()
                     }
-                }
-            )
+                })
         }
     }
 }
@@ -147,12 +143,10 @@ private fun Empty(
     modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center
     ) {
         Text(
-            text = stringResource(id = R.string.empty),
-            style = MaterialTheme.typography.bodyLarge
+            text = stringResource(id = R.string.empty), style = MaterialTheme.typography.bodyLarge
         )
     }
 }
@@ -178,12 +172,10 @@ private fun AlarmList(
     val view = LocalView.current
 
     LazyColumn(
-        state = listState,
-        modifier = modifier.padding(innerPadding)
+        state = listState, modifier = modifier.padding(innerPadding)
     ) {
         itemsIndexed(alarmList, key = ({ _, alarm -> alarm.id })) { index, alarm ->
-            AlarmCard(
-                onTitleClick = { onTitleClick(alarm) },
+            AlarmCard(onTitleClick = { onTitleClick(alarm) },
                 onDeleteClick = {
                     onDeleteClick(alarm)
                     expandCardIndex = -1
@@ -204,11 +196,10 @@ private fun AlarmList(
                 },
                 enable = notificationList.find { it.alarmId == alarm.id } != null,  // notificationListに含まれていれば(findがnull出なければ)有効
                 alarm = alarm,
-                modifier = Modifier
-                    .padding(
-                        vertical = dimensionResource(id = R.dimen.padding_small),
-                        horizontal = dimensionResource(id = R.dimen.padding_medium)
-                    ),
+                modifier = Modifier.padding(
+                    vertical = dimensionResource(id = R.dimen.padding_small),
+                    horizontal = dimensionResource(id = R.dimen.padding_medium)
+                ),
                 is24Hour = is24Hour,
                 expanded = expandCardIndex == index,
                 onExpandedChange = {
@@ -218,8 +209,7 @@ private fun AlarmList(
                         index
                     }
                 },
-                onTimeClick = { onTimeClick(alarm) }
-            )
+                onTimeClick = { onTimeClick(alarm) })
         }
         item {
             Spacer(modifier = Modifier.height(128.dp))
@@ -290,14 +280,11 @@ private fun HomeScreenContent(
                     )
                     val enabledMessage = if (later.first == 0L) {
                         context.getString(
-                            R.string.enabled_alarm_m,
-                            later.second
+                            R.string.enabled_alarm_m, later.second
                         )
                     } else {
                         context.getString(
-                            R.string.enabled_alarm_hm,
-                            later.first,
-                            later.second
+                            R.string.enabled_alarm_hm, later.first, later.second
                         )
                     }
                     snackbar.showSnackbar(enabledMessage)
@@ -342,11 +329,9 @@ private fun HomeScreenContent(
             homeScreenViewModel.hiddenTitleInputDialog()
         }
         val focusRequester = remember { FocusRequester() }
-        TitleInputDialog(
-            onDismissRequest = {
-                homeScreenViewModel
-                    .hiddenTitleInputDialog()
-            },
+        TitleInputDialog(onDismissRequest = {
+            homeScreenViewModel.hiddenTitleInputDialog()
+        },
             onPositiveClick = {
                 homeScreenViewModel.updateAlarmName(it)
             },
@@ -381,8 +366,7 @@ private fun HomeScreenContent(
                     intent.putExtra("app_package", context.packageName)
                     intent.putExtra("app_uid", context.applicationInfo.uid)
                     intent.putExtra(
-                        "android.provider.extra.APP_PACKAGE",
-                        context.packageName
+                        "android.provider.extra.APP_PACKAGE", context.packageName
                     )
                     context.startActivity(intent)
                 } else {
@@ -465,29 +449,25 @@ fun HomeScreenContentBody(
                 homeScreenViewModel = homeScreenViewModel,
                 onTitleClick = {
                     if (!homeScreenViewModel.showDialog && !homeScreenViewModel.nowProcessing) {
-                        homeScreenViewModel
-                            .selectAlarm(it)
-                            .showTitleInputDialog()
+                        homeScreenViewModel.selectAlarm(it).showTitleInputDialog()
                     }
                 },
                 onTimeClick = {
                     if (!homeScreenViewModel.showDialog && !homeScreenViewModel.nowProcessing) {
-                        timePickerDialogViewModel.showUpdateDialog(alarm = it, is24Hour = is24Hour) {
-                            homeScreenViewModel
-                                .selectAlarm(it)
-                                .showDialog()
+                        timePickerDialogViewModel.showUpdateDialog(
+                            alarm = it, is24Hour = is24Hour
+                        ) {
+                            homeScreenViewModel.selectAlarm(it).showDialog()
                         }
                     }
                 },
                 onDeleteClick = {
                     if (!homeScreenViewModel.nowProcessing) {
-                        homeScreenViewModel
-                            .selectAlarm(it)
-                            .delete {
-                                homeScreenViewModel.hiddenTitleInputDialog()
-                                timePickerDialogViewModel.hiddenAlarmAddDialog {  }
-                                timePickerDialogViewModel.hiddenUpdateDialog {  }
-                            }
+                        homeScreenViewModel.selectAlarm(it).delete {
+                            homeScreenViewModel.hiddenTitleInputDialog()
+                            timePickerDialogViewModel.hiddenAlarmAddDialog { }
+                            timePickerDialogViewModel.hiddenUpdateDialog { }
+                        }
 
                         scope.launch {
                             snackbar.currentSnackbarData?.dismiss()
@@ -498,9 +478,9 @@ fun HomeScreenContentBody(
                             )
                             when (result) {
                                 SnackbarResult.ActionPerformed -> {
-                                    homeScreenViewModel.undoDelete() {
-                                    }
+                                    homeScreenViewModel.undoDelete() {}
                                 }
+
                                 SnackbarResult.Dismissed -> {
                                     homeScreenViewModel.popTrash()
                                 }
@@ -510,30 +490,25 @@ fun HomeScreenContentBody(
                 },
                 onEnableChange = { alarm, enable ->
                     if (!homeScreenViewModel.nowProcessing) {
-                        homeScreenViewModel
-                            .selectAlarm(alarm)
-                            .changeEnableTo(enable) { enabled ->
-                                if (enabled) {
-                                    val later =
-                                        getHowManyLater(alarm.hour, alarm.min, ZonedDateTime.now())
-                                    val enabledMessage = if (later.first == 0L) {
-                                        context.getString(
-                                            R.string.enabled_alarm_m,
-                                            later.second
-                                        )
-                                    } else {
-                                        context.getString(
-                                            R.string.enabled_alarm_hm,
-                                            later.first,
-                                            later.second
-                                        )
-                                    }
-                                    scope.launch {
-                                        snackbar.currentSnackbarData?.dismiss()
-                                        snackbar.showSnackbar(enabledMessage)
-                                    }
+                        homeScreenViewModel.selectAlarm(alarm).changeEnableTo(enable) { enabled ->
+                            if (enabled) {
+                                val later =
+                                    getHowManyLater(alarm.hour, alarm.min, ZonedDateTime.now())
+                                val enabledMessage = if (later.first == 0L) {
+                                    context.getString(
+                                        R.string.enabled_alarm_m, later.second
+                                    )
+                                } else {
+                                    context.getString(
+                                        R.string.enabled_alarm_hm, later.first, later.second
+                                    )
                                 }
-                            } // changeEnableTo
+                                scope.launch {
+                                    snackbar.currentSnackbarData?.dismiss()
+                                    snackbar.showSnackbar(enabledMessage)
+                                }
+                            }
+                        } // changeEnableTo
 //                            .releaseSelectedAlarm()
                     } // if
                 },
@@ -567,25 +542,16 @@ private fun TitleInputDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.padding_medium)))
-                OutlinedTextField(
-                    modifier = Modifier.focusRequester(focusRequester),
-                    label = {
-                        Text(stringResource(id = R.string.set_title))
-                    },
-                    value = inputTitle,
-                    onValueChange = {
-                        inputTitle = it
-                    },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        imeAction = ImeAction.Done
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            onPositiveClick(inputTitle)
-                            onDismissRequest()
-                        }
-                    )
+                OutlinedTextField(modifier = Modifier.focusRequester(focusRequester), label = {
+                    Text(stringResource(id = R.string.set_title))
+                }, value = inputTitle, onValueChange = {
+                    inputTitle = it
+                }, singleLine = true, keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Done
+                ), keyboardActions = KeyboardActions(onDone = {
+                    onPositiveClick(inputTitle)
+                    onDismissRequest()
+                })
                 )
                 Row(
                     modifier = Modifier.padding(top = dimensionResource(id = R.dimen.padding_small))
@@ -643,8 +609,7 @@ private fun FloatingActionButton(
 @Composable
 fun Loading(modifier: Modifier = Modifier) {
     Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center
     ) {
         CircularProgressIndicator()
     }

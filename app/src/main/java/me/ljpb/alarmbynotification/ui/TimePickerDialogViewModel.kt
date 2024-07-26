@@ -60,7 +60,12 @@ class TimePickerDialogViewModel(
         setAlarmInitialState(true)
     }
 
-    fun showAlarmAddDialog(hour: Int? = null, min: Int? = null, is24Hour: Boolean, showAction: () -> Unit) {
+    fun showAlarmAddDialog(
+        hour: Int? = null,
+        min: Int? = null,
+        is24Hour: Boolean,
+        showAction: () -> Unit
+    ) {
         showAction()
         if (hour != null && min != null) {
             setAlarmState(hour, min, is24Hour)

@@ -192,8 +192,7 @@ class HomeScreenViewModel(
     }
 
     fun changeEnableTo(
-        enabled: Boolean,
-        changeEnableAction: (Boolean) -> Unit
+        enabled: Boolean, changeEnableAction: (Boolean) -> Unit
     ): HomeScreenViewModel {
         if (selectedAlarm != INITIAL_ALARM) {
             locked {
@@ -207,9 +206,7 @@ class HomeScreenViewModel(
                 val deferred = async {
                     if (enabled) { // アラームを有効にした場合
                         val triggerTimeMilliSeconds = getMilliSecondsOfNextTime(
-                            alarm.hour,
-                            alarm.min,
-                            ZonedDateTime.now(ZoneId.of(alarm.zoneId))
+                            alarm.hour, alarm.min, ZonedDateTime.now(ZoneId.of(alarm.zoneId))
                         )
                         val notifyId = UUID.randomUUID().hashCode()
                         val notification = NotificationEntity(
@@ -255,7 +252,7 @@ class HomeScreenViewModel(
                 if (targetNotify != null) {  // アラームを有効化していた
                     putTrash(selectedAlarm, targetNotify)
                     notificationRepository.deleteNotification(targetNotify as NotificationEntity)
-                }else {
+                } else {
                     putTrash(selectedAlarm, INITIAL_NOTIFY)
                 }
                 releaseSelectedAlarm()
@@ -330,6 +327,7 @@ class HomeScreenViewModel(
 
     private val _scope = viewModelScope
     private val mutex = Mutex()
+
     // lockedで囲まれた異なる処理が同時に行われることはない
     // これにより，アラームの削除ボタンと有効化を同時に押すことによる，「deleteしたのにchangeEnable(true)」となる事態を避ける
     private fun locked(scope: CoroutineScope = _scope, block: suspend CoroutineScope.() -> Unit) {
