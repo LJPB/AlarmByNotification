@@ -18,7 +18,7 @@ class UserPreferencesRepository(
         val TIME_PICKER = booleanPreferencesKey("time_picker")
     }
     
-    // [Android13以上] 通知権限の取得を促すダイアログを表示した？
+    // [Android13以上] 通知権限の取得を促すダイアログを表示した
     suspend fun showedPermissionDialog() {
         dataStore.edit {
             it[SHOW_PERMISSION_DIALOG] = true

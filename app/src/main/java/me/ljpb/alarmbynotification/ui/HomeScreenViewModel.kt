@@ -270,6 +270,7 @@ class HomeScreenViewModel(
     fun showPermissionDialog() {
         viewModelScope.launch {
             preferencesRepository.showedPermissionDialog()
+            showDialog()
         }
     }
 

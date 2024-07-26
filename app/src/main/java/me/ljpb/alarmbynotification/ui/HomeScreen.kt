@@ -372,6 +372,7 @@ private fun HomeScreenContent(
         if (!notificationPermissionState.status.isGranted) {
             NotificationPermissionDialog(onDismissRequest = {
                 showedPermissionSupportDialog = true
+                homeScreenViewModel.hiddenDialog()
             }) {
                 if (isShowedPermissionDialog) {
                     // 通知権限の許可ダイアログを過去に一度表示している場合は，通知設定画面に遷移する
