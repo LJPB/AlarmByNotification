@@ -34,6 +34,10 @@ import androidx.compose.material3.LargeFloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -64,14 +68,17 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import me.ljpb.alarmbynotification.R
 import me.ljpb.alarmbynotification.Utility
+import me.ljpb.alarmbynotification.Utility.getHowManyLater
 import me.ljpb.alarmbynotification.data.room.AlarmInfoInterface
 import me.ljpb.alarmbynotification.ui.component.AlarmCard
 import me.ljpb.alarmbynotification.ui.component.NotificationPermissionDialog
 import me.ljpb.alarmbynotification.ui.component.TimePickerDialog
 import java.time.LocalDateTime
+import java.time.ZonedDateTime
 
 @SuppressLint("CoroutineCreationDuringComposition", "StateFlowValueCalledInComposition")
 @Composable
@@ -83,6 +90,7 @@ fun HomeScreen(
 ) {
     val currentTime by homeScreenViewModel.currentDateTime.collectAsState()
     val scope = rememberCoroutineScope()
+    val snackbar = remember { SnackbarHostState() }
     val context = LocalContext.current
     val is24Hour = DateFormat.is24HourFormat(context)
     scope.launch {
@@ -99,7 +107,11 @@ fun HomeScreen(
                     timePickerDialogViewModel.showAlarmDialog(is24Hour = is24Hour)
                 }
             }
+        },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbar)
         }
+
     ) { innerPadding ->
         HomeScreenContent(
             innerPadding = innerPadding,
@@ -107,6 +119,7 @@ fun HomeScreen(
             homeScreenViewModel = homeScreenViewModel,
             windowSize = windowSize,
             is24Hour = is24Hour,
+            snackbar = snackbar,
             actionButtonOnClick = { timePickerDialogViewModel.showAlarmDialog(is24Hour = is24Hour) }
         )
     }
@@ -177,10 +190,12 @@ private fun AlarmList(
                 },
                 enable = notificationList.find { it.alarmId == alarm.id } != null,  // notificationListに含まれていれば(findがnull出なければ)有効
                 alarm = alarm,
-                modifier = Modifier.padding(
+                modifier = Modifier
+                    .padding(
                     vertical = dimensionResource(id = R.dimen.padding_small),
                     horizontal = dimensionResource(id = R.dimen.padding_medium)
-                ),
+                )
+                ,
                 is24Hour = is24Hour,
                 expanded = expandCardIndex == index,
                 onExpandedChange = {
@@ -223,9 +238,12 @@ private fun HomeScreenContent(
     timePickerDialogViewModel: TimePickerDialogViewModel,
     homeScreenViewModel: HomeScreenViewModel,
     actionButtonOnClick: () -> Unit,
+    snackbar: SnackbarHostState,
     is24Hour: Boolean,
 ) {
     val alarmList by homeScreenViewModel.alarmList.collectAsState()
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     // TimePickerダイアログの時間を選択するコンポーネントで最後に表示した種類が
     // TimePickerがTimeInputかを記憶して，最後に表示したものと同じ種類のコンポーネントを表示できるようにする
@@ -240,6 +258,27 @@ private fun HomeScreenContent(
             onPositiveClick = { currentIsPicker ->
                 timePickerDialogViewModel.add(homeScreenViewModel::setAddItemId)
                 timePickerDialogViewModel.setRecentlyComponentIsTimePicker(currentIsPicker)
+                scope.launch {
+                    snackbar.currentSnackbarData?.dismiss()
+                    val later = getHowManyLater(
+                        timePickerDialogViewModel.alarmState.hour,
+                        timePickerDialogViewModel.alarmState.minute,
+                        ZonedDateTime.now()
+                    )
+                    val enabledMessage = if (later.first == 0L) {
+                        context.getString(
+                            R.string.enabled_alarm_m,
+                            later.second
+                        )
+                    } else {
+                        context.getString(
+                            R.string.enabled_alarm_hm,
+                            later.first,
+                            later.second
+                        )
+                    }
+                    snackbar.showSnackbar(enabledMessage)
+                }
             },
             windowSizeClass = windowSize,
             recentlyIsTimePicker = recentlyIsTimePicker,
@@ -256,6 +295,7 @@ private fun HomeScreenContent(
                 timePickerDialogViewModel.hiddenUpdateDialog()
             },
             onPositiveClick = {
+                // TODO: 有効なアラームの時間を更新した場合はスナックバーを表示する 
                 timePickerDialogViewModel.updateTime(
                     targetAlarm = targetAlarm,
                     targetNotify = targetNotify
@@ -295,7 +335,6 @@ private fun HomeScreenContent(
     */
     if (Build.VERSION.SDK_INT >= 33 && !isShowedDialog) {
         // Android13以上で，アプリ起動後にまだ通知権限の許可を促すダイアログを表示していない場合
-        val context = LocalContext.current
         val isShowedPermissionDialog by homeScreenViewModel.isShowedPermissionDialog.collectAsState()
 
         val notificationPermissionState = rememberPermissionState(
@@ -330,6 +369,8 @@ private fun HomeScreenContent(
                 alarmList = alarmList,
                 homeScreenViewModel = homeScreenViewModel,
                 is24Hour = is24Hour,
+                snackbar = snackbar,
+                scope = scope,
                 timePickerDialogViewModel = timePickerDialogViewModel
             )
         }
@@ -342,6 +383,8 @@ private fun HomeScreenContent(
                     alarmList = alarmList,
                     homeScreenViewModel = homeScreenViewModel,
                     is24Hour = is24Hour,
+                    snackbar = snackbar,
+                    scope = scope,
                     timePickerDialogViewModel = timePickerDialogViewModel
                 )
                 Box(
@@ -368,8 +411,13 @@ fun HomeScreenContentBody(
     homeScreenViewModel: HomeScreenViewModel,
     timePickerDialogViewModel: TimePickerDialogViewModel,
     is24Hour: Boolean,
+    snackbar: SnackbarHostState,
+    scope: CoroutineScope,
 ) {
+    val context = LocalContext.current
     val alarmListIsEmpty = alarmList.isEmpty()
+    val deletedMessage = stringResource(id = R.string.deleted_alarm)
+    val undo = stringResource(id = R.string.undo)
     Box(
         modifier = modifier
     ) {
@@ -390,11 +438,28 @@ fun HomeScreenContentBody(
                 },
                 onDeleteClick = {
                     if (!homeScreenViewModel.nowProcessing) {
-                        homeScreenViewModel
-                            .selectAlarm(it)
-                            .changeEnableTo(false)
-                            .delete()
-                            .releaseSelectedAlarm()
+                        scope.launch {
+                            homeScreenViewModel
+                                .selectAlarm(it)
+                                .putTrash(it)
+                                .changeEnableTo(false)
+                                .delete()
+                                .releaseSelectedAlarm()
+                            snackbar.currentSnackbarData?.dismiss()
+                            val result = snackbar.showSnackbar(
+                                message = deletedMessage,
+                                actionLabel = undo,
+                                duration = SnackbarDuration.Short
+                            )
+                            when (result) {
+                                SnackbarResult.ActionPerformed -> {
+                                    homeScreenViewModel.undoDelete()
+                                }
+                                SnackbarResult.Dismissed -> {
+                                    homeScreenViewModel.popTrash()
+                                }
+                            }
+                        }
                     }
                 },
                 onEnableChange = { alarm, enable ->
@@ -403,6 +468,25 @@ fun HomeScreenContentBody(
                             .selectAlarm(alarm)
                             .changeEnableTo(enable)
                             .releaseSelectedAlarm()
+                        if (enable) {
+                            val later = getHowManyLater(alarm.hour, alarm.min, ZonedDateTime.now())
+                            val enabledMessage = if (later.first == 0L) {
+                                context.getString(
+                                    R.string.enabled_alarm_m,
+                                    later.second
+                                )
+                            } else {
+                                context.getString(
+                                    R.string.enabled_alarm_hm,
+                                    later.first,
+                                    later.second
+                                )
+                            }
+                            scope.launch {
+                                snackbar.currentSnackbarData?.dismiss()
+                                snackbar.showSnackbar(enabledMessage)
+                            }
+                        }
                     }
                 },
                 innerPadding = innerPadding,

@@ -11,6 +11,12 @@
     <string name="input_time">時間を入力</string>
     <string name="picker_time">時間を選択</string>
 
+    <string name="enabled_alarm_hm">%1$d時間%2$d分後にアラームをセットしました</string>
+    <string name="enabled_alarm_h">%1$d時間後にアラームをセットしました</string>
+    <string name="enabled_alarm_m">%1$d分後にアラームをセットしました</string>
+    <string name="deleted_alarm">アラームを削除しました</string>
+    <string name="undo">戻す</string>
+    
     <string name="to_open_card">展開する</string>
     <string name="to_close_card">閉じる</string>
     

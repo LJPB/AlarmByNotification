@@ -4,6 +4,8 @@ import android.content.Context
 import kotlinx.coroutines.flow.firstOrNull
 import me.ljpb.alarmbynotification.data.NotificationRepositoryInterface
 import java.time.DateTimeException
+import java.time.Duration
+import java.time.Instant
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
@@ -94,6 +96,17 @@ object Utility {
         return triggerDateTime
     }
 
+    fun getHowManyLater(triggerHour: Int, triggerMin: Int, currentTime: ZonedDateTime): Pair<Long, Long> {
+        val triggerTimeMilliSeconds = getMilliSecondsOfNextTime(triggerHour, triggerMin, currentTime)
+        val instant = Instant.ofEpochMilli(triggerTimeMilliSeconds)
+        val triggerDateTime = ZonedDateTime.ofInstant(instant, currentTime.zone)
+        val duration = Duration
+            .between(currentTime.minusSeconds(currentTime.second.toLong()), triggerDateTime)
+            .plusMinutes(1)
+            .toMinutes()
+        return Pair(duration / 60, duration % 60)
+    }
+    
     fun getZoneId(): String = try {
         ZoneId.systemDefault().id
     } catch (_: ZoneRulesException) {

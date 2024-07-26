@@ -73,6 +73,8 @@ class HomeScreenViewModel(
     var nowProcessing by mutableStateOf(false)
         private set
 
+    private var alarmTrash: Pair<AlarmInfoInterface, Boolean>? = null
+
     // アラームリストでタップしたアラーム
     private var selectedAlarm: AlarmInfoInterface? = null
 
@@ -112,7 +114,9 @@ class HomeScreenViewModel(
             val deferred = viewModelScope.async {
                 // セットしたアラームのタイトルを変更したとき，通知のタイトルも変える
                 val notify = notificationList.value.find { it.alarmId == selectedAlarm!!.id }
-                if (notify != null && alarmRepository.getItem(notify.alarmId).firstOrNull() != null) {
+                if (notify != null && alarmRepository.getItem(notify.alarmId)
+                        .firstOrNull() != null
+                ) {
                     notificationRepository.updateNotification(
                         (notify as NotificationEntity).copy(
                             notifyName = name
@@ -136,6 +140,32 @@ class HomeScreenViewModel(
             selectedAlarm!!.name
         }
         return ""
+    }
+
+    fun undoDelete() {
+        val tmp = popTrash()
+        tmp ?: return
+        val deferred = viewModelScope.async {
+            nowProcessing = true
+            alarmRepository.insert(tmp.first.toAlarmInfoEntity())
+            selectAlarm(tmp.first)
+            changeEnableTo(tmp.second)
+            releaseSelectedAlarm()
+            return@async false
+        }
+        viewModelScope.launch { nowProcessing = deferred.await() }
+    }
+
+    fun putTrash(alarm: AlarmInfoInterface): HomeScreenViewModel {
+        val enabled = notificationList.value.find { it.alarmId == alarm.id } != null
+        alarmTrash = Pair(alarm, enabled)
+        return this
+    }
+
+    fun popTrash(): Pair<AlarmInfoInterface, Boolean>? {
+        val tmp = alarmTrash
+        alarmTrash = null
+        return tmp
     }
 
     fun changeEnableTo(enabled: Boolean): HomeScreenViewModel {
