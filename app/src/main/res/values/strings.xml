@@ -1,9 +1,9 @@
 <resources>
-    <string name="app_name">Alarm By Notification</string>
+    <string name="app_name">通知アラーム</string>
     
     <string name="delete_alarm">削除</string>
     <string name="untitled">名称未設定</string>
-    <string name="empty">セットされた時間はありません</string>
+    <string name="empty">アラームはありません</string>
     
     <string name="add">追加</string>
     <string name="add_alarm">アラームを追加</string>
