@@ -104,7 +104,10 @@ fun HomeScreen(
         floatingActionButton = {
             if (windowSize.widthSizeClass == WindowWidthSizeClass.Compact) {
                 FloatingActionButton {
-                    timePickerDialogViewModel.showAlarmDialog(is24Hour = is24Hour)
+                    if (!homeScreenViewModel.showDialog) {
+                        homeScreenViewModel.showDialog()
+                        timePickerDialogViewModel.showAlarmDialog(is24Hour = is24Hour)
+                    }
                 }
             }
         },
@@ -452,6 +455,10 @@ fun HomeScreenContentBody(
                                 .putTrash(it)
                                 .changeEnableTo(false)
                                 .delete()
+                                .hiddenTitleInputDialog()
+                                .hiddenDialog()
+                            timePickerDialogViewModel.hiddenDialog()
+                            timePickerDialogViewModel.hiddenUpdateDialog()
 //                                .releaseSelectedAlarm()
                             snackbar.currentSnackbarData?.dismiss()
                             val result = snackbar.showSnackbar(
