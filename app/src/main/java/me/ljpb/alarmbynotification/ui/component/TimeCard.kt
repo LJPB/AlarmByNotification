@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -23,9 +24,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.ljpb.alarmbynotification.R
@@ -58,7 +61,10 @@ fun AlarmCard(
         modifier = modifier
             .fillMaxWidth()
             .animateContentSize()
-            .clickable { onExpandedChange() }
+            .clickable { onExpandedChange() },
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
+        )
     ) {
         CardContent(
             modifier = Modifier
@@ -185,10 +191,14 @@ private fun AlarmTime(
     modifier: Modifier = Modifier,
 ) {
     val formattedTime = getFormattedTime(hour, min, is24Hour)
-    val color = if (enable) {
-        MaterialTheme.colorScheme.onSurface
+    val color: Color
+    val weight: FontWeight
+    if (enable) {
+        color = MaterialTheme.colorScheme.onSurface
+        weight = FontWeight.Medium
     } else {
-        MaterialTheme.colorScheme.outline
+        color = MaterialTheme.colorScheme.outline
+        weight = FontWeight.Normal
     }
     Row(
         modifier = modifier,
@@ -199,6 +209,7 @@ private fun AlarmTime(
             text = formattedTime.time,
             style = MaterialTheme.typography.displayLarge,
             color = color,
+            fontWeight = weight
         )
         // 午前午後
         if (formattedTime.period != "") {
