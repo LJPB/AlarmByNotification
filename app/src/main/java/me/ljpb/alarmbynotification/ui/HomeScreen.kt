@@ -92,10 +92,10 @@ fun HomeScreen(
     val snackbar = remember { SnackbarHostState() }
     val context = LocalContext.current
     val is24Hour = DateFormat.is24HourFormat(context)
-    
+
     val alarmList by homeScreenViewModel.alarmList.collectAsState()
     val notificationList by homeScreenViewModel.notificationList.collectAsState()
-    
+
     Scaffold(
 //        topBar = {
 //            HomeScreenTopAppBar()
@@ -309,7 +309,7 @@ private fun HomeScreenContent(
             onPositiveClick = {
                 // TODO: 有効なアラームの時間を更新した場合はスナックバーを表示する 
                 timePickerDialogViewModel.updateTime(
-                    targetAlarm = targetAlarm,
+                    targetAlarm = if (targetAlarm != INITIAL_ALARM) targetAlarm else null,
                     targetNotify = targetNotify
                 )
             },
@@ -460,17 +460,16 @@ fun HomeScreenContentBody(
                 },
                 onDeleteClick = {
                     if (!homeScreenViewModel.nowProcessing) {
+                        timePickerDialogViewModel.hiddenDialog()
+                        timePickerDialogViewModel.hiddenUpdateDialog()
+                        
+                        homeScreenViewModel
+                            .hiddenTitleInputDialog()
+                            .hiddenDialog()
+                            .selectAlarm(it)
+                            .delete()
+                        
                         scope.launch {
-                            homeScreenViewModel
-                                .selectAlarm(it)
-                                .putTrash(it)
-                                .changeEnableTo(false)
-                                .delete()
-                                .hiddenTitleInputDialog()
-                                .hiddenDialog()
-                            timePickerDialogViewModel.hiddenDialog()
-                            timePickerDialogViewModel.hiddenUpdateDialog()
-//                                .releaseSelectedAlarm()
                             snackbar.currentSnackbarData?.dismiss()
                             val result = snackbar.showSnackbar(
                                 message = deletedMessage,
@@ -479,42 +478,44 @@ fun HomeScreenContentBody(
                             )
                             when (result) {
                                 SnackbarResult.ActionPerformed -> {
-                                    homeScreenViewModel.undoDelete()
+                                    homeScreenViewModel.undoDelete() {
+                                    }
                                 }
-
                                 SnackbarResult.Dismissed -> {
                                     homeScreenViewModel.popTrash()
                                 }
                             }
                         }
-                    }
+                    } // if
                 },
                 onEnableChange = { alarm, enable ->
                     if (!homeScreenViewModel.nowProcessing) {
                         homeScreenViewModel
                             .selectAlarm(alarm)
-                            .changeEnableTo(enable)
+                            .changeEnableTo(enable) { enabled ->
+                                if (enabled) {
+                                    val later =
+                                        getHowManyLater(alarm.hour, alarm.min, ZonedDateTime.now())
+                                    val enabledMessage = if (later.first == 0L) {
+                                        context.getString(
+                                            R.string.enabled_alarm_m,
+                                            later.second
+                                        )
+                                    } else {
+                                        context.getString(
+                                            R.string.enabled_alarm_hm,
+                                            later.first,
+                                            later.second
+                                        )
+                                    }
+                                    scope.launch {
+                                        snackbar.currentSnackbarData?.dismiss()
+                                        snackbar.showSnackbar(enabledMessage)
+                                    }
+                                }
+                            } // changeEnableTo
 //                            .releaseSelectedAlarm()
-                        if (enable) {
-                            val later = getHowManyLater(alarm.hour, alarm.min, ZonedDateTime.now())
-                            val enabledMessage = if (later.first == 0L) {
-                                context.getString(
-                                    R.string.enabled_alarm_m,
-                                    later.second
-                                )
-                            } else {
-                                context.getString(
-                                    R.string.enabled_alarm_hm,
-                                    later.first,
-                                    later.second
-                                )
-                            }
-                            scope.launch {
-                                snackbar.currentSnackbarData?.dismiss()
-                                snackbar.showSnackbar(enabledMessage)
-                            }
-                        }
-                    }
+                    } // if
                 },
                 innerPadding = innerPadding,
                 is24Hour = is24Hour,
