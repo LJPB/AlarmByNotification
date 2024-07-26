@@ -328,11 +328,11 @@ class HomeScreenViewModel(
         return notificationList.value.find { it.alarmId == alarmId }
     }
 
-    private val scope = viewModelScope
+    private val _scope = viewModelScope
     private val mutex = Mutex()
     // lockedで囲まれた異なる処理が同時に行われることはない
     // これにより，アラームの削除ボタンと有効化を同時に押すことによる，「deleteしたのにchangeEnable(true)」となる事態を避ける
-    private fun locked(block: suspend CoroutineScope.() -> Unit) {
+    private fun locked(scope: CoroutineScope = _scope, block: suspend CoroutineScope.() -> Unit) {
         scope.launch {
             mutex.withLock {
                 block()
