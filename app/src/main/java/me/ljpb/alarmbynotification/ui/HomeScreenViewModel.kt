@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -111,7 +112,7 @@ class HomeScreenViewModel(
             val deferred = viewModelScope.async {
                 // セットしたアラームのタイトルを変更したとき，通知のタイトルも変える
                 val notify = notificationList.value.find { it.alarmId == selectedAlarm!!.id }
-                if (notify != null) {
+                if (notify != null && alarmRepository.getItem(notify.alarmId).firstOrNull() != null) {
                     notificationRepository.updateNotification(
                         (notify as NotificationEntity).copy(
                             notifyName = name
@@ -157,7 +158,9 @@ class HomeScreenViewModel(
                         notifyName = name,
                         zoneId = zoneId
                     )
-                    notificationRepository.insertNotification(notification)
+                    if (alarmRepository.getItem(notification.alarmId).firstOrNull() != null) {
+                        notificationRepository.insertNotification(notification)
+                    }
                 } else { // アラームを無効にした場合
                     val targetNotify = notificationList.value.find { it.alarmId == alarmId }
                     if (targetNotify == null) return@async false

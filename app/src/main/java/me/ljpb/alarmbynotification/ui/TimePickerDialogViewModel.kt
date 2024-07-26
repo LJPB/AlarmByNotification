@@ -7,8 +7,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import me.ljpb.alarmbynotification.Utility.getMilliSecondsOfNextTime
@@ -40,6 +42,9 @@ class TimePickerDialogViewModel(
 
     // 既存のアラームの時間を変更すためのダイアログの表示状態
     var isShowUpdateDialog by mutableStateOf(false)
+        private set
+
+    var nowProcessing by mutableStateOf(false)
         private set
 
     // TimePickerDialogダイアログで最後に表示した時間選択コンポーネントが
@@ -82,9 +87,11 @@ class TimePickerDialogViewModel(
     fun setRecentlyComponentIsTimePicker(isTimePicker: Boolean) = viewModelScope.launch {
         preferencesRepository.recentlyIsTimePicker(isTimePicker)
     }
-    
+
     @OptIn(ExperimentalMaterial3Api::class)
     fun add(setAddedItemId: (Long) -> Unit) {
+        // TODO: alarmDBにnotifyに対応するalarmが存在するかをチェックする 
+        nowProcessing = true
         val zoneId = getZoneId()
         val alarmInfoEntity = AlarmInfoEntity(
             hour = alarmState.hour,
@@ -97,7 +104,7 @@ class TimePickerDialogViewModel(
             ZonedDateTime.now()
         )
         val notifyId = UUID.randomUUID().hashCode()
-        viewModelScope.launch {
+        val deferred = viewModelScope.async {
             val alarmId = alarmRepository.insert(alarmInfoEntity)
             val notification = NotificationEntity(
                 notifyId = notifyId,
@@ -108,16 +115,19 @@ class TimePickerDialogViewModel(
             )
             setAddedItemId(alarmId)
             notificationRepository.insertNotification(notification)
+            return@async false
         }
+        viewModelScope.launch { nowProcessing = deferred.await() }
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
     fun updateTime(targetAlarm: AlarmInfoInterface?, targetNotify: NotificationInfoInterface?) {
         if (targetAlarm != null) {
+            nowProcessing = true
             val timeZone = getZoneId()
             val hour = alarmState.hour
             val min = alarmState.minute
-            viewModelScope.launch {
+            val deferred = viewModelScope.async {
                 alarmRepository.update(
                     AlarmInfoEntity(
                         id = targetAlarm.id,
@@ -127,10 +137,9 @@ class TimePickerDialogViewModel(
                         zoneId = timeZone
                     )
                 )
-            }
-
-            if (targetNotify != null) { // 時間変更対象となるアラームを有効化していた場合
-                viewModelScope.launch {
+                if (targetNotify != null && alarmRepository.getItem(targetAlarm.id)
+                        .firstOrNull() != null
+                ) { // 時間変更対象となるアラームを有効化していた場合
                     notificationRepository.updateNotification(
                         NotificationEntity(
                             notifyId = targetNotify.notifyId,
@@ -145,7 +154,9 @@ class TimePickerDialogViewModel(
                         )
                     )
                 }
+                return@async false
             }
+            viewModelScope.launch { nowProcessing = deferred.await() }
         }
     }
 
