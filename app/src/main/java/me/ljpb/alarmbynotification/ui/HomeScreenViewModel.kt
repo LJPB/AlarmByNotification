@@ -89,6 +89,18 @@ class HomeScreenViewModel(
             initialValue = true
         )
 
+    var showDialog by mutableStateOf(false)
+        private set
+    
+    fun showDialog(): HomeScreenViewModel {
+        showDialog = true
+        return this
+    }
+    
+    fun hiddenDialog(): HomeScreenViewModel {
+        showDialog = false
+        return this
+    }
 
     /**
      * アラームを選択するときに呼び出すメソッド

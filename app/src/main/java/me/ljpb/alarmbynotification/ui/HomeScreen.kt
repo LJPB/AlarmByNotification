@@ -192,10 +192,9 @@ private fun AlarmList(
                 alarm = alarm,
                 modifier = Modifier
                     .padding(
-                    vertical = dimensionResource(id = R.dimen.padding_small),
-                    horizontal = dimensionResource(id = R.dimen.padding_medium)
-                )
-                ,
+                        vertical = dimensionResource(id = R.dimen.padding_small),
+                        horizontal = dimensionResource(id = R.dimen.padding_medium)
+                    ),
                 is24Hour = is24Hour,
                 expanded = expandCardIndex == index,
                 onExpandedChange = {
@@ -250,11 +249,14 @@ private fun HomeScreenContent(
     val recentlyIsTimePicker by timePickerDialogViewModel.isTimePicker.collectAsState()
 
     // 通知権限の許可を促すダイアログを一度表示したかどうか
-    var isShowedDialog by remember { mutableStateOf(false) }
+    var showedPermissionSupportDialog by remember { mutableStateOf(false) }
 
     if (timePickerDialogViewModel.isShowAddDialog) {
         TimePickerDialog(
-            onDismissRequest = timePickerDialogViewModel::hiddenDialog,
+            onDismissRequest = {
+                timePickerDialogViewModel.hiddenDialog()
+                homeScreenViewModel.hiddenDialog()
+            },
             onPositiveClick = { currentIsPicker ->
                 timePickerDialogViewModel.add(homeScreenViewModel::setAddItemId)
                 timePickerDialogViewModel.setRecentlyComponentIsTimePicker(currentIsPicker)
@@ -291,7 +293,7 @@ private fun HomeScreenContent(
         val targetNotify = homeScreenViewModel.getNotifyOfSelectedAlarm()
         TimePickerDialog(
             onDismissRequest = {
-//                homeScreenViewModel.releaseSelectedAlarm()
+                homeScreenViewModel.hiddenDialog()
                 timePickerDialogViewModel.hiddenUpdateDialog()
             },
             onPositiveClick = {
@@ -314,6 +316,7 @@ private fun HomeScreenContent(
             onDismissRequest = {
                 homeScreenViewModel
                     .hiddenTitleInputDialog()
+                    .hiddenDialog()
 //                    .releaseSelectedAlarm()
             },
             onPositiveClick = {
@@ -331,7 +334,7 @@ private fun HomeScreenContent(
         通知権限の許可を促すダイアログ・・・NotificationPermissionDialog
         通知権限の許可ダイアログ・・・OSのやつ
     */
-    if (Build.VERSION.SDK_INT >= 33 && !isShowedDialog) {
+    if (Build.VERSION.SDK_INT >= 33 && !showedPermissionSupportDialog) {
         // Android13以上で，アプリ起動後にまだ通知権限の許可を促すダイアログを表示していない場合
         val isShowedPermissionDialog by homeScreenViewModel.isShowedPermissionDialog.collectAsState()
 
@@ -339,7 +342,9 @@ private fun HomeScreenContent(
             android.Manifest.permission.POST_NOTIFICATIONS
         )
         if (!notificationPermissionState.status.isGranted) {
-            NotificationPermissionDialog(onDismissRequest = { isShowedDialog = true }) {
+            NotificationPermissionDialog(onDismissRequest = {
+                showedPermissionSupportDialog = true
+            }) {
                 if (isShowedPermissionDialog) {
                     // 通知権限の許可ダイアログを過去に一度表示している場合は，通知設定画面に遷移する
                     val intent = Intent()
@@ -426,13 +431,18 @@ fun HomeScreenContentBody(
                 alarmList = alarmList,
                 homeScreenViewModel = homeScreenViewModel,
                 onTitleClick = {
-                    homeScreenViewModel
-                        .selectAlarm(it)
-                        .showTitleInputDialog()
+                    if (!homeScreenViewModel.showDialog) {
+                        homeScreenViewModel
+                            .selectAlarm(it)
+                            .showTitleInputDialog()
+                            .showDialog()
+                    }
                 },
                 onTimeClick = {
-                    homeScreenViewModel.selectAlarm(it)
-                    timePickerDialogViewModel.showUpdateDialog(alarm = it, is24Hour = is24Hour)
+                    if (!homeScreenViewModel.showDialog) {
+                        homeScreenViewModel.selectAlarm(it).showDialog()
+                        timePickerDialogViewModel.showUpdateDialog(alarm = it, is24Hour = is24Hour)
+                    }
                 },
                 onDeleteClick = {
                     if (!homeScreenViewModel.nowProcessing) {
@@ -453,6 +463,7 @@ fun HomeScreenContentBody(
                                 SnackbarResult.ActionPerformed -> {
                                     homeScreenViewModel.undoDelete()
                                 }
+
                                 SnackbarResult.Dismissed -> {
                                     homeScreenViewModel.popTrash()
                                 }
