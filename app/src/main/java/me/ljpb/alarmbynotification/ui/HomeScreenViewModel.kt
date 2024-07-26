@@ -28,6 +28,7 @@ import me.ljpb.alarmbynotification.data.room.AlarmInfoEntity
 import me.ljpb.alarmbynotification.data.room.AlarmInfoInterface
 import me.ljpb.alarmbynotification.data.room.NotificationEntity
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.UUID
 
@@ -190,7 +191,9 @@ class HomeScreenViewModel(
                 if (enabled) { // アラームを有効にした場合
                     // TODO: TimePickerDialogViewModelのaddと同じ処理だからまとめる
                     val triggerTimeMilliSeconds = getMilliSecondsOfNextTime(
-                        selectedAlarm!!.hour, selectedAlarm!!.min, ZonedDateTime.now()
+                        selectedAlarm!!.hour, 
+                        selectedAlarm!!.min, 
+                        ZonedDateTime.now(ZoneId.of(zoneId))
                     )
                     val notifyId = UUID.randomUUID().hashCode()
                     val notification = NotificationEntity(

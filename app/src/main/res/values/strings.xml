@@ -10,6 +10,7 @@
     <string name="set_title">タイトルを入力</string>
     <string name="input_time">時間を入力</string>
     <string name="picker_time">時間を選択</string>
+    <string name="time_zone">タイムゾーン</string>
 
     <string name="enabled_alarm_hm">%1$d時間%2$d分後にアラームをセットしました</string>
     <string name="enabled_alarm_h">%1$d時間後にアラームをセットしました</string>

@@ -9,12 +9,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -33,6 +35,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.ljpb.alarmbynotification.R
 import me.ljpb.alarmbynotification.Utility.getFormattedTime
+import me.ljpb.alarmbynotification.Utility.getZoneId
 import me.ljpb.alarmbynotification.data.AlarmInfo
 import me.ljpb.alarmbynotification.data.room.AlarmInfoInterface
 
@@ -160,22 +163,42 @@ private fun CardContent(
         }
 
         if (expanded) {
-            Row(
-                modifier = Modifier
-                    .clickable { onDeleteClick() }
-                    .padding(top = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = stringResource(id = R.string.delete_alarm),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            Column {
+                // タイムゾーン
+                Row(
+                    modifier = Modifier.padding(top = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Public,
+                        contentDescription = stringResource(id = R.string.time_zone),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = alarm.zoneId,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // 削除ボタン
+                Row(
+                    modifier = Modifier
+                        .clickable { onDeleteClick() },
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = stringResource(id = R.string.delete_alarm),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
     }
@@ -200,6 +223,7 @@ private fun AlarmTime(
         color = MaterialTheme.colorScheme.outline
         weight = FontWeight.Normal
     }
+    val currentZoneId = getZoneId()
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
@@ -207,7 +231,7 @@ private fun AlarmTime(
         // 時間
         Text(
             text = formattedTime.time,
-            style = MaterialTheme.typography.displayLarge,
+            style = MaterialTheme.typography.displayMedium,
             color = color,
             fontWeight = weight
         )
@@ -215,7 +239,15 @@ private fun AlarmTime(
         if (formattedTime.period != "") {
             Text(
                 text = formattedTime.period,
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.headlineSmall,
+                color = color,
+            )
+        }
+        
+        if (currentZoneId != zoneId) {
+            Text(
+                text = " ($zoneId)",
+                style = MaterialTheme.typography.labelMedium,
                 color = color,
             )
         }

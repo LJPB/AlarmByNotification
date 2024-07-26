@@ -23,6 +23,7 @@ import me.ljpb.alarmbynotification.data.room.AlarmInfoEntity
 import me.ljpb.alarmbynotification.data.room.AlarmInfoInterface
 import me.ljpb.alarmbynotification.data.room.NotificationEntity
 import java.time.LocalTime
+import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.UUID
 
@@ -101,7 +102,7 @@ class TimePickerDialogViewModel(
         val triggerTimeMilliSeconds = getMilliSecondsOfNextTime(
             alarmInfoEntity.hour,
             alarmInfoEntity.min,
-            ZonedDateTime.now()
+            ZonedDateTime.now(ZoneId.of(zoneId))
         )
         val notifyId = UUID.randomUUID().hashCode()
         val deferred = viewModelScope.async {
@@ -124,7 +125,7 @@ class TimePickerDialogViewModel(
     fun updateTime(targetAlarm: AlarmInfoInterface?, targetNotify: NotificationInfoInterface?) {
         if (targetAlarm != null) {
             nowProcessing = true
-            val timeZone = getZoneId()
+            val timeZone = targetAlarm.zoneId
             val hour = alarmState.hour
             val min = alarmState.minute
             val deferred = viewModelScope.async {
@@ -147,7 +148,7 @@ class TimePickerDialogViewModel(
                             triggerTimeMilliSeconds = getMilliSecondsOfNextTime(
                                 hour,
                                 min,
-                                ZonedDateTime.now()
+                                ZonedDateTime.now(ZoneId.of(timeZone))
                             ),
                             notifyName = targetNotify.notifyName,
                             zoneId = timeZone,
