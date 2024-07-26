@@ -34,7 +34,8 @@ import java.util.UUID
 
 // 現在時刻を取得するための更新間隔
 const val DELAY_TIME: Long = 100L
-
+val INITIAL_ALARM_LIST = listOf(AlarmInfo(-1, -1, -1, "", ""))
+val INITIAL_NOTIFY_LIST = listOf(NotificationEntity(-1, -1, -1, "", ""))
 val INITIAL_ID: Long? = null
 
 class HomeScreenViewModel(
@@ -52,7 +53,7 @@ class HomeScreenViewModel(
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(2_000L),
-            initialValue = listOf()
+            initialValue = INITIAL_ALARM_LIST
         )
 
     val notificationList: StateFlow<List<NotificationInfoInterface>> =
@@ -62,7 +63,7 @@ class HomeScreenViewModel(
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(2_000L),
-            initialValue = listOf()
+            initialValue = INITIAL_NOTIFY_LIST
         )
 
     var isShowTitleInputDialog by mutableStateOf(false)

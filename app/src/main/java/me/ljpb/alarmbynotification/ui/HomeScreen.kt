@@ -27,6 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.BasicAlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
@@ -73,6 +74,7 @@ import kotlinx.coroutines.launch
 import me.ljpb.alarmbynotification.R
 import me.ljpb.alarmbynotification.Utility
 import me.ljpb.alarmbynotification.Utility.getHowManyLater
+import me.ljpb.alarmbynotification.data.NotificationInfoInterface
 import me.ljpb.alarmbynotification.data.room.AlarmInfoInterface
 import me.ljpb.alarmbynotification.ui.component.AlarmCard
 import me.ljpb.alarmbynotification.ui.component.NotificationPermissionDialog
@@ -96,6 +98,10 @@ fun HomeScreen(
     scope.launch {
         homeScreenViewModel.updateCurrentDateTime()
     }
+    
+    val alarmList by homeScreenViewModel.alarmList.collectAsState()
+    val notificationList by homeScreenViewModel.notificationList.collectAsState()
+    
     Scaffold(
         topBar = {
             HomeScreenTopAppBar(currentTime = currentTime)
@@ -116,15 +122,21 @@ fun HomeScreen(
         }
 
     ) { innerPadding ->
-        HomeScreenContent(
-            innerPadding = innerPadding,
-            timePickerDialogViewModel = timePickerDialogViewModel,
-            homeScreenViewModel = homeScreenViewModel,
-            windowSize = windowSize,
-            is24Hour = is24Hour,
-            snackbar = snackbar,
-            actionButtonOnClick = { timePickerDialogViewModel.showAlarmDialog(is24Hour = is24Hour) }
-        )
+        if (alarmList == INITIAL_ALARM_LIST || notificationList == INITIAL_NOTIFY_LIST) {
+            Loading(modifier = Modifier.padding(innerPadding))
+        } else {
+            HomeScreenContent(
+                innerPadding = innerPadding,
+                timePickerDialogViewModel = timePickerDialogViewModel,
+                homeScreenViewModel = homeScreenViewModel,
+                windowSize = windowSize,
+                is24Hour = is24Hour,
+                snackbar = snackbar,
+                alarmList = alarmList,
+                notificationList = notificationList,
+                actionButtonOnClick = { timePickerDialogViewModel.showAlarmDialog(is24Hour = is24Hour) }
+            )
+        }
     }
 }
 
@@ -154,6 +166,7 @@ private fun AlarmList(
     modifier: Modifier = Modifier,
     innerPadding: PaddingValues,
     alarmList: List<AlarmInfoInterface>,
+    notificationList: List<NotificationInfoInterface>,
     onTitleClick: (AlarmInfoInterface) -> Unit,
     onTimeClick: (AlarmInfoInterface) -> Unit,
     onDeleteClick: (AlarmInfoInterface) -> Unit,
@@ -162,7 +175,6 @@ private fun AlarmList(
     homeScreenViewModel: HomeScreenViewModel
 ) {
     val listState = rememberLazyListState()
-    val notificationList by homeScreenViewModel.notificationList.collectAsState()
     var expandCardIndex by remember { mutableIntStateOf(-1) }
     val view = LocalView.current
 
@@ -241,9 +253,10 @@ private fun HomeScreenContent(
     homeScreenViewModel: HomeScreenViewModel,
     actionButtonOnClick: () -> Unit,
     snackbar: SnackbarHostState,
+    alarmList: List<AlarmInfoInterface>,
+    notificationList: List<NotificationInfoInterface>,
     is24Hour: Boolean,
 ) {
-    val alarmList by homeScreenViewModel.alarmList.collectAsState()
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
@@ -373,11 +386,12 @@ private fun HomeScreenContent(
             HomeScreenContentBody(
                 innerPadding = innerPadding,
                 alarmList = alarmList,
+                notificationList = notificationList,
                 homeScreenViewModel = homeScreenViewModel,
                 is24Hour = is24Hour,
                 snackbar = snackbar,
                 scope = scope,
-                timePickerDialogViewModel = timePickerDialogViewModel
+                timePickerDialogViewModel = timePickerDialogViewModel,
             )
         }
 
@@ -387,6 +401,7 @@ private fun HomeScreenContent(
                     modifier = Modifier.weight(1f),
                     innerPadding = innerPadding,
                     alarmList = alarmList,
+                    notificationList = notificationList,
                     homeScreenViewModel = homeScreenViewModel,
                     is24Hour = is24Hour,
                     snackbar = snackbar,
@@ -414,6 +429,7 @@ fun HomeScreenContentBody(
     modifier: Modifier = Modifier,
     innerPadding: PaddingValues,
     alarmList: List<AlarmInfoInterface>,
+    notificationList: List<NotificationInfoInterface>,
     homeScreenViewModel: HomeScreenViewModel,
     timePickerDialogViewModel: TimePickerDialogViewModel,
     is24Hour: Boolean,
@@ -432,6 +448,7 @@ fun HomeScreenContentBody(
         } else {
             AlarmList(
                 alarmList = alarmList,
+                notificationList = notificationList,
                 homeScreenViewModel = homeScreenViewModel,
                 onTitleClick = {
                     if (!homeScreenViewModel.showDialog) {
@@ -594,7 +611,6 @@ private fun HomeScreenTopAppBar(currentTime: LocalDateTime) {
     )
 }
 
-
 @Composable
 private fun FloatingActionButton(
     modifier: Modifier = Modifier,
@@ -606,6 +622,17 @@ private fun FloatingActionButton(
         shape = CircleShape,
     ) {
         Icon(Icons.Filled.Add, stringResource(id = R.string.add))
+    }
+}
+
+@Preview(showSystemUi = true)
+@Composable
+fun Loading(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator()
     }
 }
 
