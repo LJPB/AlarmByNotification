@@ -96,8 +96,16 @@ object Utility {
         return triggerDateTime
     }
 
-    fun getHowManyLater(triggerHour: Int, triggerMin: Int, currentTime: ZonedDateTime): Pair<Long, Long> {
-        val triggerTimeMilliSeconds = getMilliSecondsOfNextTime(triggerHour, triggerMin, currentTime)
+    /**
+     * 指定の時間は[currentTime]から何時間何分後かをPair<Hour, Minutes>の形式(いずれもInt)で返す
+     */
+    fun getHowManyLater(
+        triggerHour: Int,
+        triggerMin: Int,
+        currentTime: ZonedDateTime
+    ): Pair<Long, Long> {
+        val triggerTimeMilliSeconds =
+            getMilliSecondsOfNextTime(triggerHour, triggerMin, currentTime)
         val instant = Instant.ofEpochMilli(triggerTimeMilliSeconds)
         val triggerDateTime = ZonedDateTime.ofInstant(instant, currentTime.zone)
         val duration = Duration
@@ -106,7 +114,7 @@ object Utility {
             .toMinutes()
         return Pair(duration / 60, duration % 60)
     }
-    
+
     fun getZoneId(): String = try {
         ZoneId.systemDefault().id
     } catch (_: ZoneRulesException) {
