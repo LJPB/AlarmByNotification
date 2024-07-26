@@ -105,8 +105,9 @@ fun HomeScreen(
             if (windowSize.widthSizeClass == WindowWidthSizeClass.Compact) {
                 FloatingActionButton {
                     if (!homeScreenViewModel.showDialog) {
-                        homeScreenViewModel.showDialog()
-                        timePickerDialogViewModel.showAlarmDialog(is24Hour = is24Hour)
+                        timePickerDialogViewModel.showAlarmAddDialog(is24Hour = is24Hour) {
+                            homeScreenViewModel.showDialog()
+                        }
                     }
                 }
             }
@@ -128,7 +129,11 @@ fun HomeScreen(
                 snackbar = snackbar,
                 alarmList = alarmList,
                 notificationList = notificationList,
-                actionButtonOnClick = { timePickerDialogViewModel.showAlarmDialog(is24Hour = is24Hour) }
+                actionButtonOnClick = { 
+                    timePickerDialogViewModel.showAlarmAddDialog(is24Hour = is24Hour) {
+                        homeScreenViewModel.showDialog()
+                    }
+                }
             )
         }
     }
@@ -176,7 +181,7 @@ private fun AlarmList(
         state = listState,
         modifier = modifier.padding(innerPadding)
     ) {
-        itemsIndexed(alarmList, key = ({ index, alarm -> alarm.id })) { index, alarm ->
+        itemsIndexed(alarmList, key = ({ _, alarm -> alarm.id })) { index, alarm ->
             AlarmCard(
                 onTitleClick = { onTitleClick(alarm) },
                 onDeleteClick = {
@@ -262,10 +267,16 @@ private fun HomeScreenContent(
     var showedPermissionSupportDialog by remember { mutableStateOf(false) }
 
     if (timePickerDialogViewModel.isShowAddDialog) {
+        if (homeScreenViewModel.nowProcessing) {
+            timePickerDialogViewModel.hiddenUpdateDialog() {
+                homeScreenViewModel.hiddenDialog()
+            }
+        }
         TimePickerDialog(
             onDismissRequest = {
-                timePickerDialogViewModel.hiddenDialog()
-                homeScreenViewModel.hiddenDialog()
+                timePickerDialogViewModel.hiddenAlarmAddDialog() {
+                    homeScreenViewModel.hiddenDialog()
+                }
             },
             onPositiveClick = { currentIsPicker ->
                 timePickerDialogViewModel.add(homeScreenViewModel::setAddItemId)
@@ -299,12 +310,18 @@ private fun HomeScreenContent(
     }
 
     if (timePickerDialogViewModel.isShowUpdateDialog) {
+        if (homeScreenViewModel.nowProcessing) {
+            timePickerDialogViewModel.hiddenUpdateDialog() {
+                homeScreenViewModel.hiddenDialog()
+            }
+        }
         val targetAlarm = homeScreenViewModel.getSelectedAlarm()
         val targetNotify = homeScreenViewModel.getNotifyOfSelectedAlarm()
         TimePickerDialog(
             onDismissRequest = {
-                homeScreenViewModel.hiddenDialog()
-                timePickerDialogViewModel.hiddenUpdateDialog()
+                timePickerDialogViewModel.hiddenUpdateDialog() {
+                    homeScreenViewModel.hiddenDialog()
+                }
             },
             onPositiveClick = {
                 // TODO: 有効なアラームの時間を更新した場合はスナックバーを表示する 
@@ -321,13 +338,14 @@ private fun HomeScreenContent(
 
 
     if (homeScreenViewModel.isShowTitleInputDialog) {
+        if (homeScreenViewModel.nowProcessing) {
+            homeScreenViewModel.hiddenTitleInputDialog()
+        }
         val focusRequester = remember { FocusRequester() }
         TitleInputDialog(
             onDismissRequest = {
                 homeScreenViewModel
                     .hiddenTitleInputDialog()
-                    .hiddenDialog()
-//                    .releaseSelectedAlarm()
             },
             onPositiveClick = {
                 homeScreenViewModel.updateAlarmName(it)
@@ -445,30 +463,31 @@ fun HomeScreenContentBody(
                 notificationList = notificationList,
                 homeScreenViewModel = homeScreenViewModel,
                 onTitleClick = {
-                    if (!homeScreenViewModel.showDialog) {
+                    if (!homeScreenViewModel.showDialog && !homeScreenViewModel.nowProcessing) {
                         homeScreenViewModel
                             .selectAlarm(it)
                             .showTitleInputDialog()
-                            .showDialog()
                     }
                 },
                 onTimeClick = {
-                    if (!homeScreenViewModel.showDialog) {
-                        homeScreenViewModel.selectAlarm(it).showDialog()
-                        timePickerDialogViewModel.showUpdateDialog(alarm = it, is24Hour = is24Hour)
+                    if (!homeScreenViewModel.showDialog && !homeScreenViewModel.nowProcessing) {
+                        timePickerDialogViewModel.showUpdateDialog(alarm = it, is24Hour = is24Hour) {
+                            homeScreenViewModel
+                                .selectAlarm(it)
+                                .showDialog()
+                        }
                     }
                 },
                 onDeleteClick = {
                     if (!homeScreenViewModel.nowProcessing) {
-                        timePickerDialogViewModel.hiddenDialog()
-                        timePickerDialogViewModel.hiddenUpdateDialog()
-                        
                         homeScreenViewModel
-                            .hiddenTitleInputDialog()
-                            .hiddenDialog()
                             .selectAlarm(it)
-                            .delete()
-                        
+                            .delete {
+                                homeScreenViewModel.hiddenTitleInputDialog()
+                                timePickerDialogViewModel.hiddenAlarmAddDialog {  }
+                                timePickerDialogViewModel.hiddenUpdateDialog {  }
+                            }
+
                         scope.launch {
                             snackbar.currentSnackbarData?.dismiss()
                             val result = snackbar.showSnackbar(

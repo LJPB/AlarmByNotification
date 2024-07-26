@@ -99,21 +99,23 @@ class HomeScreenViewModel(
         return this
     }
 
-    /**
-     * アラームを選択するときに呼び出すメソッド
-     */
-    fun selectAlarm(alarm: AlarmInfoInterface): HomeScreenViewModel {
-        selectedAlarm = alarm
-        return this
-    }
-
     fun showTitleInputDialog(): HomeScreenViewModel {
-        isShowTitleInputDialog = !nowProcessing
+        isShowTitleInputDialog = true
+        showDialog()
         return this
     }
 
     fun hiddenTitleInputDialog(): HomeScreenViewModel {
         isShowTitleInputDialog = false
+        hiddenDialog()
+        return this
+    }
+
+    /**
+     * アラームを選択するときに呼び出すメソッド
+     */
+    fun selectAlarm(alarm: AlarmInfoInterface): HomeScreenViewModel {
+        selectedAlarm = alarm
         return this
     }
 
@@ -124,12 +126,14 @@ class HomeScreenViewModel(
                 val alarm = getSelectedAlarmFromDb()
                 if (alarm == null) {
                     nowProcessing = false
+                    hiddenDialog()
                     hiddenTitleInputDialog()
                     return@locked
                 }
                 val targetNotify = getAlarmNotifyFromList(alarm.id)
                 if (targetNotify == null) {
                     nowProcessing = false
+                    hiddenDialog()
                     hiddenTitleInputDialog()
                     return@locked
                 }
@@ -242,7 +246,7 @@ class HomeScreenViewModel(
         selectedAlarm = INITIAL_ALARM
     }
 
-    fun delete(): HomeScreenViewModel {
+    fun delete(deleteAction: () -> Unit): HomeScreenViewModel {
         locked {
             nowProcessing = true
             val deferred = viewModelScope.async {
@@ -255,6 +259,7 @@ class HomeScreenViewModel(
                     putTrash(selectedAlarm, INITIAL_NOTIFY)
                 }
                 releaseSelectedAlarm()
+                deleteAction()
                 return@async false
             }
             viewModelScope.launch { nowProcessing = deferred.await() }
