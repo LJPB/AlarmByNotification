@@ -72,14 +72,12 @@ import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import me.ljpb.alarmbynotification.R
-import me.ljpb.alarmbynotification.Utility
 import me.ljpb.alarmbynotification.Utility.getHowManyLater
 import me.ljpb.alarmbynotification.data.NotificationInfoInterface
 import me.ljpb.alarmbynotification.data.room.AlarmInfoInterface
 import me.ljpb.alarmbynotification.ui.component.AlarmCard
 import me.ljpb.alarmbynotification.ui.component.NotificationPermissionDialog
 import me.ljpb.alarmbynotification.ui.component.TimePickerDialog
-import java.time.LocalDateTime
 import java.time.ZonedDateTime
 
 @SuppressLint("CoroutineCreationDuringComposition", "StateFlowValueCalledInComposition")
@@ -90,22 +88,18 @@ fun HomeScreen(
     homeScreenViewModel: HomeScreenViewModel,
     timePickerDialogViewModel: TimePickerDialogViewModel,
 ) {
-    val currentTime by homeScreenViewModel.currentDateTime.collectAsState()
     val scope = rememberCoroutineScope()
     val snackbar = remember { SnackbarHostState() }
     val context = LocalContext.current
     val is24Hour = DateFormat.is24HourFormat(context)
-    scope.launch {
-        homeScreenViewModel.updateCurrentDateTime()
-    }
     
     val alarmList by homeScreenViewModel.alarmList.collectAsState()
     val notificationList by homeScreenViewModel.notificationList.collectAsState()
     
     Scaffold(
-        topBar = {
-            HomeScreenTopAppBar(currentTime = currentTime)
-        },
+//        topBar = {
+//            HomeScreenTopAppBar()
+//        },
         floatingActionButtonPosition = FabPosition.Center,
         floatingActionButton = {
             if (windowSize.widthSizeClass == WindowWidthSizeClass.Compact) {
@@ -595,9 +589,8 @@ private fun TitleInputDialog(
 @SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun HomeScreenTopAppBar(currentTime: LocalDateTime) {
+private fun HomeScreenTopAppBar() {
     val context = LocalContext.current
-    val isFormat24 = DateFormat.is24HourFormat(context)
 
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
@@ -606,7 +599,7 @@ private fun HomeScreenTopAppBar(currentTime: LocalDateTime) {
         ),
         // 現在の時刻を表示
         title = {
-            Text(text = Utility.localDateTimeToFormattedTime(currentTime, isFormat24))
+            Text(text = stringResource(id = R.string.alarm_channel_name))
         },
     )
 }

@@ -7,15 +7,11 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import me.ljpb.alarmbynotification.Utility
 import me.ljpb.alarmbynotification.Utility.getMilliSecondsOfNextTime
@@ -27,7 +23,6 @@ import me.ljpb.alarmbynotification.data.UserPreferencesRepository
 import me.ljpb.alarmbynotification.data.room.AlarmInfoEntity
 import me.ljpb.alarmbynotification.data.room.AlarmInfoInterface
 import me.ljpb.alarmbynotification.data.room.NotificationEntity
-import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.UUID
@@ -43,9 +38,6 @@ class HomeScreenViewModel(
     private val notificationRepository: NotificationRepositoryInterface,
     private val preferencesRepository: UserPreferencesRepository,
 ) : ViewModel() {
-    private val _currentDateTime = MutableStateFlow(LocalDateTime.now())
-    val currentDateTime: StateFlow<LocalDateTime> = _currentDateTime.asStateFlow()
-
     val alarmList: StateFlow<List<AlarmInfoInterface>> =
         alarmRepository.getAllItemOrderByTimeAsc().map { alarmList ->
             if (alarmList.isNullOrEmpty()) return@map listOf()
@@ -241,13 +233,6 @@ class HomeScreenViewModel(
     fun showPermissionDialog() {
         viewModelScope.launch {
             preferencesRepository.showedPermissionDialog()
-        }
-    }
-
-    suspend fun updateCurrentDateTime() {
-        while (true) {
-            _currentDateTime.update { LocalDateTime.now() }
-            delay(DELAY_TIME)
         }
     }
 
