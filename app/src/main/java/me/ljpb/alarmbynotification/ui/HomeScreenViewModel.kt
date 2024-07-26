@@ -206,7 +206,7 @@ class HomeScreenViewModel(
     /**
      * 選択したアラームを解除する
      */
-    fun releaseSelectedAlarm() {
+    private fun releaseSelectedAlarm() {
         selectedAlarm = null
     }
 

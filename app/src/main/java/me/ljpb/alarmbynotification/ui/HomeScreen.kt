@@ -291,7 +291,7 @@ private fun HomeScreenContent(
         val targetNotify = homeScreenViewModel.getNotifyOfSelectedAlarm()
         TimePickerDialog(
             onDismissRequest = {
-                homeScreenViewModel.releaseSelectedAlarm()
+//                homeScreenViewModel.releaseSelectedAlarm()
                 timePickerDialogViewModel.hiddenUpdateDialog()
             },
             onPositiveClick = {
@@ -314,12 +314,10 @@ private fun HomeScreenContent(
             onDismissRequest = {
                 homeScreenViewModel
                     .hiddenTitleInputDialog()
-                    .releaseSelectedAlarm()
+//                    .releaseSelectedAlarm()
             },
             onPositiveClick = {
-                homeScreenViewModel
-                    .updateAlarmName(it)
-                    .releaseSelectedAlarm()
+                homeScreenViewModel.updateAlarmName(it)
             },
             focusRequester = focusRequester,
             defaultTitle = homeScreenViewModel.getSelectedAlarmName()
@@ -444,7 +442,7 @@ fun HomeScreenContentBody(
                                 .putTrash(it)
                                 .changeEnableTo(false)
                                 .delete()
-                                .releaseSelectedAlarm()
+//                                .releaseSelectedAlarm()
                             snackbar.currentSnackbarData?.dismiss()
                             val result = snackbar.showSnackbar(
                                 message = deletedMessage,
@@ -467,7 +465,7 @@ fun HomeScreenContentBody(
                         homeScreenViewModel
                             .selectAlarm(alarm)
                             .changeEnableTo(enable)
-                            .releaseSelectedAlarm()
+//                            .releaseSelectedAlarm()
                         if (enable) {
                             val later = getHowManyLater(alarm.hour, alarm.min, ZonedDateTime.now())
                             val enabledMessage = if (later.first == 0L) {
