@@ -1,0 +1,34 @@
+<resources>
+    <string name="app_name">通知アラーム</string>
+
+    <string name="delete_alarm">削除</string>
+    <string name="untitled">名称未設定</string>
+    <string name="empty">アラームはありません</string>
+
+    <string name="add">追加</string>
+    <string name="add_alarm">アラームを追加</string>
+    <string name="set_title">タイトルを入力</string>
+    <string name="input_time">時間を入力</string>
+    <string name="picker_time">時間を選択</string>
+    <string name="time_zone">タイムゾーン</string>
+
+    <string name="enabled_alarm_hm">%1$d時間%2$d分後にアラームをセットしました</string>
+    <string name="enabled_alarm_h">%1$d時間後にアラームをセットしました</string>
+    <string name="enabled_alarm_m">%1$d分後にアラームをセットしました</string>
+    <string name="deleted_alarm">アラームを削除しました</string>
+    <string name="undo">戻す</string>
+
+    <string name="to_open_card">展開する</string>
+    <string name="to_close_card">閉じる</string>
+
+    <string name="request_permission_title">通知を許可する</string>
+    <string name="request_permission_detail">設定した時間に通知を受け取るために必要です。</string>
+    <string name="allow">許可</string>
+
+    <string name="cancel">キャンセル</string>
+    <string name="ok">OK</string>
+
+    <string name="alarm_channel_name">アラーム</string>
+    <string name="alarm_channel_id">ALARM_CHANNEL</string>
+
+</resources>
