@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Delete</string>
+    <string name="app_name">Alarm By Notification</string>
     
     <string name="delete_alarm">Delete</string>
     <string name="untitled">Untitled</string>
