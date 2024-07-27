@@ -224,8 +224,14 @@ private fun AlarmList(
         if (listState.layoutInfo.totalItemsCount > 0) {
             if (homeScreenViewModel.isScroll()) {
                 val index = homeScreenViewModel.getAddedItemIndex()
-                listState.animateScrollToItem(index)
+                val visibleIndex = listState.layoutInfo.visibleItemsInfo.map { it.index }
+                if (index !in visibleIndex) { // 画面に表示されているアイテムの位置に追加された場合は無駄にスクロールしない
+                    listState.animateScrollToItem(index)
+                }
                 homeScreenViewModel.changeExpandCardIndex(index)
+                // アラームを新規追加した後，アラームを削除した場合前回追加したアラームの位置へスクロールしないように，
+                // 前回追加したアラームの情報を初期化する。(isScrollによって)初期値ではスクロールしないため，
+                // アラームを削除したalarmList.sizeが変わってもこのスクロールが実行されることはない
                 homeScreenViewModel.initAddItemId()
             }
         }
