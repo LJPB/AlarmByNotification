@@ -5,6 +5,8 @@ import android.content.Intent
 import android.os.Build
 import android.text.format.DateFormat
 import android.view.HapticFeedbackConstants
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -153,6 +155,7 @@ private fun Empty(
 /**
  * アラームの一覧を表示する
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun AlarmList(
     modifier: Modifier = Modifier,
@@ -171,10 +174,14 @@ private fun AlarmList(
     val view = LocalView.current
 
     LazyColumn(
-        state = listState, modifier = modifier.padding(innerPadding)
+        state = listState, 
+        modifier = modifier.padding(dimensionResource(id = R.dimen.padding_medium)),
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_medium)),
     ) {
         itemsIndexed(alarmList, key = ({ _, alarm -> alarm.id })) { index, alarm ->
-            AlarmCard(onTitleClick = { onTitleClick(alarm) },
+            AlarmCard(
+                modifier = Modifier.animateItem(),
+                onTitleClick = { onTitleClick(alarm) },
                 onDeleteClick = {
                     onDeleteClick(alarm)
                     homeScreenViewModel.changeExpandCardIndex()
@@ -195,10 +202,6 @@ private fun AlarmList(
                 },
                 enable = notificationList.find { it.alarmId == alarm.id } != null,  // notificationListに含まれていれば(findがnull出なければ)有効
                 alarm = alarm,
-                modifier = Modifier.padding(
-                    vertical = dimensionResource(id = R.dimen.padding_small),
-                    horizontal = dimensionResource(id = R.dimen.padding_medium)
-                ),
                 is24Hour = is24Hour,
                 expanded = expandCardIndex == index,
                 onExpandedChange = {
@@ -227,7 +230,6 @@ private fun AlarmList(
             }
         }
     }
-
 }
 
 /**
@@ -462,7 +464,7 @@ fun HomeScreenContentBody(
     val deletedMessage = stringResource(id = R.string.deleted_alarm)
     val undo = stringResource(id = R.string.undo)
     Box(
-        modifier = modifier
+        modifier = modifier.padding(innerPadding)
     ) {
         if (alarmListIsEmpty) {
             Empty()

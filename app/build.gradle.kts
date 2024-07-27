@@ -83,6 +83,9 @@ dependencies {
     // アダプティブレイアウト用
     implementation("androidx.compose.material3:material3-window-size-class:1.2.1")
     
+    
+    implementation("androidx.compose.foundation:foundation:1.7.0-beta06")
+    
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

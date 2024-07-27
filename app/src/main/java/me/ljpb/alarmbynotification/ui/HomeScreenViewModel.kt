@@ -311,16 +311,26 @@ class HomeScreenViewModel(
      */
     fun getAddedItemIndex(): Int {
         if (idOfAddedAlarm == INITIAL_ID) return 0
+        return getItemIndexFromAlarmId(idOfAddedAlarm ?: -1L)
+    }
+    
+// === 以上，追加したアラームへスクロールするための機能 ===
+    
+    fun getSelectedAlarmIndex(): Int {
+        return getItemIndexFromAlarmId(selectedAlarm.id)
+    }
+    
+    fun getItemIndexFromAlarmId(alarmId: Long): Int {
+        if (alarmId == -1L) return 0
         val tmpList = alarmList.value
         for (i in tmpList.indices) {
-            if (tmpList[i].id == idOfAddedAlarm) {
+            if (tmpList[i].id == alarmId) {
                 return i
             }
         }
         return 0
     }
-// === 以上，追加したアラームへスクロールするための機能 ===
-
+    
     suspend fun resettingNotify(context: Context) {
         Utility.resettingNotify(context, notificationRepository)
     }
