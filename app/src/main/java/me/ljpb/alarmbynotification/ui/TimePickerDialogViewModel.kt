@@ -131,7 +131,7 @@ class TimePickerDialogViewModel(
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
-    fun updateTime(targetAlarm: AlarmInfoInterface?, targetNotify: NotificationInfoInterface?) {
+    fun updateTime(targetAlarm: AlarmInfoInterface?, targetNotify: NotificationInfoInterface?, updatedAction: (Boolean) -> Unit) {
         if (targetAlarm != null) {
             nowProcessing = true
             val timeZone = targetAlarm.zoneId
@@ -163,6 +163,9 @@ class TimePickerDialogViewModel(
                             zoneId = timeZone,
                         )
                     )
+                    updatedAction(true)
+                } else {
+                    updatedAction(false)
                 }
                 return@async false
             }

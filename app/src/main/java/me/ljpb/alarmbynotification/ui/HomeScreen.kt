@@ -311,11 +311,31 @@ private fun HomeScreenContent(
                 }
             },
             onPositiveClick = {
-                // TODO: 有効なアラームの時間を更新した場合はスナックバーを表示する 
                 timePickerDialogViewModel.updateTime(
                     targetAlarm = if (targetAlarm != INITIAL_ALARM) targetAlarm else null,
                     targetNotify = targetNotify
-                )
+                ) { enabled ->
+                    if (enabled) {
+                        scope.launch {
+                            snackbar.currentSnackbarData?.dismiss()
+                            val later = getHowManyLater(
+                                timePickerDialogViewModel.alarmState.hour,
+                                timePickerDialogViewModel.alarmState.minute,
+                                ZonedDateTime.now()
+                            )
+                            val enabledMessage = if (later.first == 0L) {
+                                context.getString(
+                                    R.string.enabled_alarm_m, later.second
+                                )
+                            } else {
+                                context.getString(
+                                    R.string.enabled_alarm_hm, later.first, later.second
+                                )
+                            }
+                            snackbar.showSnackbar(enabledMessage)
+                        } // scope
+                    } // if
+                } // lambda
             },
             windowSizeClass = windowSize,
             recentlyIsTimePicker = recentlyIsTimePicker,
