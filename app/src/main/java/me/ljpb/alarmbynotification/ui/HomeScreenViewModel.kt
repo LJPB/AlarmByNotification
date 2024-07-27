@@ -2,6 +2,7 @@ package me.ljpb.alarmbynotification.ui
 
 import android.content.Context
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -69,6 +70,9 @@ class HomeScreenViewModel(
 
     var nowProcessing by mutableStateOf(false)
         private set
+    
+    var expandCardIndex by mutableIntStateOf(-1)
+        private set
 
     private var alarmTrash: Pair<AlarmInfoInterface, NotificationInfoInterface>? = null
 
@@ -111,6 +115,10 @@ class HomeScreenViewModel(
         return this
     }
 
+    fun changeExpandCardIndex(index: Int = -1) {
+        expandCardIndex = index
+    }
+    
     /**
      * アラームを選択するときに呼び出すメソッド
      */

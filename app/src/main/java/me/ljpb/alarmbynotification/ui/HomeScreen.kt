@@ -50,7 +50,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -168,7 +167,7 @@ private fun AlarmList(
     homeScreenViewModel: HomeScreenViewModel
 ) {
     val listState = rememberLazyListState()
-    var expandCardIndex by remember { mutableIntStateOf(-1) }
+    val expandCardIndex = homeScreenViewModel.expandCardIndex
     val view = LocalView.current
 
     LazyColumn(
@@ -178,7 +177,7 @@ private fun AlarmList(
             AlarmCard(onTitleClick = { onTitleClick(alarm) },
                 onDeleteClick = {
                     onDeleteClick(alarm)
-                    expandCardIndex = -1
+                    homeScreenViewModel.changeExpandCardIndex()
                 },
                 onEnableChange = { enable ->
                     view.performHapticFeedback(
@@ -203,13 +202,15 @@ private fun AlarmList(
                 is24Hour = is24Hour,
                 expanded = expandCardIndex == index,
                 onExpandedChange = {
-                    expandCardIndex = if (expandCardIndex == index) {
-                        -1
-                    } else {
-                        index
-                    }
+                    homeScreenViewModel.changeExpandCardIndex(
+                        // expandCardIndex == indexのとき，indexのカードは展開済みだから
+                        // changeで閉じる，つまりexpandCardIndexを-1にする
+                        if (expandCardIndex == index) -1 else index
+                    )
                 },
-                onTimeClick = { onTimeClick(alarm) })
+                onTimeClick = {
+                    onTimeClick(alarm)
+                })
         }
         item {
             Spacer(modifier = Modifier.height(128.dp))
@@ -221,6 +222,7 @@ private fun AlarmList(
             if (homeScreenViewModel.isScroll()) {
                 val index = homeScreenViewModel.getAddedItemIndex()
                 listState.animateScrollToItem(index)
+                homeScreenViewModel.changeExpandCardIndex(index)
                 homeScreenViewModel.initAddItemId()
             }
         }
@@ -297,6 +299,7 @@ private fun HomeScreenContent(
     }
 
     if (timePickerDialogViewModel.isShowUpdateDialog) {
+        // TODO: 時間を更新した後，該当アラームまでスクロールする 
         if (homeScreenViewModel.nowProcessing) {
             timePickerDialogViewModel.hiddenUpdateDialog() {
                 homeScreenViewModel.hiddenDialog()
@@ -349,9 +352,10 @@ private fun HomeScreenContent(
             homeScreenViewModel.hiddenTitleInputDialog()
         }
         val focusRequester = remember { FocusRequester() }
-        TitleInputDialog(onDismissRequest = {
-            homeScreenViewModel.hiddenTitleInputDialog()
-        },
+        TitleInputDialog(
+            onDismissRequest = {
+                homeScreenViewModel.hiddenTitleInputDialog()
+            },
             onPositiveClick = {
                 homeScreenViewModel.updateAlarmName(it)
             },
