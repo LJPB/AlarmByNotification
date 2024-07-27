@@ -139,20 +139,16 @@ class HomeScreenViewModel(
                     return@locked
                 }
                 val targetNotify = getAlarmNotifyFromList(alarm.id)
-                if (targetNotify == null) {
-                    nowProcessing = false
-                    hiddenDialog()
-                    hiddenTitleInputDialog()
-                    return@locked
-                }
                 val deferred = async {
-                    // セットしたアラームのタイトルを変更したとき，通知のタイトルも変える
-                    notificationRepository.updateNotification(
-                        (targetNotify as NotificationEntity).copy(
-                            notifyName = name
-                        )
-                    )
                     alarmRepository.update(alarm.toAlarmInfoEntity().copy(name = name))
+                    if (targetNotify != null) {
+                        // アラームが有効なとき，通知のタイトルも変える
+                        notificationRepository.updateNotification(
+                            (targetNotify as NotificationEntity).copy(
+                                notifyName = name
+                            )
+                        )
+                    }
                     return@async false
                 } // async
                 viewModelScope.launch { nowProcessing = deferred.await() }
