@@ -311,11 +311,12 @@ private fun DialogContentCompactLandscapePickerBody(
             text = dialogTitle,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.labelMedium,
+            modifier = Modifier.padding(top = 8.dp)
         )
         TimePicker(
             modifier = Modifier
                 .align(Alignment.Center)
-                .scale(0.5f),
+                .scale(0.8f),
             state = timePickerState,
             layoutType = TimePickerLayoutType.Horizontal
         )
