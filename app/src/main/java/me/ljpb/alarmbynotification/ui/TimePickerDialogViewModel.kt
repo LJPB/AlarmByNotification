@@ -45,11 +45,15 @@ class TimePickerDialogViewModel(
     var isShowUpdateDialog by mutableStateOf(false)
         private set
 
+    // 現在表示している時刻選択コンポーネントの種類
+    // ダイアログ表示状態で画面を横にするなど
+    var currentIsPicker by mutableStateOf<Boolean?>(null)
+        private set
+    
     var nowProcessing by mutableStateOf(false)
         private set
 
-    // TimePickerDialogダイアログで最後に表示した時間選択コンポーネントが
-    // TimePickerかTimeInputか
+    // TimePickerDialogダイアログで最後に表示した時間選択コンポーネントがTimePickerかTimeInputか
     val isTimePicker: StateFlow<Boolean> = preferencesRepository.isTimePicker.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(2_000L),

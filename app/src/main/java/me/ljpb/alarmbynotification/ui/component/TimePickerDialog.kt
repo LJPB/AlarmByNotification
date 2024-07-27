@@ -1,7 +1,6 @@
 package me.ljpb.alarmbynotification.ui.component
 
 import android.content.res.Configuration
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,9 +33,8 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -76,11 +74,8 @@ fun TimePickerDialog(
     timePickerState: TimePickerState,
 ) {
     // 表示しているダイアログはTimePicker? 初期値は，前回表示した種類と同じ(初回起動時はtrue)
-    var currentIsPicker by remember { mutableStateOf(recentlyIsTimePicker) }
+    var currentIsPicker by rememberSaveable { mutableStateOf(recentlyIsTimePicker) }
 
-    var compositionCount by remember { mutableIntStateOf(0) }
-    compositionCount++
-    Log.d("compositionCount", "$compositionCount")
     // 横画面?
     val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
