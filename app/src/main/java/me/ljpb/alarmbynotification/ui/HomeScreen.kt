@@ -298,6 +298,10 @@ private fun HomeScreenContent(
                     }
                     snackbar.showSnackbar(enabledMessage)
                 }
+                // ダイアログを閉じる
+                timePickerDialogViewModel.hiddenAlarmAddDialog() {
+                    homeScreenViewModel.hiddenDialog()
+                }
             },
             windowSizeClass = windowSize,
             recentlyIsTimePicker = recentlyIsTimePicker,
@@ -345,6 +349,10 @@ private fun HomeScreenContent(
                         } // scope
                     } // if
                 } // lambda
+                // ダイアログを閉じる
+                timePickerDialogViewModel.hiddenUpdateDialog() {
+                    homeScreenViewModel.hiddenDialog()
+                }
             },
             windowSizeClass = windowSize,
             recentlyIsTimePicker = recentlyIsTimePicker,
@@ -364,6 +372,7 @@ private fun HomeScreenContent(
             },
             onPositiveClick = {
                 homeScreenViewModel.updateAlarmName(it)
+                homeScreenViewModel.hiddenTitleInputDialog()
             },
             focusRequester = focusRequester,
             defaultTitle = homeScreenViewModel.getSelectedAlarmName()
@@ -390,7 +399,8 @@ private fun HomeScreenContent(
                     showedPermissionSupportDialog = true
                     homeScreenViewModel.hiddenDialog()
                 }
-            ) {
+            ) { // onPositive
+                showedPermissionSupportDialog = true
                 if (isShowedPermissionDialog) {
                     // 通知権限の許可ダイアログを過去に一度表示している場合は，通知設定画面に遷移する
                     val intent = Intent()
@@ -406,6 +416,8 @@ private fun HomeScreenContent(
                     notificationPermissionState.launchPermissionRequest()
                     homeScreenViewModel.showPermissionDialog()
                 }
+                // ダイアログを閉じる
+                homeScreenViewModel.hiddenDialog()
             }
         }
     }
@@ -597,13 +609,14 @@ private fun TitleInputDialog(
                     modifier = Modifier.padding(top = dimensionResource(id = R.dimen.padding_small))
                 ) {
                     Spacer(modifier = Modifier.weight(1f))
+                    // dismiss
                     TextButton(onClick = { onDismissRequest() }) {
                         Text(text = stringResource(id = R.string.cancel))
                     }
                     Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.padding_small)))
+                    // positive
                     TextButton(onClick = {
                         onPositiveClick(inputTitle)
-                        onDismissRequest()
                     }) {
                         Text(text = stringResource(id = R.string.ok))
                     }

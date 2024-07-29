@@ -60,7 +60,10 @@ val ALARM_ICON = Icons.Default.Alarm
  * [NormalLandscape] 一般的な大きさの端末を除く，Normalの横画面
  */
 enum class ScreenType {
-    CompactCompact, CompactLandscape, NormalPortrait, NormalLandscape,
+    CompactCompact, 
+    CompactLandscape, 
+    NormalPortrait, 
+    NormalLandscape,
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -85,7 +88,8 @@ fun TimePickerDialog(
     val dialogModifier: Modifier
 
     when {
-        windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact && windowSizeClass.heightSizeClass == WindowHeightSizeClass.Compact -> { // 縦横ともにCompact
+        windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact &&
+                windowSizeClass.heightSizeClass == WindowHeightSizeClass.Compact -> { // 縦横ともにCompact
             screenType = ScreenType.CompactCompact
             usePlatformDefaultWidth = false
             dialogModifier = modifier
@@ -269,11 +273,12 @@ private fun DialogContentBody(
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
+            // dismiss
             TextButton(onClick = onDismissRequest) {
                 Text(text = stringResource(id = R.string.cancel))
             }
+            // positive
             TextButton(onClick = {
-                onDismissRequest()
                 onPositiveClick()
             }) {
                 Text(text = stringResource(id = R.string.ok))
@@ -326,11 +331,12 @@ private fun DialogContentCompactLandscapePickerBody(
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
+            // dismiss
             TextButton(onClick = onDismissRequest) {
                 Text(text = stringResource(id = R.string.cancel))
             }
+            // positive
             TextButton(onClick = {
-                onDismissRequest()
                 onPositiveClick()
             }) {
                 Text(text = stringResource(id = R.string.ok))
@@ -368,11 +374,12 @@ private fun DialogContentCompactBody(
         Spacer(modifier = Modifier.height(8.dp))
         Row {
             Spacer(modifier = Modifier.weight(1f))
+            // dismiss
             TextButton(onClick = onDismissRequest) {
                 Text(text = stringResource(id = R.string.cancel))
             }
+            // positive
             TextButton(onClick = {
-                onDismissRequest()
                 onPositiveClick()
             }) {
                 Text(text = stringResource(id = R.string.ok))

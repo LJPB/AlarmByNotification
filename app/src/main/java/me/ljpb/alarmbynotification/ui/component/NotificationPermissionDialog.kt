@@ -73,12 +73,13 @@ fun NotificationPermissionDialog(
 
                 Row {
                     Spacer(modifier = Modifier.weight(1f))
+                    // dismiss
                     TextButton(onClick = onDismissRequest) {
                         Text(stringResource(id = R.string.cancel))
                     }
+                    // positive
                     TextButton(onClick = {
                         onPositiveClick()
-                        onDismissRequest()
                     }) {
                         Text(stringResource(id = R.string.allow))
                     }
