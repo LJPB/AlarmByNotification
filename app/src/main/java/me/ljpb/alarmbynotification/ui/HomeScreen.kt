@@ -174,13 +174,12 @@ private fun AlarmList(
     val view = LocalView.current
 
     LazyColumn(
-        state = listState, 
+        state = listState,
         modifier = modifier.padding(dimensionResource(id = R.dimen.padding_medium)),
         verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_medium)),
     ) {
         itemsIndexed(alarmList, key = ({ _, alarm -> alarm.id })) { index, alarm ->
-            AlarmCard(
-                modifier = Modifier.animateItem(),
+            AlarmCard(modifier = Modifier.animateItem(),
                 onTitleClick = { onTitleClick(alarm) },
                 onDeleteClick = {
                     onDeleteClick(alarm)
@@ -268,7 +267,7 @@ private fun HomeScreenContent(
 
     if (timePickerDialogViewModel.isShowAddDialog) {
         if (homeScreenViewModel.nowProcessing) {
-            timePickerDialogViewModel.hiddenUpdateDialog() {
+            timePickerDialogViewModel.hiddenAlarmAddDialog {
                 homeScreenViewModel.hiddenDialog()
             }
         }
@@ -307,7 +306,6 @@ private fun HomeScreenContent(
     }
 
     if (timePickerDialogViewModel.isShowUpdateDialog) {
-        // TODO: 時間を更新した後，該当アラームまでスクロールする 
         if (homeScreenViewModel.nowProcessing) {
             timePickerDialogViewModel.hiddenUpdateDialog() {
                 homeScreenViewModel.hiddenDialog()
@@ -387,10 +385,12 @@ private fun HomeScreenContent(
             android.Manifest.permission.POST_NOTIFICATIONS
         )
         if (!notificationPermissionState.status.isGranted) {
-            NotificationPermissionDialog(onDismissRequest = {
-                showedPermissionSupportDialog = true
-                homeScreenViewModel.hiddenDialog()
-            }) {
+            NotificationPermissionDialog(
+                onDismissRequest = {
+                    showedPermissionSupportDialog = true
+                    homeScreenViewModel.hiddenDialog()
+                }
+            ) {
                 if (isShowedPermissionDialog) {
                     // 通知権限の許可ダイアログを過去に一度表示している場合は，通知設定画面に遷移する
                     val intent = Intent()
@@ -487,7 +487,8 @@ fun HomeScreenContentBody(
                 onTimeClick = {
                     if (!homeScreenViewModel.showDialog && !homeScreenViewModel.nowProcessing) {
                         timePickerDialogViewModel.showUpdateDialog(
-                            alarm = it, is24Hour = is24Hour
+                            alarm = it,
+                            is24Hour = is24Hour
                         ) {
                             homeScreenViewModel.selectAlarm(it).showDialog()
                         }
@@ -527,12 +528,12 @@ fun HomeScreenContentBody(
                                 val later =
                                     getHowManyLater(alarm.hour, alarm.min, ZonedDateTime.now())
                                 val enabledMessage = if (later.first == 0L) {
-                                    context.getString(
-                                        R.string.enabled_alarm_m, later.second
-                                    )
+                                    context.getString(R.string.enabled_alarm_m, later.second)
                                 } else {
                                     context.getString(
-                                        R.string.enabled_alarm_hm, later.first, later.second
+                                        R.string.enabled_alarm_hm,
+                                        later.first,
+                                        later.second
                                     )
                                 }
                                 scope.launch {
@@ -574,16 +575,23 @@ private fun TitleInputDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.padding_medium)))
-                OutlinedTextField(modifier = Modifier.focusRequester(focusRequester), label = {
-                    Text(stringResource(id = R.string.set_title))
-                }, value = inputTitle, onValueChange = {
-                    inputTitle = it
-                }, singleLine = true, keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = ImeAction.Done
-                ), keyboardActions = KeyboardActions(onDone = {
-                    onPositiveClick(inputTitle)
-                    onDismissRequest()
-                })
+                OutlinedTextField(
+                    modifier = Modifier.focusRequester(focusRequester),
+                    label = {
+                        Text(stringResource(id = R.string.set_title))
+                    },
+                    value = inputTitle,
+                    onValueChange = {
+                        inputTitle = it
+                    },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(onDone = {
+                        onPositiveClick(inputTitle)
+                        onDismissRequest()
+                    })
                 )
                 Row(
                     modifier = Modifier.padding(top = dimensionResource(id = R.dimen.padding_small))

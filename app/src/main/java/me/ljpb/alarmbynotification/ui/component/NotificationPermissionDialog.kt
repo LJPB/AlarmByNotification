@@ -35,9 +35,8 @@ fun NotificationPermissionDialog(
     onPositiveClick: () -> Unit,
 ) {
     BasicAlertDialog(
-        onDismissRequest = onDismissRequest, properties = DialogProperties(
-            dismissOnClickOutside = false
-        )
+        onDismissRequest = onDismissRequest, 
+        properties = DialogProperties(dismissOnClickOutside = false)
     ) {
         Surface(
             modifier = modifier
