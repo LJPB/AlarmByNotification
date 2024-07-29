@@ -104,7 +104,6 @@ class TimePickerDialogViewModel(
 
     @OptIn(ExperimentalMaterial3Api::class)
     fun add(setAddedItemId: (Long) -> Unit) {
-        // TODO: alarmDBにnotifyに対応するalarmが存在するかをチェックする 
         nowProcessing = true
         val zoneId = getZoneId()
         val alarmInfoEntity = AlarmInfoEntity(
@@ -151,9 +150,7 @@ class TimePickerDialogViewModel(
                         zoneId = timeZone
                     )
                 )
-                if (targetNotify != null && alarmRepository.getItem(targetAlarm.id)
-                        .firstOrNull() != null
-                ) { // 時間変更対象となるアラームを有効化していた場合
+                if (targetNotify != null && alarmRepository.getItem(targetAlarm.id).firstOrNull() != null) { // 時間変更対象となるアラームを有効化していた場合
                     notificationRepository.updateNotification(
                         NotificationEntity(
                             notifyId = targetNotify.notifyId,
