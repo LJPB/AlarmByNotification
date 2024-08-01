@@ -9,7 +9,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -27,12 +26,16 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeFloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -61,6 +64,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -81,6 +85,7 @@ import me.ljpb.alarmbynotification.ui.component.NotificationPermissionDialog
 import me.ljpb.alarmbynotification.ui.component.TimePickerDialog
 import java.time.ZonedDateTime
 
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("CoroutineCreationDuringComposition", "StateFlowValueCalledInComposition")
 @Composable
 fun HomeScreen(
@@ -96,11 +101,10 @@ fun HomeScreen(
 
     val alarmList by homeScreenViewModel.alarmList.collectAsState()
     val notificationList by homeScreenViewModel.notificationList.collectAsState()
-
     Scaffold(
-//        topBar = {
-//            HomeScreenTopAppBar()
-//        },
+        topBar = {
+            HomeScreenTopAppBar()
+        },
         floatingActionButtonPosition = FabPosition.Center, floatingActionButton = {
             if (windowSize.widthSizeClass == WindowWidthSizeClass.Compact) {
                 FloatingActionButton {
@@ -119,7 +123,8 @@ fun HomeScreen(
         if (alarmList == INITIAL_ALARM_LIST || notificationList == INITIAL_NOTIFY_LIST) {
             Loading(modifier = Modifier.padding(innerPadding))
         } else {
-            HomeScreenContent(innerPadding = innerPadding,
+            HomeScreenContent(
+                modifier = Modifier.padding(innerPadding),
                 timePickerDialogViewModel = timePickerDialogViewModel,
                 homeScreenViewModel = homeScreenViewModel,
                 windowSize = windowSize,
@@ -144,10 +149,12 @@ private fun Empty(
     modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
     ) {
         Text(
-            text = stringResource(id = R.string.empty), style = MaterialTheme.typography.bodyLarge
+            text = stringResource(id = R.string.empty),
+            style = MaterialTheme.typography.bodyLarge
         )
     }
 }
@@ -159,7 +166,6 @@ private fun Empty(
 @Composable
 private fun AlarmList(
     modifier: Modifier = Modifier,
-    innerPadding: PaddingValues,
     alarmList: List<AlarmInfoInterface>,
     notificationList: List<NotificationInfoInterface>,
     onTitleClick: (AlarmInfoInterface) -> Unit,
@@ -246,7 +252,6 @@ private fun AlarmList(
 private fun HomeScreenContent(
     modifier: Modifier = Modifier,
     windowSize: WindowSizeClass,
-    innerPadding: PaddingValues,
     timePickerDialogViewModel: TimePickerDialogViewModel,
     homeScreenViewModel: HomeScreenViewModel,
     actionButtonOnClick: () -> Unit,
@@ -425,7 +430,7 @@ private fun HomeScreenContent(
     when (windowSize.widthSizeClass) {
         WindowWidthSizeClass.Compact -> {
             HomeScreenContentBody(
-                innerPadding = innerPadding,
+                modifier = modifier,
                 alarmList = alarmList,
                 notificationList = notificationList,
                 homeScreenViewModel = homeScreenViewModel,
@@ -437,10 +442,11 @@ private fun HomeScreenContent(
         }
 
         else -> {  // 横画面やタブレットなど画面の幅が広い場合
-            Row {
+            Row(
+                modifier = modifier
+            ) {
                 HomeScreenContentBody(
                     modifier = Modifier.weight(1f),
-                    innerPadding = innerPadding,
                     alarmList = alarmList,
                     notificationList = notificationList,
                     homeScreenViewModel = homeScreenViewModel,
@@ -452,8 +458,7 @@ private fun HomeScreenContent(
                 Box(
                     modifier = Modifier
                         .width(128.dp)
-                        .fillMaxHeight()
-                        .padding(innerPadding),
+                        .fillMaxHeight(),
                     contentAlignment = Alignment.Center
                 ) {
                     FloatingActionButton {
@@ -468,7 +473,6 @@ private fun HomeScreenContent(
 @Composable
 fun HomeScreenContentBody(
     modifier: Modifier = Modifier,
-    innerPadding: PaddingValues,
     alarmList: List<AlarmInfoInterface>,
     notificationList: List<NotificationInfoInterface>,
     homeScreenViewModel: HomeScreenViewModel,
@@ -482,7 +486,7 @@ fun HomeScreenContentBody(
     val deletedMessage = stringResource(id = R.string.deleted_alarm)
     val undo = stringResource(id = R.string.undo)
     Box(
-        modifier = modifier.padding(innerPadding)
+        modifier = modifier
     ) {
         if (alarmListIsEmpty) {
             Empty()
@@ -557,7 +561,7 @@ fun HomeScreenContentBody(
 //                            .releaseSelectedAlarm()
                     } // if
                 },
-                innerPadding = innerPadding,
+
                 is24Hour = is24Hour,
             )
         }
@@ -630,17 +634,34 @@ private fun TitleInputDialog(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HomeScreenTopAppBar() {
-    val context = LocalContext.current
+    var expanded by remember { mutableStateOf(false) }
+    val url = "https://ljpb.me/AlarmByNotification/PrivacyAndTerms.html"
+    val uriHandler = LocalUriHandler.current
 
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
-            titleContentColor = MaterialTheme.colorScheme.onBackground,
-            actionIconContentColor = MaterialTheme.colorScheme.onBackground,
+            actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         ),
-        // 現在の時刻を表示
-        title = {
-            Text(text = stringResource(id = R.string.alarm_channel_name))
-        },
+        title = {},
+        actions = {
+            IconButton(onClick = { expanded = !expanded }) {
+                Icon(
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = if (expanded) stringResource(id = R.string.open) else stringResource(
+                        id = R.string.close
+                    )
+                )
+            }
+            DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                DropdownMenuItem(
+                    text = { Text(text = stringResource(id = R.string.privacy)) },
+                    onClick = {
+                        uriHandler.openUri(url)
+                        expanded = false
+                    }
+                )
+            }
+        }
     )
 }
 

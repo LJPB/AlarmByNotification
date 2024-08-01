@@ -20,6 +20,9 @@
 
     <string name="to_open_card">展開する</string>
     <string name="to_close_card">閉じる</string>
+    
+    <string name="open">展開する</string>
+    <string name="close">閉じる</string>
 
     <string name="request_permission_title">通知を許可する</string>
     <string name="request_permission_detail">設定した時間に通知を受け取るために必要です。</string>
@@ -30,5 +33,6 @@
 
     <string name="alarm_channel_name">アラーム</string>
     <string name="alarm_channel_id">ALARM_CHANNEL</string>
-
+    
+    <string name="privacy">プライバシーポリシー</string>
 </resources>

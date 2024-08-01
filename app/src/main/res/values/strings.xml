@@ -20,6 +20,9 @@
 
     <string name="to_open_card">Expand</string>
     <string name="to_close_card">Collapse</string>
+    
+    <string name="open">Expand</string>
+    <string name="close">Collapse</string>
 
     <string name="request_permission_title">Allow Notifications</string>
     <string name="request_permission_detail">Necessary to receive notifications at the set time.</string>
@@ -30,5 +33,7 @@
 
     <string name="alarm_channel_name">Alarm</string>
     <string name="alarm_channel_id">ALARM_CHANNEL</string>
+
+    <string name="privacy">Privacy Policy</string>
 
 </resources>
