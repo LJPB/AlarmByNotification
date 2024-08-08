@@ -64,6 +64,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.dimensionResource
@@ -371,20 +372,20 @@ private fun HomeScreenContent(
             homeScreenViewModel.hiddenTitleInputDialog()
         }
         val focusRequester = remember { FocusRequester() }
+        val focusManager = LocalFocusManager.current
         TitleInputDialog(
             onDismissRequest = {
+                focusManager.clearFocus()
                 homeScreenViewModel.hiddenTitleInputDialog()
             },
             onPositiveClick = {
                 homeScreenViewModel.updateAlarmName(it)
+                focusManager.clearFocus()
                 homeScreenViewModel.hiddenTitleInputDialog()
             },
             focusRequester = focusRequester,
             defaultTitle = homeScreenViewModel.getSelectedAlarmName()
         )
-        LaunchedEffect(Unit) {
-            focusRequester.requestFocus()
-        }
     }
 
     /*
@@ -609,6 +610,11 @@ private fun TitleInputDialog(
                         onDismissRequest()
                     })
                 )
+                
+                LaunchedEffect(Unit) {
+                    focusRequester.requestFocus()
+                }
+                
                 Row(
                     modifier = Modifier.padding(top = dimensionResource(id = R.dimen.padding_small))
                 ) {
@@ -619,9 +625,7 @@ private fun TitleInputDialog(
                     }
                     Spacer(modifier = Modifier.width(dimensionResource(id = R.dimen.padding_small)))
                     // positive
-                    TextButton(onClick = {
-                        onPositiveClick(inputTitle)
-                    }) {
+                    TextButton(onClick = { onPositiveClick(inputTitle) }) {
                         Text(text = stringResource(id = R.string.ok))
                     }
                 }

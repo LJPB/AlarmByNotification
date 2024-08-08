@@ -12,8 +12,8 @@ android {
         applicationId = "me.ljpb.alarmbynotification"
         minSdk = 31
         targetSdk = 34
-        versionCode = 4
-        versionName = "1.0.0"
+        versionCode = 6
+        versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
