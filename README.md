@@ -1,6 +1,6 @@
 大きな音の代わりに通知で時間を知らせるアラームアプリ[(GooglePlayStore)](https://play.google.com/store/apps/details?id=me.ljpb.alarmbynotification)
 
-AlarmByNotification」は通常のアラームの代わりに通知で時間を知らせるアプリです。
+AlarmByNotificationは通常のアラームの代わりに通知で時間を知らせるアプリです。
 
 次の点にこだわりました：
 
